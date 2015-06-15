@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\..\src\block.cpp">
+        <Filter>lib\synapse\libs\synapse\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\synapse.cpp">
+        <Filter>lib\synapse\libs\synapse\src</Filter>
+    </ClInclude>
+    <ClInclude Include="win_WindowProc.cpp">
+        <Filter>lib\synapse\libs\synapse\example\win</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="lib">
+      <UniqueIdentifier>{3AC74B30-4AE9-2310-1617-063E66FE4A50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\synapse">
+      <UniqueIdentifier>{04140E4F-60FD-0D02-7436-36811AD97357}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\synapse\libs">
+      <UniqueIdentifier>{03B645C1-241D-61C4-0C09-5B3D5C8A4110}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\synapse\libs\synapse">
+      <UniqueIdentifier>{7AA7771C-2A02-6CAC-5610-7B6D45A55B42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\synapse\libs\synapse\example">
+      <UniqueIdentifier>{1411395E-6439-3590-2543-5EAF3DCF4F77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\synapse\libs\synapse\example\win">
+      <UniqueIdentifier>{59D65766-38A3-374F-038C-77C33B454F7E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\synapse\libs\synapse\src">
+      <UniqueIdentifier>{79080276-69F6-2649-5E49-5F1053557FEA}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

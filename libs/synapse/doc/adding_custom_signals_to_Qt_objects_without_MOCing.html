@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'
+'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
+<head>
+	<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+	<title>adding custom signals to Qt objects without MOCing</title>
+	<link href='reno.css' type='text/css' rel='stylesheet'/>
+</head>
+<body>
+<div class="body-0">
+<div class="body-1">
+<div class="body-2">
+<div>
+<div id="reverge_logo">
+<a href="http://www.revergestudios.com"><img style="border:0" src="reverge.png" alt="Reverge"/></a>
+</div>
+<h1><a href="index.html">Boost Synapse</a></h1>
+</div>
+<!-- Copyright (c) 2015 Emil Dotchevski and Reverge Studios, Inc. -->
+<!-- Distributed under the Boost Software License, Version 1.0. (See accompanying -->
+<!-- file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt) -->
+<div class="RenoIncludeDIV"><div class="RenoAutoDIV"><h3>Adding Custom Signals to Qt Objects Without MOCing</h3>
+</div>
+<p>This program demonstrates how Boost Synapse can be used to add custom signals to Qt objects without having to run the Qt Meta Object Compiler. It creates a <i>QDialog</i> which is populated by controls that respond to the custom Boost Synapse signal <i>enable_controls</i> which is emitted by the <i>QDialog</i> object when the corresponding <i>QButton</i> is clicked.</p>
+<pre>#include &lt;<span class="RenoLink"><a href="boost_synapse_connect_hpp.html">boost/synapse/connect.hpp</a></span>&gt;
+#include &lt;boost/bind.hpp&gt;
+#define QT_NO_EMIT //Suppress the #define emit from Qt since it clashes with boost::synapse::emit.
+#include &lt;QtWidgets/QApplication&gt;
+#include &lt;QtWidgets/QDialog&gt;
+#include &lt;QtWidgets/QCheckBox&gt;
+#include &lt;QtWidgets/QPushButton&gt;
+#include &lt;QtWidgets/QBoxLayout&gt;
+
+namespace synapse=boost::synapse;
+
+namespace
+    {
+    //Define a custom enable_controls signal which is emitted by the QDialog object to indicate that
+    //controls that listen for it should become enabled or disabled.
+    typedef struct enable_controls_(*enable_controls)( bool enabled );
+    }
+
+int
+main( int argc, char const * argv[ ] )
+    {
+    QApplication app(argc,(char * *)argv);
+
+    //Create a QDialog and populate it with controls.
+    boost::shared_ptr&lt;QDialog&gt; qd(new QDialog);
+    qd-&gt;setGeometry(QRect(QPoint(200,200),QSize(300,100)));
+    QVBoxLayout * layout = new QVBoxLayout;
+    QCheckBox * c1 = new QCheckBox("Control 1"); layout-&gt;addWidget(c1);
+    QCheckBox * c2 = new QCheckBox("Control 2"); layout-&gt;addWidget(c2);
+    QPushButton * b1 = new QPushButton("Enable"); layout-&gt;addWidget(b1);
+    QPushButton * b2 = new QPushButton("Disable"); layout-&gt;addWidget(b2);
+    qd-&gt;setLayout(layout);
+    b1-&gt;setMaximumWidth(100);
+    b2-&gt;setMaximumWidth(100);
+
+    //Emit the enable_controls signal from the QDialog when b1 or b2 is clicked.
+    (void) QObject::connect(b1,&amp;QPushButton::clicked,boost::bind(&amp;synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>&lt;enable_controls&gt;,qd.get(),true));
+    (void) QObject::connect(b2,&amp;QPushButton::clicked,boost::bind(&amp;synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>&lt;enable_controls&gt;,qd.get(),false));
+
+    //Connect the enable_controls signal from the QDialog to the appropriate QCheckbox member function.
+    boost::shared_ptr&lt;<span class="RenoLink"><a href="connection.html">connection</a></span>&gt; conn1=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;enable_controls&gt;(qd,boost::bind(&amp;QCheckBox::setEnabled,c1,_1));
+    boost::shared_ptr&lt;<span class="RenoLink"><a href="connection.html">connection</a></span>&gt; conn2=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;enable_controls&gt;(qd,boost::bind(&amp;QCheckBox::setEnabled,c2,_1));
+
+    qd-&gt;exec();
+    return 0;
+    }</pre>
+</div><div class="RenoAutoDIV"><div class="RenoHR"><hr/></div>
+See also: <span class="RenoPageList"><a href="Tutorial.html">Tutorial</a></span>
+</div>
+<!-- Copyright (c) 2008-2013 Emil Dotchevski and Reverge Studios, Inc. -->
+<!-- Distributed under the Boost Software License, Version 1.0. (See accompanying -->
+<!-- file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt) -->
+<div id="footer">
+<p>
+<a class="logo" href="http://jigsaw.w3.org/css-validator/check/referer"><img class="logo_pic" src="valid-css.png" alt="Valid CSS" height="31" width="88"/></a>
+<a class="logo" href="http://validator.w3.org/check?uri=referer"><img class="logo_pic" src="valid-xhtml.png" alt="Valid XHTML 1.0" height="31" width="88"/></a>
+<small>Copyright (c) 2015 by Emil Dotchevski and Reverge Studios, Inc.<br/>
+Distributed under the <a href="http://www.boost.org/LICENSE_1_0.txt">Boost Software License, Version 1.0</a>.</small>
+</p>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

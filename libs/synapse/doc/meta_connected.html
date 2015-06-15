@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'
+'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
+<head>
+	<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+	<title>meta::connected</title>
+	<link href='reno.css' type='text/css' rel='stylesheet'/>
+</head>
+<body>
+<div class="body-0">
+<div class="body-1">
+<div class="body-2">
+<div>
+<div id="reverge_logo">
+<a href="http://www.revergestudios.com"><img style="border:0" src="reverge.png" alt="Reverge"/></a>
+</div>
+<h1><a href="index.html">Boost Synapse</a></h1>
+</div>
+<!-- Copyright (c) 2015 Emil Dotchevski and Reverge Studios, Inc. -->
+<!-- Distributed under the Boost Software License, Version 1.0. (See accompanying -->
+<!-- file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt) -->
+<div class="RenoIncludeDIV"><div class="RenoAutoDIV"><h3>meta::connected</h3>
+</div>
+<div class="RenoIncludeDIV"><p><span class="RenoEscape">&#35;<!--<wiki>`&#35;</wiki>--></span>include &lt;<span class="RenoLink"><a href="boost_synapse_connect_hpp.html">boost/synapse/connect.hpp</a></span>&gt;</p>
+<pre>namespace
+boost
+    {
+    namespace
+    synapse
+        {
+        namespace
+        meta
+            {
+<span class="RenoIncludeSPAN">            namespace
+            connect_flags
+                {
+                unsigned const connecting=1;
+                unsigned const first_for_this_emitter=2;
+                unsigned const last_for_this_emitter=4;
+                }
+            
+            template &lt;class Signal&gt;
+            struct
+            <span class="RenoLink">connected</span>
+                {
+                typedef <span class="RenoLink">connected</span>&lt;Signal&gt;(*type)( <span class="RenoLink"><a href="connection.html">connection</a></span> &amp; c, unsigned flags );
+                };</span>
+            }
+        }
+    }</pre>
+</div><p>This template defines a signal that is emitted by the <i><span class="RenoLink"><a href="meta_emitter.html">meta::emitter</a></span></i> every time a <i><span class="RenoLink"><a href="connection.html">connection</a></span></i> object is created (or destroyed) connecting (or disconnecting) the specified <i>Signal</i>. This meta signal can be used to integrate <i><span class="RenoLink"><a href="index.html">Boost Synapse</a></span></i> with a 3rd-party callback/signal API. For an example see "<span class="RenoLink"><a href="using_meta_signals_to_connect_to_a_C-style_callback_API.html">Using Meta Signals to Connect to a C-Style Callback API</a></span>".</p>
+<p>Connected handlers must take two arguments: <i>c</i> is the <i><span class="RenoLink"><a href="connection.html">connection</a></span></i> being created or destroyed, and <i>flags</i> is a combination of the bits defined in the <i>connect_flags</i> namespace:</p>
+<div><ul><li> the <i>connecting</i> bit is set if the <i><span class="RenoLink"><a href="connection.html">connection</a></span></i> object is being created, and cleared if it's being destroyed;</li>
+<li> the <i>first_for_this_emitter</i> bit is set if the <i><span class="RenoLink"><a href="connection.html">connection</a></span></i> object is being created and it is the first <i><span class="RenoLink"><a href="connection.html">connection</a></span></i> for the emitter passed to <i><span class="RenoLink"><a href="connect.html">connect</a></span></i>/<i><span class="RenoLink"><a href="translate.html">translate</a></span></i>;</li>
+<li> the <i>last_for_this_emitter</i> bit is set if the <i><span class="RenoLink"><a href="connection.html">connection</a></span></i> object is being destroyed and it is the last <i><span class="RenoLink"><a href="connection.html">connection</a></span></i> for the emitter passed to <i><span class="RenoLink"><a href="connect.html">connect</a></span></i>/<i><span class="RenoLink"><a href="translate.html">translate</a></span></i>.</li>
+</ul></div>
+</div><div class="RenoAutoDIV"><div class="RenoHR"><hr/></div>
+See also: <span class="RenoPageList"><a href="boost_synapse_connect_hpp.html">boost/synapse/connect.hpp</a>&nbsp;| <a href="connect.html">connect</a>&nbsp;| <a href="connection.html">connection</a>&nbsp;| <a href="meta_emitter.html">meta::emitter</a>&nbsp;| <a href="Tutorial.html">Tutorial</a>&nbsp;| <a href="using_meta_signals_to_connect_to_a_C-style_callback_API.html">Using Meta Signals to Connect to a C-Style Callback API</a>&nbsp;| <a href="using_meta_signals_to_respond_to_signals_being_blocked_or_unblocked.html">Using Meta Signals to Respond to Signals Being Blocked or Unblocked</a>&nbsp;| <a href="using_meta_signals_with_QPushButton.html">Using Meta Signals with QPushButton</a></span>
+</div>
+<!-- Copyright (c) 2008-2013 Emil Dotchevski and Reverge Studios, Inc. -->
+<!-- Distributed under the Boost Software License, Version 1.0. (See accompanying -->
+<!-- file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt) -->
+<div id="footer">
+<p>
+<a class="logo" href="http://jigsaw.w3.org/css-validator/check/referer"><img class="logo_pic" src="valid-css.png" alt="Valid CSS" height="31" width="88"/></a>
+<a class="logo" href="http://validator.w3.org/check?uri=referer"><img class="logo_pic" src="valid-xhtml.png" alt="Valid XHTML 1.0" height="31" width="88"/></a>
+<small>Copyright (c) 2015 by Emil Dotchevski and Reverge Studios, Inc.<br/>
+Distributed under the <a href="http://www.boost.org/LICENSE_1_0.txt">Boost Software License, Version 1.0</a>.</small>
+</p>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\src\synapse.cpp">
+        <Filter>lib\synapse\libs\synapse\src</Filter>
+    </ClInclude>
+    <ClInclude Include="connection_lifetime_test.cpp">
+        <Filter>lib\synapse\libs\synapse\test</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="lib">
+      <UniqueIdentifier>{3AA0535B-0587-3B18-3299-4E2E55195388}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\synapse">
+      <UniqueIdentifier>{7E192E80-67EC-0AF1-6674-2EE50A98469E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\synapse\libs">
+      <UniqueIdentifier>{1A9E6612-4E4C-130C-74EE-05921CB97841}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\synapse\libs\synapse">
+      <UniqueIdentifier>{4E2370BB-432B-685F-01A5-3FE138F97C79}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\synapse\libs\synapse\src">
+      <UniqueIdentifier>{070D03C9-2520-73A5-44E6-5D60672B2853}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\synapse\libs\synapse\test">
+      <UniqueIdentifier>{00B53DAD-2756-6FDD-1038-620531F2185F}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

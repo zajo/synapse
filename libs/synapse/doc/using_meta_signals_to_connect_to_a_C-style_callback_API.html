@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'
+'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
+<head>
+	<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+	<title>using meta signals to connect to a C-style callback API</title>
+	<link href='reno.css' type='text/css' rel='stylesheet'/>
+</head>
+<body>
+<div class="body-0">
+<div class="body-1">
+<div class="body-2">
+<div>
+<div id="reverge_logo">
+<a href="http://www.revergestudios.com"><img style="border:0" src="reverge.png" alt="Reverge"/></a>
+</div>
+<h1><a href="index.html">Boost Synapse</a></h1>
+</div>
+<!-- Copyright (c) 2015 Emil Dotchevski and Reverge Studios, Inc. -->
+<!-- Distributed under the Boost Software License, Version 1.0. (See accompanying -->
+<!-- file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt) -->
+<div class="RenoIncludeDIV"><div class="RenoAutoDIV"><h3>Using Meta Signals to Connect to a C-Style Callback API</h3>
+</div>
+<p>This example program demonstrates how to use <i><span class="RenoLink"><a href="index.html">Boost Synapse</a></span></i> to bind a C-style callback API that uses function pointers. By using meta signals, such C-style callbacks can be connected directly through the <i><span class="RenoLink"><a href="index.html">Boost Synapse</a></span></i> <i><span class="RenoLink"><a href="connect.html">connect</a></span></i> function. The program consists of several source files (also available for download on the main page):</p>
+<div><ul><li> <i>callback_api.h/.c</i> define an example 3rd-party API that uses C-style callbacks. It lets users set a single function pointer callback on objects of type <i>api_handle</i>. The callback is invoked with different values for the <i>event</i> argument to report on different events. In this case calling <i>api_do_this</i> generates <i>API_EVENT_THIS</i>, and calling <i>api_do_that</i> generates <i>API_EVENT_THAT</i>.</li>
+<li> <i>synapsify.hpp/.cpp</i> contain the machinery needed to handle <i><span class="RenoLink"><a href="index.html">Boost Synapse</a></span></i> meta signals. Once initialized, user calls to <i><span class="RenoLink"><a href="connect.html">connect</a></span>&lt;synapse_callback&gt;</i> are forwarded automatically to <i>api_set_callback</i>/<i>api_clear_callback</i> (from <i>callback_api.h</i>) if needed.</li>
+<li> Finally, <i>main.cpp</i> creates an <i>api_handle</i> object and then <i><span class="RenoLink"><a href="connect.html">connect</a></span></i>s two different handlers that get called when the <i>api_do_this</i>/<i>api_do_that</i> is called.</li>
+</ul></div>
+<p><b>Program output:</b></p>
+<pre>Detected synapse_callback connection on api_handle at 0x00000000004EE980 (first connection, calling api_set_callback)
+Detected synapse_callback connection on api_handle at 0x00000000004EE980
+handler1 called on api_handle object at 0x00000000004EE980, event=1
+handler2 called on api_handle object at 0x00000000004EE980, event=1
+handler1 called on api_handle object at 0x00000000004EE980, event=2
+handler2 called on api_handle object at 0x00000000004EE980, event=2
+Detected expiring synapse_callback connection on api_handle at 0x00000000004EE980
+Detected expiring synapse_callback connection on api_handle at 0x00000000004EE980 (last connection, calling api_clear_callback)</pre>
+<p><b>callback_api.h:</b></p>
+<pre>typedef struct api_handle api_handle;
+api_handle * api_create_object();
+void api_destroy_object( api_handle * );
+
+//The user_data pointer is typical in C-style callbacks APIs, so it's included
+//here even though this example has no use for it.
+typedef void (*api_callback_type)( api_handle *, void * user_data, int event );
+
+void api_set_callback( api_handle *, api_callback_type, void * user_data );
+void api_clear_callback( api_handle * );
+
+//When api_do_this is called, it calls the callback passing API_EVENT_THIS as
+//the event argument; api_do_that calls the callback with API_EVENT_THAT.
+#define API_EVENT_THIS 1
+#define API_EVENT_THAT 2
+void api_do_this( api_handle * );
+void api_do_that( api_handle * );</pre>
+<p><b>callback_api.c:</b></p>
+<pre>#include "callback_api.h"
+#include &lt;malloc.h&gt;
+
+struct
+api_handle
+    {
+    api_callback_type callback;
+    void * user_data;
+    };
+
+api_handle *
+api_create_object()
+    {
+    api_handle * p=(api_handle *)malloc(sizeof(api_handle));
+    p-&gt;callback=0;
+    return p;
+    }
+
+void
+api_destroy_object( api_handle * p )
+    {
+    free(p);
+    }
+
+void
+api_set_callback( api_handle * p, api_callback_type c, void * user_data )
+    {
+    p-&gt;callback=c;
+    p-&gt;user_data=user_data;
+    }
+
+void
+api_clear_callback( api_handle * p )
+    {
+    p-&gt;callback=0;
+    }
+
+void
+api_do_this( api_handle * p )
+    {
+    if( p-&gt;callback )
+        p-&gt;callback(p,p-&gt;user_data,API_EVENT_THIS);
+    }
+
+void
+api_do_that( api_handle * p )
+    {
+    if( p-&gt;callback )
+        p-&gt;callback(p,p-&gt;user_data,API_EVENT_THAT);
+    }
+</pre>
+<p><b>synapsify.hpp:</b></p>
+<pre>extern "C"
+    {
+    #include "callback_api.h"
+    }
+
+//This is the Synapse <span class="RenoLink"><a href="Signal.html">Signal</a></span> that corresponds to the callbacks received from the C-style callback API.
+typedef struct synapse_callback_(*synapse_callback)( api_handle *, int event );
+
+//Connect synapse::meta::connected&lt;synapse_callback&gt; and synapse::meta::disconnected&lt;synapse_callback&gt;
+//to set/clear the api_handle callbacks when synapse_callback signals are connected or disconnected.
+void synapsify();</pre>
+<p><b>synapsify.cpp</b></p>
+<pre>#include "synapsify.hpp"
+#include &lt;<span class="RenoLink"><a href="boost_synapse_connect_hpp.html">boost/synapse/connect.hpp</a></span>&gt;
+#include &lt;<span class="RenoLink"><a href="boost_synapse_connection_hpp.html">boost/synapse/connection.hpp</a></span>&gt;
+#include &lt;iostream&gt;
+
+namespace synapse=boost::synapse;
+
+namespace
+    {
+    void
+    emit_fwd( api_handle * h, void *, int v )
+        {
+        (void) synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>&lt;synapse_callback&gt;(h,h,v);
+        }
+    void
+    handle_meta_signal( synapse::<span class="RenoLink"><a href="connection.html">connection</a></span> &amp; c, unsigned flags )
+        {
+        boost::shared_ptr&lt;api_handle&gt; h=c.emitter&lt;api_handle&gt;();
+        std::cout &lt;&lt; "Detected synapse_callback " &lt;&lt; ((flags&amp;synapse::<span class="RenoLink"><a href="meta_connected.html">meta::connect_flags::connecting</a></span>)?"":"dis") &lt;&lt;
+            "connection on api_handle at 0x" &lt;&lt; h.get();
+        if( flags&amp;synapse::<span class="RenoLink"><a href="meta_connected.html">meta::connect_flags::first_for_this_emitter</a></span> )
+            {
+            assert(flags&amp;synapse::<span class="RenoLink"><a href="meta_connected.html">meta::connect_flags::connecting</a></span>);
+            std::cout &lt;&lt; " (first connection, calling api_set_callback)";
+            api_set_callback(h.get(),&amp;emit_fwd,0);
+            }
+        else if( flags&amp;synapse::<span class="RenoLink"><a href="meta_connected.html">meta::connect_flags::last_for_this_emitter</a></span> )
+            {
+            assert(!(flags&amp;synapse::<span class="RenoLink"><a href="meta_connected.html">meta::connect_flags::connecting</a></span>));
+            std::cout &lt;&lt; " (last connection, calling api_clear_callback)";
+            api_clear_callback(h.get());
+            }
+        std::cout &lt;&lt; std::endl;
+        }
+    }
+
+void
+synapsify()
+    {
+    static boost::shared_ptr&lt;synapse::<span class="RenoLink"><a href="connection.html">connection</a></span>&gt; c=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;synapse::<span class="RenoLink"><a href="meta_connected.html">meta::connected</a></span>&lt;synapse_callback&gt; &gt;(synapse::<span class="RenoLink"><a href="meta_emitter.html">meta::emitter</a></span>(),&amp;handle_meta_signal);
+    }</pre>
+<p><b>main.cpp</b></p>
+<pre>#include "synapsify.hpp"
+#include &lt;<span class="RenoLink"><a href="boost_synapse_connect_hpp.html">boost/synapse/connect.hpp</a></span>&gt;
+#include &lt;iostream&gt;
+
+namespace synapse=boost::synapse;
+
+namespace
+    {
+    void
+    handler1( api_handle * h, int event )
+        {
+        std::cout &lt;&lt; "handler1 called on api_handle object at 0x" &lt;&lt; h &lt;&lt; ", event=" &lt;&lt; event &lt;&lt; std::endl;
+        }
+    void
+    handler2( api_handle * h, int event )
+        {
+        std::cout &lt;&lt; "handler2 called on api_handle object at 0x" &lt;&lt; h &lt;&lt; ", event=" &lt;&lt; event &lt;&lt; std::endl;
+        }
+    }
+
+int
+main()
+    {
+    //Connect the meta signal handlers to deal with  api_set_callback and api_clear_callback
+    //automatically -- see callback_api.h and synapsify.cpp.
+    synapsify();
+
+    //Use shared_ptr with a custom deleter to hold an api_handle object.
+    boost::shared_ptr&lt;api_handle&gt; h(api_create_object(),&amp;api_destroy_object);
+
+        {
+        //The meta signal handlers deal with api_set_callback and api_clear_callback as needed,
+        //so now we can use Synapse to connect to the C-style API callbacks. Note that we can
+        //create many connections even though the C-style API supports only a single callback
+        //per api_handle object.
+        auto c1=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;synapse_callback&gt;(h,&amp;handler1);
+        auto c2=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;synapse_callback&gt;(h,&amp;handler2);
+
+        //This invokes handler1 and handler2, in that order, passing API_EVENT_THIS.
+        api_do_this(h.get());
+
+        //This invokes handler1 and handler2, in that order, passing API_EVENT_THAT.
+        api_do_that(h.get());
+        }
+
+    //At this point all synapse_callback connections have expired and the meta handlers have
+    //cleared the callback on the api_handle object, so the calls below do not invoke any handlers.
+    api_do_this(h.get());
+    api_do_that(h.get());
+
+    return 0;
+    }</pre>
+</div><div class="RenoAutoDIV"><div class="RenoHR"><hr/></div>
+See also: <span class="RenoPageList"><a href="meta_connected.html">meta::connected</a>&nbsp;| <a href="Tutorial.html">Tutorial</a></span>
+</div>
+<!-- Copyright (c) 2008-2013 Emil Dotchevski and Reverge Studios, Inc. -->
+<!-- Distributed under the Boost Software License, Version 1.0. (See accompanying -->
+<!-- file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt) -->
+<div id="footer">
+<p>
+<a class="logo" href="http://jigsaw.w3.org/css-validator/check/referer"><img class="logo_pic" src="valid-css.png" alt="Valid CSS" height="31" width="88"/></a>
+<a class="logo" href="http://validator.w3.org/check?uri=referer"><img class="logo_pic" src="valid-xhtml.png" alt="Valid XHTML 1.0" height="31" width="88"/></a>
+<small>Copyright (c) 2015 by Emil Dotchevski and Reverge Studios, Inc.<br/>
+Distributed under the <a href="http://www.boost.org/LICENSE_1_0.txt">Boost Software License, Version 1.0</a>.</small>
+</p>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
