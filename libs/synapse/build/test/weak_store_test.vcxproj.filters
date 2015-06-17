@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\..\test\weak_store_test.cpp">
+        <Filter>lib\synapse\libs\synapse\test</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="lib">
+      <UniqueIdentifier>{137439DB-0BD4-5490-53D8-493B50500287}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\synapse">
+      <UniqueIdentifier>{5DEB5C51-3B59-2BC5-1D65-7D8C04F66244}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\synapse\libs">
+      <UniqueIdentifier>{6E2523D7-68B4-526E-6DBC-4E1023495A32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\synapse\libs\synapse">
+      <UniqueIdentifier>{062F72BC-7376-1656-15F9-17F922325A0F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\synapse\libs\synapse\test">
+      <UniqueIdentifier>{595027B3-5604-44CF-78A9-541B35B16A5E}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

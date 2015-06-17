@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\..\test\args_translate_test.cpp">
+        <Filter>lib\synapse\libs\synapse\test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\synapse.cpp">
+        <Filter>lib\synapse\libs\synapse\build\src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="lib">
+      <UniqueIdentifier>{13B82B8F-453F-0A81-21F6-0B584FA11267}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\synapse">
+      <UniqueIdentifier>{286363FC-2F37-2F62-3579-4ADD216A7088}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\synapse\libs">
+      <UniqueIdentifier>{060E0B49-7EE1-5C30-162A-43FC72F8199C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\synapse\libs\synapse">
+      <UniqueIdentifier>{34167DE6-476E-5DDC-49B5-202F185D1FEE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\synapse\libs\synapse\build">
+      <UniqueIdentifier>{50176579-0470-582A-214C-36652D504EDE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\synapse\libs\synapse\build\src">
+      <UniqueIdentifier>{1C760D58-1C5F-3E35-5022-477F5FA94B5D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\synapse\libs\synapse\test">
+      <UniqueIdentifier>{1ED90710-7318-1AE8-11F1-0AD349E70473}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

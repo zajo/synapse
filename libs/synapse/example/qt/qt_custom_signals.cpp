@@ -3,54 +3,76 @@
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-//This program demonstrates how Boost Synapse can be used to add custom signals to Qt objects
-//without having to run the Qt Meta Object Compiler. It creates a QDialog which is populated by
-//controls that respond to the custom Boost Synapse signal enable_controls which is emitted by
-//the QDialog object when the corresponding QButton is clicked.
+//The Qt Wiki contains the following example on creating custom signals and slots:
+//https://wiki.qt.io/Qt_for_Beginners#Creating_custom_signals_and_slots.
+//It requires running the Qt Meta Object Compiler.
+
+//Below is the same example, modified to use Boost Synapse to implement the
+//custom counterReached signal. This approach does not require running the
+//Qt Meta Object Compiler.
+
+//The changes made to the original program are marked with //<--
 
 #include <boost/synapse/connect.hpp>
 #include <boost/bind.hpp>
 #define QT_NO_EMIT //Suppress the #define emit from Qt since it clashes with boost::synapse::emit.
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QDialog>
-#include <QtWidgets/QCheckBox>
 #include <QtWidgets/QPushButton>
-#include <QtWidgets/QBoxLayout>
 
-namespace synapse=boost::synapse;
+namespace synapse = boost::synapse;
 
-namespace
-    {
-    //Define a custom enable_controls signal which is emitted by the QDialog object to indicate that
-    //controls that listen for it should become enabled or disabled.
-    typedef struct enable_controls_(*enable_controls)( bool enabled );
-    }
+class Window : public QWidget
+{
+public:
+ explicit Window(QWidget *parent = 0);
+signals: //<-- Not needed with Synapse but okay
+ typedef struct counterReached_(*counterReached)(); //<-- Was: void counterReached();
+private slots: //<-- Not needed with Synapse but okay
+ void slotButtonClicked(bool checked);
+private:
+ int m_counter;
+ QPushButton *m_button;
+ boost::shared_ptr<synapse::connection> c_; //<-- Needed to keep the synapse connection afloat.
+};
 
-int
-main( int argc, char const * argv[ ] )
-    {
-    QApplication app(argc,(char * *)argv);
+Window::Window(QWidget *parent) :
+ QWidget(parent)
+{
+ // Set size of the window
+ setFixedSize(100, 50);
+ 
+// Create and position the button
+ m_button = new QPushButton("Hello World", this);
+ m_button->setGeometry(10, 10, 80, 30);
+ m_button->setCheckable(true);
+ 
+// Set the counter to 0
+ m_counter = 0;
+ 
+ connect(m_button,&QPushButton::clicked,boost::bind(&Window::slotButtonClicked,this,_1)); //<-- Was: connect(m_button, SIGNAL (clicked(bool)), this, SLOT (slotButtonClicked(bool)));
+ c_=synapse::connect<counterReached>(this,&QApplication::quit); //<-- Was: connect(this, SIGNAL (counterReached()), QApplication::instance(), SLOT (quit()));
+}
+ 
+void Window::slotButtonClicked(bool checked)
+{
+ if (checked) {
+ m_button->setText("Checked");
+ } else {
+ m_button->setText("Hello World");
+ }
+ 
+m_counter ++;
+ if (m_counter == 10) {
+ synapse::emit<counterReached>(this); //<-- Was: emit counterReached();
+ }
+}
 
-    //Create a QDialog and populate it with controls.
-    boost::shared_ptr<QDialog> qd(new QDialog);
-    qd->setGeometry(QRect(QPoint(200,200),QSize(300,100)));
-    QVBoxLayout * layout = new QVBoxLayout;
-    QCheckBox * c1 = new QCheckBox("Control 1"); layout->addWidget(c1);
-    QCheckBox * c2 = new QCheckBox("Control 2"); layout->addWidget(c2);
-    QPushButton * b1 = new QPushButton("Enable"); layout->addWidget(b1);
-    QPushButton * b2 = new QPushButton("Disable"); layout->addWidget(b2);
-    qd->setLayout(layout);
-    b1->setMaximumWidth(100);
-    b2->setMaximumWidth(100);
-
-    //Emit the enable_controls signal from the QDialog when b1 or b2 is clicked.
-    (void) QObject::connect(b1,&QPushButton::clicked,boost::bind(&synapse::emit<enable_controls>,qd.get(),true));
-    (void) QObject::connect(b2,&QPushButton::clicked,boost::bind(&synapse::emit<enable_controls>,qd.get(),false));
-
-    //Connect the enable_controls signal from the QDialog to the appropriate QCheckbox member function.
-    boost::shared_ptr<synapse::connection> conn1=synapse::connect<enable_controls>(qd,boost::bind(&QCheckBox::setEnabled,c1,_1));
-    boost::shared_ptr<synapse::connection> conn2=synapse::connect<enable_controls>(qd,boost::bind(&QCheckBox::setEnabled,c2,_1));
-
-    qd->exec();
-    return 0;
-    }
+int main(int argc, char **argv)
+{
+ QApplication app (argc, argv);
+ 
+ Window window;
+ window.show();
+ 
+ return app.exec();
+}

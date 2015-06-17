@@ -128,10 +128,10 @@
 																<hook>
 																	<stream_hook_path>
 																		<size>1</size>
-																		<strong>1CE2B6BFA79533326B9AE988DAFE0075096180A60C0BA1AC98CAC015DA35D945</strong>
-																		<weak>2194907572</weak>
-																		<size>2057</size>
-																		<position>577</position>
+																		<strong>71F60E7B606CF89286EF6C614645B35B2F907B01D0DC27724901BDAB238C78F0</strong>
+																		<weak>268063066</weak>
+																		<size>1818</size>
+																		<position>685</position>
 																	</stream_hook_path>
 																</hook>
 																<file>
@@ -3483,9 +3483,18 @@
 														<id>-7</id>
 													</shared_ptr>
 												</weak_ptr>
-												<size>15</size>
+												<size>11</size>
 												<variant>2</variant>
-												<string>(:auto !!!:)&#10;&#10;This program demonstrates how Boost Synapse can be used to add custom signals to Qt objects without having to run the Qt Meta Object Compiler. It creates a &apos;&apos;QDialog&apos;&apos; which is populated by controls that respond to the custom Boost Synapse signal &apos;&apos;enable_controls&apos;&apos; which is emitted by the &apos;&apos;QDialog&apos;&apos; object when the corresponding &apos;&apos;QButton&apos;&apos; is clicked.&#10;&#10;[@#include &lt;(:link </string>
+												<string>(:auto !!!:)&#10;&#10;The Qt Wiki contains the following example on creating custom signals and slots:&#10;&#10;-&gt;(:link https://wiki.qt.io/Qt_for_Beginners#Creating_custom_signals_and_slots|https://wiki.qt.io/Qt_for_Beginners#Creating_custom_signals_and_slots:)&#10;&#10;It requires running the Qt Meta Object Compiler.&#10;&#10;Below is the same example, modified to use &apos;&apos;</string>
+												<variant>1</variant>
+												<weak_ptr>
+													<expired>0</expired>
+													<shared_ptr>
+														<id>-10</id>
+													</shared_ptr>
+												</weak_ptr>
+												<variant>2</variant>
+												<string>&apos;&apos; to implement the custom counterReached signal. This approach does not require running the Qt Meta Object Compiler.&#10;&#10;The changes made to the original program are marked with //&lt;--&#10;&#10;[@#include &lt;</string>
 												<variant>1</variant>
 												<weak_ptr>
 													<expired>0</expired>
@@ -3494,25 +3503,7 @@
 													</shared_ptr>
 												</weak_ptr>
 												<variant>2</variant>
-												<string>:)&gt;&#10;#include &lt;boost/bind.hpp&gt;&#10;#define QT_NO_EMIT //Suppress the #define emit from Qt since it clashes with boost::synapse::emit.&#10;#include &lt;QtWidgets/QApplication&gt;&#10;#include &lt;QtWidgets/QDialog&gt;&#10;#include &lt;QtWidgets/QCheckBox&gt;&#10;#include &lt;QtWidgets/QPushButton&gt;&#10;#include &lt;QtWidgets/QBoxLayout&gt;&#10;&#10;namespace synapse=boost::synapse;&#10;&#10;namespace&#10;    {&#10;    //Define a custom enable_controls signal which is emitted by the QDialog object to indicate that&#10;    //controls that listen for it should become enabled or disabled.&#10;    typedef struct enable_controls_(*enable_controls)( bool enabled );&#10;    }&#10;&#10;int&#10;main( int argc, char const * argv[ ] )&#10;    {&#10;    QApplication app(argc,(char * *)argv);&#10;&#10;    //Create a QDialog and populate it with controls.&#10;    boost::shared_ptr&lt;QDialog&gt; qd(new QDialog);&#10;    qd-&gt;setGeometry(QRect(QPoint(200,200),QSize(300,100)));&#10;    QVBoxLayout * layout = new QVBoxLayout;&#10;    QCheckBox * c1 = new QCheckBox(&quot;Control 1&quot;); layout-&gt;addWidget(c1);&#10;    QCheckBox * c2 = new QCheckBox(&quot;Control 2&quot;); layout-&gt;addWidget(c2);&#10;    QPushButton * b1 = new QPushButton(&quot;Enable&quot;); layout-&gt;addWidget(b1);&#10;    QPushButton * b2 = new QPushButton(&quot;Disable&quot;); layout-&gt;addWidget(b2);&#10;    qd-&gt;setLayout(layout);&#10;    b1-&gt;setMaximumWidth(100);&#10;    b2-&gt;setMaximumWidth(100);&#10;&#10;    //Emit the enable_controls signal from the QDialog when b1 or b2 is clicked.&#10;    (void) QObject::connect(b1,&amp;QPushButton::clicked,boost::bind(&amp;synapse::(:link </string>
-												<variant>1</variant>
-												<weak_ptr>
-													<expired>0</expired>
-													<shared_ptr>
-														<id>-16</id>
-													</shared_ptr>
-												</weak_ptr>
-												<variant>2</variant>
-												<string>:)&lt;enable_controls&gt;,qd.get(),true));&#10;    (void) QObject::connect(b2,&amp;QPushButton::clicked,boost::bind(&amp;synapse::(:link </string>
-												<variant>1</variant>
-												<weak_ptr>
-													<expired>0</expired>
-													<shared_ptr>
-														<id>-16</id>
-													</shared_ptr>
-												</weak_ptr>
-												<variant>2</variant>
-												<string>:)&lt;enable_controls&gt;,qd.get(),false));&#10;&#10;    //Connect the enable_controls signal from the QDialog to the appropriate QCheckbox member function.&#10;    boost::shared_ptr&lt;(:link </string>
+												<string>&gt;&#10;#include &lt;boost/bind.hpp&gt;&#10;#define QT_NO_EMIT //Suppress the #define emit from Qt since it clashes with boost::synapse::emit.&#10;#include &lt;QtWidgets/QApplication&gt;&#10;#include &lt;QtWidgets/QPushButton&gt;&#10;&#10;namespace synapse = boost::synapse;&#10;&#10;class Window : public QWidget&#10;{&#10;public:&#10; explicit Window(QWidget *parent = 0);&#10;signals: //&lt;-- Not needed with Synapse but okay&#10; typedef struct counterReached_(*counterReached)(); //&lt;-- Was: void counterReached();&#10;private slots: //&lt;-- Not needed with Synapse but okay&#10; void slotButtonClicked(bool checked);&#10;private:&#10; int m_counter;&#10; QPushButton *m_button;&#10; boost::shared_ptr&lt;synapse::</string>
 												<variant>1</variant>
 												<weak_ptr>
 													<expired>0</expired>
@@ -3521,7 +3512,7 @@
 													</shared_ptr>
 												</weak_ptr>
 												<variant>2</variant>
-												<string>:)&gt; conn1=synapse::(:link </string>
+												<string>&gt; c_; //&lt;-- Needed to keep the synapse connection afloat.&#10;};&#10;&#10;Window::Window(QWidget *parent) :&#10; QWidget(parent)&#10;{&#10; // Set size of the window&#10; setFixedSize(100, 50);&#10; &#10; // Create and position the button&#10; m_button = new QPushButton(&quot;Hello World&quot;, this);&#10; m_button-&gt;setGeometry(10, 10, 80, 30);&#10; m_button-&gt;setCheckable(true);&#10; &#10; // Set the counter to 0&#10; m_counter = 0;&#10; &#10; connect(m_button,&amp;QPushButton::clicked,boost::bind(&amp;Window::slotButtonClicked,this,_1)); //&lt;-- Was: connect(m_button, SIGNAL (clicked(bool)), this, SLOT (slotButtonClicked(bool)));&#10; c_=synapse::</string>
 												<variant>1</variant>
 												<weak_ptr>
 													<expired>0</expired>
@@ -3530,25 +3521,16 @@
 													</shared_ptr>
 												</weak_ptr>
 												<variant>2</variant>
-												<string>:)&lt;enable_controls&gt;(qd,boost::bind(&amp;QCheckBox::setEnabled,c1,_1));&#10;    boost::shared_ptr&lt;(:link </string>
+												<string>&lt;counterReached&gt;(this,&amp;QApplication::quit); //&lt;-- Was: connect(this, SIGNAL (counterReached()), QApplication::instance(), SLOT (quit()));&#10;}&#10; &#10;void Window::slotButtonClicked(bool checked)&#10;{&#10; if (checked) {&#10; m_button-&gt;setText(&quot;Checked&quot;);&#10; } else {&#10; m_button-&gt;setText(&quot;Hello World&quot;);&#10; }&#10; &#10; m_counter ++;&#10; if (m_counter == 10) {&#10; synapse::</string>
 												<variant>1</variant>
 												<weak_ptr>
 													<expired>0</expired>
 													<shared_ptr>
-														<id>-11</id>
+														<id>-16</id>
 													</shared_ptr>
 												</weak_ptr>
 												<variant>2</variant>
-												<string>:)&gt; conn2=synapse::(:link </string>
-												<variant>1</variant>
-												<weak_ptr>
-													<expired>0</expired>
-													<shared_ptr>
-														<id>-17</id>
-													</shared_ptr>
-												</weak_ptr>
-												<variant>2</variant>
-												<string>:)&lt;enable_controls&gt;(qd,boost::bind(&amp;QCheckBox::setEnabled,c2,_1));&#10;&#10;    qd-&gt;exec();&#10;    return 0;&#10;    }@]&#10;</string>
+												<string>&lt;counterReached&gt;(this); //&lt;-- Was: emit counterReached();&#10; }&#10;}&#10;&#10;int main(int argc, char **argv)&#10;{&#10; QApplication app (argc, argv);&#10; &#10; Window window;&#10; window.show();&#10; &#10; return app.exec();&#10;}@]&#10;</string>
 											</pair>
 											<pair>
 												<weak_ptr>
@@ -3977,7 +3959,7 @@
 													</shared_ptr>
 												</weak_ptr>
 												<variant>2</variant>
-												<string>:)&apos;&apos; is not yet thread-safe.&#10;&#10;!!!Download&#10;&#10;Click (:link http://www.revergestudios.com/boost-synapse/boost-synapse.zip|here:) to download the source code and this documentation.&#10;</string>
+												<string>:)&apos;&apos; is not yet thread-safe.&#10;&#10;!!!Download&#10;&#10;See (:link https://github.com/zajo/boost-synapse|this:) github repo.&#10;</string>
 											</pair>
 											<pair>
 												<weak_ptr>
@@ -8457,28 +8439,6 @@
 								<pair>
 									<hook>
 										<stream_hook_path>
-											<size>1</size>
-											<strong>1CE2B6BFA79533326B9AE988DAFE0075096180A60C0BA1AC98CAC015DA35D945</strong>
-											<weak>2194907572</weak>
-											<size>2057</size>
-											<position>577</position>
-										</stream_hook_path>
-									</hook>
-									<file>
-										<path>
-											<empty>0</empty>
-											<string>../../example/qt/qt_custom_signals.cpp</string>
-											<type>0</type>
-											<base>0</base>
-										</path>
-									</file>
-									<shared_ptr>
-										<id>-7</id>
-									</shared_ptr>
-								</pair>
-								<pair>
-									<hook>
-										<stream_hook_path>
 											<size>3</size>
 											<strong>ACFB1B4FF4D7D2AD69052FDF0BA4649F37B89D61B2BEC8DD51D6BE09173C484E</strong>
 											<weak>1036837280</weak>
@@ -8970,6 +8930,28 @@
 									</file>
 									<shared_ptr>
 										<id>-31</id>
+									</shared_ptr>
+								</pair>
+								<pair>
+									<hook>
+										<stream_hook_path>
+											<size>1</size>
+											<strong>71F60E7B606CF89286EF6C614645B35B2F907B01D0DC27724901BDAB238C78F0</strong>
+											<weak>268063066</weak>
+											<size>1818</size>
+											<position>685</position>
+										</stream_hook_path>
+									</hook>
+									<file>
+										<path>
+											<empty>0</empty>
+											<string>../../example/qt/qt_custom_signals.cpp</string>
+											<type>0</type>
+											<base>0</base>
+										</path>
+									</file>
+									<shared_ptr>
+										<id>-7</id>
 									</shared_ptr>
 								</pair>
 								<pair>

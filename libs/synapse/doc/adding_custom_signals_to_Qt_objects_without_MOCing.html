@@ -21,53 +21,74 @@
 <!-- file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt) -->
 <div class="RenoIncludeDIV"><div class="RenoAutoDIV"><h3>Adding Custom Signals to Qt Objects Without MOCing</h3>
 </div>
-<p>This program demonstrates how Boost Synapse can be used to add custom signals to Qt objects without having to run the Qt Meta Object Compiler. It creates a <i>QDialog</i> which is populated by controls that respond to the custom Boost Synapse signal <i>enable_controls</i> which is emitted by the <i>QDialog</i> object when the corresponding <i>QButton</i> is clicked.</p>
+<p>The Qt Wiki contains the following example on creating custom signals and slots:</p>
+<blockquote><p><span class="RenoLink"><a href="https://wiki.qt.io/Qt_for_Beginners#Creating_custom_signals_and_slots">https://wiki.qt.io/Qt_for_Beginners#Creating_custom_signals_and_slots</a></span></p></blockquote>
+<p>It requires running the Qt Meta Object Compiler.</p>
+<p>Below is the same example, modified to use <i><span class="RenoLink"><a href="index.html">Boost Synapse</a></span></i> to implement the custom counterReached signal. This approach does not require running the Qt Meta Object Compiler.</p>
+<p>The changes made to the original program are marked with //&lt;--</p>
 <pre>#include &lt;<span class="RenoLink"><a href="boost_synapse_connect_hpp.html">boost/synapse/connect.hpp</a></span>&gt;
 #include &lt;boost/bind.hpp&gt;
 #define QT_NO_EMIT //Suppress the #define emit from Qt since it clashes with boost::synapse::emit.
 #include &lt;QtWidgets/QApplication&gt;
-#include &lt;QtWidgets/QDialog&gt;
-#include &lt;QtWidgets/QCheckBox&gt;
 #include &lt;QtWidgets/QPushButton&gt;
-#include &lt;QtWidgets/QBoxLayout&gt;
 
-namespace synapse=boost::synapse;
+namespace synapse = boost::synapse;
 
-namespace
-    {
-    //Define a custom enable_controls signal which is emitted by the QDialog object to indicate that
-    //controls that listen for it should become enabled or disabled.
-    typedef struct enable_controls_(*enable_controls)( bool enabled );
-    }
+class Window : public QWidget
+{
+public:
+ explicit Window(QWidget *parent = 0);
+signals: //&lt;-- Not needed with Synapse but okay
+ typedef struct counterReached_(*counterReached)(); //&lt;-- Was: void counterReached();
+private slots: //&lt;-- Not needed with Synapse but okay
+ void slotButtonClicked(bool checked);
+private:
+ int m_counter;
+ QPushButton *m_button;
+ boost::shared_ptr&lt;synapse::<span class="RenoLink"><a href="connection.html">connection</a></span>&gt; c_; //&lt;-- Needed to keep the synapse connection afloat.
+};
 
-int
-main( int argc, char const * argv[ ] )
-    {
-    QApplication app(argc,(char * *)argv);
+Window::Window(QWidget *parent) :
+ QWidget(parent)
+{
+ // Set size of the window
+ setFixedSize(100, 50);
+ 
+ // Create and position the button
+ m_button = new QPushButton("Hello World", this);
+ m_button-&gt;setGeometry(10, 10, 80, 30);
+ m_button-&gt;setCheckable(true);
+ 
+ // Set the counter to 0
+ m_counter = 0;
+ 
+ connect(m_button,&amp;QPushButton::clicked,boost::bind(&amp;Window::slotButtonClicked,this,_1)); //&lt;-- Was: connect(m_button, SIGNAL (clicked(bool)), this, SLOT (slotButtonClicked(bool)));
+ c_=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;counterReached&gt;(this,&amp;QApplication::quit); //&lt;-- Was: connect(this, SIGNAL (counterReached()), QApplication::instance(), SLOT (quit()));
+}
+ 
+void Window::slotButtonClicked(bool checked)
+{
+ if (checked) {
+ m_button-&gt;setText("Checked");
+ } else {
+ m_button-&gt;setText("Hello World");
+ }
+ 
+ m_counter ++;
+ if (m_counter == 10) {
+ synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>&lt;counterReached&gt;(this); //&lt;-- Was: emit counterReached();
+ }
+}
 
-    //Create a QDialog and populate it with controls.
-    boost::shared_ptr&lt;QDialog&gt; qd(new QDialog);
-    qd-&gt;setGeometry(QRect(QPoint(200,200),QSize(300,100)));
-    QVBoxLayout * layout = new QVBoxLayout;
-    QCheckBox * c1 = new QCheckBox("Control 1"); layout-&gt;addWidget(c1);
-    QCheckBox * c2 = new QCheckBox("Control 2"); layout-&gt;addWidget(c2);
-    QPushButton * b1 = new QPushButton("Enable"); layout-&gt;addWidget(b1);
-    QPushButton * b2 = new QPushButton("Disable"); layout-&gt;addWidget(b2);
-    qd-&gt;setLayout(layout);
-    b1-&gt;setMaximumWidth(100);
-    b2-&gt;setMaximumWidth(100);
-
-    //Emit the enable_controls signal from the QDialog when b1 or b2 is clicked.
-    (void) QObject::connect(b1,&amp;QPushButton::clicked,boost::bind(&amp;synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>&lt;enable_controls&gt;,qd.get(),true));
-    (void) QObject::connect(b2,&amp;QPushButton::clicked,boost::bind(&amp;synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>&lt;enable_controls&gt;,qd.get(),false));
-
-    //Connect the enable_controls signal from the QDialog to the appropriate QCheckbox member function.
-    boost::shared_ptr&lt;<span class="RenoLink"><a href="connection.html">connection</a></span>&gt; conn1=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;enable_controls&gt;(qd,boost::bind(&amp;QCheckBox::setEnabled,c1,_1));
-    boost::shared_ptr&lt;<span class="RenoLink"><a href="connection.html">connection</a></span>&gt; conn2=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;enable_controls&gt;(qd,boost::bind(&amp;QCheckBox::setEnabled,c2,_1));
-
-    qd-&gt;exec();
-    return 0;
-    }</pre>
+int main(int argc, char **argv)
+{
+ QApplication app (argc, argv);
+ 
+ Window window;
+ window.show();
+ 
+ return app.exec();
+}</pre>
 </div><div class="RenoAutoDIV"><div class="RenoHR"><hr/></div>
 See also: <span class="RenoPageList"><a href="Tutorial.html">Tutorial</a></span>
 </div>
