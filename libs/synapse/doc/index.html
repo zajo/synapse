@@ -41,6 +41,15 @@
 <a href="using_meta_signals_with_QPushButton.html">Using Meta Signals with QPushButton</a></div>
 <h3>Thread Safety</h3>
 <p><i><span class="RenoLink">Boost Synapse</span></i> is not yet thread-safe.</p>
+<h3>Building</h3>
+<p><i><span class="RenoLink">Boost Synapse</span></i> has been formatted to be submitted for a Boost review, so its directory structure follows the common directory structure for Boost libraries—and it's built with Boost Build.</p>
+<p>Alternatively, just put <i>synapse.cpp</i> into your favorite build system. If your program uses the <i><span class="RenoLink"><a href="block.html">block</a></span></i> function, you also need to compile and link <i>block.cpp</i>.</p>
+<p>The following header-only Boost components are also needed:</p>
+<div><ul><li> bind</li>
+<li> function</li>
+<li> shared_ptr</li>
+<li> weak_ptr</li>
+</ul></div>
 <h3>Download</h3>
 <p>See <span class="RenoLink"><a href="https://github.com/zajo/boost-synapse">this</a></span> github repo.</p>
 </div><!-- Copyright (c) 2008-2013 Emil Dotchevski and Reverge Studios, Inc. -->

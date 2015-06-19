@@ -24,8 +24,8 @@
 <p>The Qt Wiki contains the following example on creating custom signals and slots:</p>
 <blockquote><p><span class="RenoLink"><a href="https://wiki.qt.io/Qt_for_Beginners#Creating_custom_signals_and_slots">https://wiki.qt.io/Qt_for_Beginners#Creating_custom_signals_and_slots</a></span></p></blockquote>
 <p>It requires running the Qt Meta Object Compiler.</p>
-<p>Below is the same example, modified to use <i><span class="RenoLink"><a href="index.html">Boost Synapse</a></span></i> to implement the custom counterReached signal. This approach does not require running the Qt Meta Object Compiler.</p>
-<p>The changes made to the original program are marked with //&lt;--</p>
+<p>Below is the same example, modified to use <i><span class="RenoLink"><a href="index.html">Boost Synapse</a></span></i> to implement the custom <i>counterReached</i> signal. This approach does not require running the Qt Meta Object Compiler.</p>
+<p>The changes made to the original program are marked with //&lt;--.</p>
 <pre>#include &lt;<span class="RenoLink"><a href="boost_synapse_connect_hpp.html">boost/synapse/connect.hpp</a></span>&gt;
 #include &lt;boost/bind.hpp&gt;
 #define QT_NO_EMIT //Suppress the #define emit from Qt since it clashes with boost::synapse::emit.

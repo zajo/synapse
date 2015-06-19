@@ -146,25 +146,6 @@ handle_QPushButton_clicked_connect( synapse::<span class="RenoLink"><a href="con
 <div><ul><li> "<span class="RenoLink"><a href="using_meta_signals_to_connect_to_a_C-style_callback_API.html">Using Meta Signals to Connect to a C-Style Callback API</a></span>", and</li>
 <li> "<span class="RenoLink"><a href="using_meta_signals_with_QPushButton.html">Using Meta Signals with QPushButton</a></span>".</li>
 </ul></div>
-<h3>Blocking signals</h3>
-<p>It is possible to block a specific signal for a specific emitter. While the signal is blocked, calls to <i><span class="RenoLink"><a href="emit.html">emit</a></span></i> are ignored:</p>
-<pre>my_button b;
-boost::shared_ptr&lt;synapse::<span class="RenoLink"><a href="connection.html">connection</a></span>&gt; c=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;button_clicked&gt;(&amp;b,f);
-    {
-    boost::shared_ptr&lt;synapse::<span class="RenoLink"><a href="blocker.html">blocker</a></span>&gt; blk=synapse::<span class="RenoLink"><a href="block.html">block</a></span>&lt;button_clicked&gt;(&amp;b);
-    synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>&lt;button_clicked&gt;(&amp;b); //Doesn't call any handlers, button_clicked is blocked.
-    }
-
-//Here blk has expired, unblocking the button_clicked signal for b.
-//The following call to emit will call the connected handlers.
-synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>&lt;button_clicked&gt;(&amp;b);</pre>
-<p>In general, a signal will remain blocked for a given emitter until all <i><span class="RenoLink"><a href="blocker.html">blocker</a></span></i> objects for that signal and that emitter have expired. Note that blocking a signal affects current as well as future connections:</p>
-<pre>my_button b;
-boost::shared_ptr&lt;synapse::<span class="RenoLink"><a href="blocker.html">blocker</a></span>&gt; blk=synapse::<span class="RenoLink"><a href="block.html">block</a></span>&lt;button_clicked&gt;(&amp;b);
-boost::shared_ptr&lt;synapse::<span class="RenoLink"><a href="connection.html">connection</a></span>&gt; c=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;button_clicked&gt;(&amp;b,f);
-
-synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>&lt;button_clicked&gt;(&amp;b); //Doesn't call any handlers, button_clicked is blocked.</pre>
-<p>In addition (similarly to <i><span class="RenoLink"><a href="connect.html">connect</a></span></i>) there is a meta signal associated with <i><span class="RenoLink"><a href="block.html">block</a></span></i>. When a specific signal for a specific emitter transitions from being unblocked to being blocked, the <i><span class="RenoLink"><a href="meta_emitter.html">meta::emitter</a></span></i> emits <i><span class="RenoLink"><a href="meta_blocked.html">meta::blocked</a></span></i>, passing <i>true</i> for its <i>is_blocked</i> argument. The signal is emitted again when the signal becomes unblocked and this time <i>is_blocked</i> is <i>false</i>. One possible use of <i><span class="RenoLink"><a href="meta_blocked.html">meta::blocked</a></span></i> is to automatically reflect the blocked state of the signal in some user interface; see "<span class="RenoLink"><a href="using_meta_signals_to_respond_to_signals_being_blocked_or_unblocked.html">Using Meta Signals to Respond to Signals Being Blocked or Unblocked</a></span>".</p>
 <h3>Emitter lifetime safety</h3>
 <p>Because the emitter object passed to <i><span class="RenoLink"><a href="connect.html">connect</a></span></i> may have been destroyed by the time it is accessed by a handler of the <i><span class="RenoLink"><a href="meta_connected.html">meta::connected</a></span></i> signal, <i><span class="RenoLink"><a href="connect.html">connect</a></span></i> can also take the emitter argument by <i>weak_ptr</i>:</p>
 <pre>boost::shared_ptr&lt;my_button&gt; b(new my_button);
@@ -199,6 +180,25 @@ else
         hitting this "else" branch means that the emitter has expired. */
     }</pre>
 <p>Note however that <i><span class="RenoLink"><a href="connection_emitter.html">connection::emitter</a></span></i> does handle const-ness correctly. For example, if <i><span class="RenoLink"><a href="connect.html">connect</a></span></i> was passed a <i>QPushButton</i> emitter, it can be accessed as <i>QPushButton</i> and as <i>QPushButton const</i>, but if <i><span class="RenoLink"><a href="connect.html">connect</a></span></i> was passed a <i>QPushButton const</i> then it can not be accessed as a <i>QPushButton</i>.</p>
+<h3>Blocking signals</h3>
+<p>It is possible to block a specific signal for a specific emitter. While the signal is blocked, calls to <i><span class="RenoLink"><a href="emit.html">emit</a></span></i> are ignored:</p>
+<pre>my_button b;
+boost::shared_ptr&lt;synapse::<span class="RenoLink"><a href="connection.html">connection</a></span>&gt; c=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;button_clicked&gt;(&amp;b,f);
+    {
+    boost::shared_ptr&lt;synapse::<span class="RenoLink"><a href="blocker.html">blocker</a></span>&gt; blk=synapse::<span class="RenoLink"><a href="block.html">block</a></span>&lt;button_clicked&gt;(&amp;b);
+    synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>&lt;button_clicked&gt;(&amp;b); //Doesn't call any handlers, button_clicked is blocked.
+    }
+
+//Here blk has expired, unblocking the button_clicked signal for b.
+//The following call to emit will call the connected handlers.
+synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>&lt;button_clicked&gt;(&amp;b);</pre>
+<p>In general, a signal will remain blocked for a given emitter until all <i><span class="RenoLink"><a href="blocker.html">blocker</a></span></i> objects for that signal and that emitter have expired. Note that blocking a signal affects current as well as future connections:</p>
+<pre>my_button b;
+boost::shared_ptr&lt;synapse::<span class="RenoLink"><a href="blocker.html">blocker</a></span>&gt; blk=synapse::<span class="RenoLink"><a href="block.html">block</a></span>&lt;button_clicked&gt;(&amp;b);
+boost::shared_ptr&lt;synapse::<span class="RenoLink"><a href="connection.html">connection</a></span>&gt; c=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;button_clicked&gt;(&amp;b,f);
+
+synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>&lt;button_clicked&gt;(&amp;b); //Doesn't call any handlers, button_clicked is blocked.</pre>
+<p>In addition (similarly to <i><span class="RenoLink"><a href="connect.html">connect</a></span></i>) there is a meta signal associated with <i><span class="RenoLink"><a href="block.html">block</a></span></i>. When a specific signal for a specific emitter transitions from being unblocked to being blocked, the <i><span class="RenoLink"><a href="meta_emitter.html">meta::emitter</a></span></i> emits <i><span class="RenoLink"><a href="meta_blocked.html">meta::blocked</a></span></i>, passing <i>true</i> for its <i>is_blocked</i> argument. The signal is emitted again when the signal becomes unblocked and this time <i>is_blocked</i> is <i>false</i>. One possible use of <i><span class="RenoLink"><a href="meta_blocked.html">meta::blocked</a></span></i> is to automatically reflect the blocked state of the signal in some user interface; see "<span class="RenoLink"><a href="using_meta_signals_to_respond_to_signals_being_blocked_or_unblocked.html">Using Meta Signals to Respond to Signals Being Blocked or Unblocked</a></span>".</p>
 <h3>Header-only emit</h3>
 <p>If no signals are ever connected, <i>emit</i> is a no-op. For this reason, if a user library calls <i><span class="RenoLink"><a href="emit.html">emit</a></span></i> but does not call <i>connect</i>, there is no need to link the <i><span class="RenoLink"><a href="index.html">Boost Synapse</a></span></i> library. As an example, a low level library that emits signals similar to <i>report_progress</i> (see the <i>FILE</i> example earlier on this page) can do so without requiring a client program that doesn't care about them to link <i><span class="RenoLink"><a href="index.html">Boost Synapse</a></span></i>—yet other client programs that do connect and handle the signals will "just work" without having to recompile the low level library.</p>
 </div><div class="RenoAutoDIV"><div class="RenoHR"><hr/></div>
