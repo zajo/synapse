@@ -9,16 +9,15 @@
       <Configuration>release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="release-assert|Win32">
-      <Configuration>release-assert</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup>
-	  <BaseIntermediateOutputPath>$(SolutionDir)..\..\..\..\..\bld\msvc\lib\$(SolutionName)\$(ProjectName)</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath>$(SolutionDir)..\..\..\..\..\bld\msvc\lib\$(SolutionName)\$(ProjectName)</BaseIntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <!-- reverge_begin cpps -->
+    <ClInclude Include="..\..\..\..\..\libs\synapse\src\block.cpp" />
+    <ClInclude Include="..\..\..\..\..\libs\synapse\src\synapse.cpp" />
+    <ClInclude Include="..\..\..\example\win\win_WindowProc.cpp" />
     <!-- reverge_end cpps -->
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -26,11 +25,6 @@
     <Keyword>MakeFileProj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release-assert|Win32'" Label="Configuration">
-    <ConfigurationType>Makefile</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug|Win32'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
@@ -44,9 +38,6 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='release-assert|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -56,13 +47,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug|Win32'">
     <!-- reverge_begin defines(debug) -->
-    <NMakePreprocessorDefinitions></NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>BOOST_ALL_NO_LIB=1;</NMakePreprocessorDefinitions>
     <!-- reverge_end defines(debug) -->
     <!-- reverge_begin includes(debug) -->
-    <NMakeIncludeSearchPath></NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>;$(ProjectDir)..\..\..\..\..</NMakeIncludeSearchPath>
     <!-- reverge_end includes(debug) -->
     <!-- reverge_begin options(debug) -->
-    <AdditionalOptions></AdditionalOptions>
+    <AdditionalOptions>-TP -c /EHs /GR /MDd /Ob0 /Od /W3 /Z7 /Zc:forScope /Zc:wchar_t /favor:blend /wd4675 </AdditionalOptions>
     <!-- reverge_end options(debug) -->
     <OutDir>$(SolutionDir)..\..\..\..\..\bld\lib\$(SolutionName)\libs\$(SolutionName)\example\win\msvc-12.0\$(Configuration)\address-model-64\link-static\threading-multi\user-interface-gui</OutDir>
     <IntDir>$(SolutionDir)..\..\..\..\..\bld\lib\$(SolutionName)\libs\$(SolutionName)\example\win\msvc-12.0\$(Configuration)\address-model-64\link-static\threading-multi\user-interface-gui</IntDir>
@@ -73,19 +64,19 @@
     <LibraryWPath />
     <SourcePath />
     <ExcludePath />
-    <NMakeBuildCommandLine>$(SolutionDir)..\..\..\..\..\munch\ide\bld.bat msvc-12.0 $(Configuration) $(ProjectName)</NMakeBuildCommandLine>
-    <NMakeReBuildCommandLine>$(SolutionDir)..\..\..\..\..\munch\ide\bld.bat msvc-12.0 $(Configuration) $(ProjectName) -a</NMakeReBuildCommandLine>
-    <NMakeCleanCommandLine>$(SolutionDir)..\..\..\..\..\munch\ide\vcxproj.bat msvc-12.0 $(SolutionName) $(ProjectPath)</NMakeCleanCommandLine>
+    <NMakeBuildCommandLine>$(SolutionDir)..\..\..\b2 address-model=64 variant=$(configuration) toolset=msvc-14.0 $(ProjectName)</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>$(SolutionDir)..\..\..\b2 address-model=64 variant=$(configuration) toolset=msvc-14.0 $(ProjectName) -a</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>$(SolutionDir)vcxproj.bat msvc-14.0 $(ProjectPath)</NMakeCleanCommandLine>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
     <!-- reverge_begin defines(release) -->
-    <NMakePreprocessorDefinitions></NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>BOOST_ALL_NO_LIB=1;NDEBUG;</NMakePreprocessorDefinitions>
     <!-- reverge_end defines(release) -->
     <!-- reverge_begin includes(release) -->
-    <NMakeIncludeSearchPath></NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>;$(ProjectDir)..\..\..\..\..</NMakeIncludeSearchPath>
     <!-- reverge_end includes(release) -->
     <!-- reverge_begin options(release) -->
-    <AdditionalOptions></AdditionalOptions>
+    <AdditionalOptions>-TP -c /EHs /GR /MD /O2 /Ob2 /W3 /Zc:forScope /Zc:wchar_t /favor:blend /wd4675 </AdditionalOptions>
     <!-- reverge_end options(release) -->
     <OutDir>$(SolutionDir)..\..\..\..\..\bld\lib\$(SolutionName)\libs\$(SolutionName)\example\win\msvc-12.0\$(Configuration)\address-model-64\link-static\threading-multi\user-interface-gui</OutDir>
     <IntDir>$(SolutionDir)..\..\..\..\..\bld\lib\$(SolutionName)\libs\$(SolutionName)\example\win\msvc-12.0\$(Configuration)\address-model-64\link-static\threading-multi\user-interface-gui</IntDir>
@@ -96,32 +87,9 @@
     <LibraryWPath />
     <SourcePath />
     <ExcludePath />
-    <NMakeBuildCommandLine>$(SolutionDir)..\..\..\..\..\munch\ide\bld.bat msvc-12.0 $(Configuration) $(ProjectName)</NMakeBuildCommandLine>
-    <NMakeReBuildCommandLine>$(SolutionDir)..\..\..\..\..\munch\ide\bld.bat msvc-12.0 $(Configuration) $(ProjectName) -a</NMakeReBuildCommandLine>
-    <NMakeCleanCommandLine>$(SolutionDir)..\..\..\..\..\munch\ide\vcxproj.bat msvc-12.0 $(SolutionName) $(ProjectPath)</NMakeCleanCommandLine>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release-assert|Win32'">
-    <!-- reverge_begin defines(release-assert) -->
-    <NMakePreprocessorDefinitions></NMakePreprocessorDefinitions>
-    <!-- reverge_end defines(release-assert) -->
-    <!-- reverge_begin includes(release-assert) -->
-    <NMakeIncludeSearchPath></NMakeIncludeSearchPath>
-    <!-- reverge_end includes(release-assert) -->
-    <!-- reverge_begin options(release-assert) -->
-    <AdditionalOptions></AdditionalOptions>
-    <!-- reverge_end options(release-assert) -->
-    <OutDir>$(SolutionDir)..\..\..\..\..\bld\lib\$(SolutionName)\libs\$(SolutionName)\example\win\msvc-12.0\$(Configuration)\address-model-64\link-static\threading-multi\user-interface-gui</OutDir>
-    <IntDir>$(SolutionDir)..\..\..\..\..\bld\lib\$(SolutionName)\libs\$(SolutionName)\example\win\msvc-12.0\$(Configuration)\address-model-64\link-static\threading-multi\user-interface-gui</IntDir>
-    <ExecutablePath>$(PATH)</ExecutablePath>
-    <IncludePath />
-    <ReferencePath />
-    <LibraryPath />
-    <LibraryWPath />
-    <SourcePath />
-    <ExcludePath />
-    <NMakeBuildCommandLine>$(SolutionDir)..\..\..\..\..\munch\ide\bld.bat msvc-12.0 $(Configuration) $(ProjectName)</NMakeBuildCommandLine>
-    <NMakeReBuildCommandLine>$(SolutionDir)..\..\..\..\..\munch\ide\bld.bat msvc-12.0 $(Configuration) $(ProjectName) -a</NMakeReBuildCommandLine>
-    <NMakeCleanCommandLine>$(SolutionDir)..\..\..\..\..\munch\ide\vcxproj.bat msvc-12.0 $(SolutionName) $(ProjectPath)</NMakeCleanCommandLine>
+    <NMakeBuildCommandLine>$(SolutionDir)..\..\..\b2 address-model=64 variant=$(configuration) toolset=msvc-14.0 $(ProjectName)</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>$(SolutionDir)..\..\..\b2 address-model=64 variant=$(configuration) toolset=msvc-14.0 $(ProjectName) -a</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>$(SolutionDir)vcxproj.bat msvc-14.0 $(ProjectPath)</NMakeCleanCommandLine>
   </PropertyGroup>
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>

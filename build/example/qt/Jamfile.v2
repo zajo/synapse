@@ -1,0 +1,27 @@
+# Copyright (c) 2015 Emil Dotchevski and Reverge Studios, Inc.
+
+# Distributed under the Boost Software License, Version 1.0. (See accompanying
+# file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
+project
+    : source-location
+		../../../example/qt
+    ;
+
+local qt_msvc_dir = C:/Qt/Qt5.6.0/5.6/msvc2015_64 ;
+
+local qt_dir = $(qt_msvc_dir) ;
+local qt_dir_lib = $(qt_dir)/lib ;
+local qt_dir_bin = $(qt_dir)/bin ;
+
+local qt_usage_requirements = <include>$(qt_dir)/include ;
+
+lib QtCore : : <variant>release <name>Qt5Core <search>$(qt_dir_lib) : : $(qt_usage_requirements) ;
+lib QtCore : : <name>Qt5Cored <search>$(qt_dir_lib) : : $(qt_usage_requirements) ;
+
+lib QtWidgets : : <variant>release <name>Qt5Widgets <search>$(qt_dir_lib) : : $(qt_usage_requirements) ;
+lib QtWidgets : : <name>Qt5Widgetsd <search>$(qt_dir_lib) : : $(vqt_usage_requirements) ;
+
+exe qt_button : qt_button.cpp QtWidgets QtCore ../..//libsynapse ;
+exe qt_custom_signals : qt_custom_signals.cpp QtWidgets QtCore ../..//libsynapse ;
+exe qt_meta_block : qt_meta_block.cpp QtWidgets QtCore ../..//libsynapse ;

@@ -1,7 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\libs\synapse\src\block.cpp">
+        <Filter>synapse\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\libs\synapse\src\synapse.cpp">
+        <Filter>synapse\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\example\win\win_WindowProc.cpp">
+        <Filter>synapse\example\win</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <Filter Include="synapse">
+      <UniqueIdentifier>{341A2FCA-0315-018F-7ABE-584B2F873895}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="synapse\example">
+      <UniqueIdentifier>{15D966BA-043F-5CA2-5C50-2FB337746EE4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="synapse\example\win">
+      <UniqueIdentifier>{1F300263-54B3-217C-09A1-58A43C7928CB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="synapse\src">
+      <UniqueIdentifier>{3D155269-4201-31EC-7DC5-005D5B5B2281}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

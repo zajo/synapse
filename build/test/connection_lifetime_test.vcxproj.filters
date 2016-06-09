@@ -1,34 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="..\..\test\connection_lifetime_test.cpp">
-        <Filter>lib\synapse\libs\synapse\test</Filter>
+    <ClInclude Include="..\..\..\..\libs\synapse\src\synapse.cpp">
+        <Filter>synapse\src</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\synapse.cpp">
-        <Filter>lib\synapse\libs\synapse\build\src</Filter>
+    <ClInclude Include="..\..\test\connection_lifetime_test.cpp">
+        <Filter>synapse\test</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="lib">
-      <UniqueIdentifier>{139B31B0-5136-3C87-3757-014B62357950}</UniqueIdentifier>
+    <Filter Include="synapse">
+      <UniqueIdentifier>{33D86812-0F72-299D-54EA-25853C5E1D46}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\synapse">
-      <UniqueIdentifier>{63E73C20-346A-2DD6-2B27-052815380EFD}</UniqueIdentifier>
+    <Filter Include="synapse\src">
+      <UniqueIdentifier>{0BE1470B-0FCD-5931-1AB6-230571B0245A}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\synapse\libs">
-      <UniqueIdentifier>{573C0386-3E85-2126-04D6-23BB631B2301}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\synapse\libs\synapse">
-      <UniqueIdentifier>{32B3791D-5A4D-1AA2-6A65-53862EDD38D8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\synapse\libs\synapse\build">
-      <UniqueIdentifier>{66545D49-151D-06BA-5906-556A0C551182}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\synapse\libs\synapse\build\src">
-      <UniqueIdentifier>{399E3A0E-2F65-089F-39A3-773078AB0205}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\synapse\libs\synapse\test">
-      <UniqueIdentifier>{48036D96-7D27-58C8-4558-660362DD59E9}</UniqueIdentifier>
+    <Filter Include="synapse\test">
+      <UniqueIdentifier>{700962EA-45AD-739F-0DCA-1F31277104C7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

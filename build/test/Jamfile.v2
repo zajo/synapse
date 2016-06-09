@@ -1,0 +1,32 @@
+# Copyright (c) 2015 Emil Dotchevski and Reverge Studios, Inc.
+
+# Distributed under the Boost Software License, Version 1.0. (See accompanying
+# file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
+import testing ;
+import path ;
+
+project
+    : source-location
+		../../test
+    ;
+
+#build-project ../example ;
+
+compile compile_blocker_hpp.cpp ;
+compile compile_block_hpp.cpp ;
+compile compile_connection_hpp.cpp ;
+compile compile_connect_hpp.cpp ;
+compile compile_emit_hpp.cpp ;
+compile compile_signal_traits_hpp.cpp ;
+compile compile_translate_hpp.cpp ;
+
+run block_test.cpp ..//block ;
+run block_emit_test.cpp ..//libsynapse ;
+run args_connect_test.cpp ..//synapse ;
+run args_translate_test.cpp ..//synapse  ;
+run connection_lifetime_test.cpp ..//synapse  ;
+run connection_user_data_test.cpp ..//synapse  ;
+run emit_test.cpp ..//synapse  ;
+run emit_stub_test.cpp ..//headers ;
+run weak_store_test.cpp ;

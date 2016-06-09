@@ -2,24 +2,15 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="..\..\test\emit_stub_test.cpp">
-        <Filter>lib\synapse\libs\synapse\test</Filter>
+        <Filter>synapse\test</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="lib">
-      <UniqueIdentifier>{138735C5-2E85-088C-4597-254319433DEC}</UniqueIdentifier>
+    <Filter Include="synapse">
+      <UniqueIdentifier>{33B84436-55A0-7DA4-4201-0C2142CA0F9F}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\synapse">
-      <UniqueIdentifier>{60E94C39-37E2-2CCE-2446-015A0D1778A1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\synapse\libs">
-      <UniqueIdentifier>{62B053AE-139D-79CA-7949-38E603327E99}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\synapse\libs\synapse">
-      <UniqueIdentifier>{5C7175ED-66E2-187C-002F-75BF68874973}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\synapse\libs\synapse\test">
-      <UniqueIdentifier>{1FD2027E-7591-25C4-28D8-14C321033DF0}</UniqueIdentifier>
+    <Filter Include="synapse\test">
+      <UniqueIdentifier>{06E53734-1595-5779-39EA-1CAE0ECF7F15}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

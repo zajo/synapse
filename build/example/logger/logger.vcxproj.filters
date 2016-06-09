@@ -1,43 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\libs\synapse\src\block.cpp">
+        <Filter>synapse\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\libs\synapse\src\synapse.cpp">
+        <Filter>synapse\src</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\example\logger\logger.cpp">
-        <Filter>lib\synapse\libs\synapse\example\logger</Filter>
+        <Filter>synapse\example\logger</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\example\logger\main.cpp">
-        <Filter>lib\synapse\libs\synapse\example\logger</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\block.cpp">
-        <Filter>lib\synapse\libs\synapse\build\src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\synapse.cpp">
-        <Filter>lib\synapse\libs\synapse\build\src</Filter>
+        <Filter>synapse\example\logger</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="lib">
-      <UniqueIdentifier>{13F31F4F-2D52-2675-7734-1F712A7A4494}</UniqueIdentifier>
+    <Filter Include="synapse">
+      <UniqueIdentifier>{345B7782-76B9-5982-2091-0B1222B053E3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\synapse">
-      <UniqueIdentifier>{315B33B3-24D1-327B-4A1D-564739CD339E}</UniqueIdentifier>
+    <Filter Include="synapse\example">
+      <UniqueIdentifier>{1FD00669-78B1-6013-1DE9-3C627D37396E}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\synapse\libs">
-      <UniqueIdentifier>{63B21ACF-7F9A-5244-38D1-047D12B306D3}</UniqueIdentifier>
+    <Filter Include="synapse\example\logger">
+      <UniqueIdentifier>{4E5821DB-63BA-4F5A-0577-121751824CCF}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\synapse\libs\synapse">
-      <UniqueIdentifier>{36DB0778-21B0-644E-0857-39826B5E6E1C}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\synapse\libs\synapse\build">
-      <UniqueIdentifier>{239E75D9-6315-7B0B-31D7-785A6F464994}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\synapse\libs\synapse\build\src">
-      <UniqueIdentifier>{622633EC-7654-2961-7D21-681C2DA55E0C}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\synapse\libs\synapse\example">
-      <UniqueIdentifier>{4C843A05-5EF8-1F2A-2B25-547317F95988}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\synapse\libs\synapse\example\logger">
-      <UniqueIdentifier>{512A5348-7812-15B4-3079-7E1E108527BF}</UniqueIdentifier>
+    <Filter Include="synapse\src">
+      <UniqueIdentifier>{31F13261-42BC-3916-0A78-38F245CE15D0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

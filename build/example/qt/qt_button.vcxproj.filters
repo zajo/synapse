@@ -1,40 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\libs\synapse\src\block.cpp">
+        <Filter>synapse\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\libs\synapse\src\synapse.cpp">
+        <Filter>synapse\src</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\example\qt\qt_button.cpp">
-        <Filter>lib\synapse\libs\synapse\example\qt</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\block.cpp">
-        <Filter>lib\synapse\libs\synapse\build\src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\synapse.cpp">
-        <Filter>lib\synapse\libs\synapse\build\src</Filter>
+        <Filter>synapse\example\qt</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="lib">
-      <UniqueIdentifier>{13E6775D-1632-2E78-560A-621679D87251}</UniqueIdentifier>
+    <Filter Include="synapse">
+      <UniqueIdentifier>{344E4F90-5F98-6184-7F67-4DB7720F01A0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\synapse">
-      <UniqueIdentifier>{2F5D13C3-2720-31CB-7031-53BD5F0C24B5}</UniqueIdentifier>
+    <Filter Include="synapse\example">
+      <UniqueIdentifier>{1DD26679-7B01-5F63-43FE-39D922762A85}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\synapse\libs">
-      <UniqueIdentifier>{40AA7AEA-6300-62B1-0673-129928181939}</UniqueIdentifier>
+    <Filter Include="synapse\example\qt">
+      <UniqueIdentifier>{2B5001F6-471F-5FC7-5319-203366E65F34}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\synapse\libs\synapse">
-      <UniqueIdentifier>{52AF5AAD-54BD-62DF-6C33-7AFE3C7B23D9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\synapse\libs\synapse\build">
-      <UniqueIdentifier>{49F263FC-4E0D-0FBC-11B8-229627BA3C88}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\synapse\libs\synapse\build\src">
-      <UniqueIdentifier>{6F1C2B5A-45E5-66E5-56B0-60DD7FDF4BAC}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\synapse\libs\synapse\example">
-      <UniqueIdentifier>{097A595D-46FF-3AA9-6CA8-27A55BF546A0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\synapse\libs\synapse\example\qt">
-      <UniqueIdentifier>{097F2B31-6E5B-368D-4995-2B935A8D1C30}</UniqueIdentifier>
+    <Filter Include="synapse\src">
+      <UniqueIdentifier>{4DC50596-75CA-37A7-6E55-7A6E16EA4B8D}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

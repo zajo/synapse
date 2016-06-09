@@ -1,46 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\libs\synapse\src\block.cpp">
+        <Filter>synapse\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\libs\synapse\src\synapse.cpp">
+        <Filter>synapse\src</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\example\callback_api\callback_api.c">
-        <Filter>lib\synapse\libs\synapse\example\callback_api</Filter>
+        <Filter>synapse\example\callback_api</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\example\callback_api\main.cpp">
-        <Filter>lib\synapse\libs\synapse\example\callback_api</Filter>
+        <Filter>synapse\example\callback_api</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\example\callback_api\synapsify.cpp">
-        <Filter>lib\synapse\libs\synapse\example\callback_api</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\block.cpp">
-        <Filter>lib\synapse\libs\synapse\build\src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\synapse.cpp">
-        <Filter>lib\synapse\libs\synapse\build\src</Filter>
+        <Filter>synapse\example\callback_api</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="lib">
-      <UniqueIdentifier>{13FD1D44-7EAB-4073-7014-4D754EF32246}</UniqueIdentifier>
+    <Filter Include="synapse">
+      <UniqueIdentifier>{346B4970-53A1-2F7E-6A06-57C45F7B1AB7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\synapse">
-      <UniqueIdentifier>{72DA6BA6-2315-32FF-4D8D-182E3DDD7ECC}</UniqueIdentifier>
+    <Filter Include="synapse\example">
+      <UniqueIdentifier>{624E0E54-75CE-60EF-4E50-7F8D2EA80C10}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\synapse\libs">
-      <UniqueIdentifier>{1DF872BA-150F-65F2-3E97-39E842A75907}</UniqueIdentifier>
+    <Filter Include="synapse\example\callback_api">
+      <UniqueIdentifier>{5A2209B9-077B-1AD1-646C-407476C455D0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\synapse\libs\synapse">
-      <UniqueIdentifier>{61FC0911-1B65-2561-7D71-28650E8965CE}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\synapse\libs\synapse\build">
-      <UniqueIdentifier>{46DF233E-32DC-6B85-49EF-18AE24EF335D}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\synapse\libs\synapse\build\src">
-      <UniqueIdentifier>{586E7A5A-1AA7-3B3D-59F6-2D8C4FF94BD4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\synapse\libs\synapse\example">
-      <UniqueIdentifier>{3ECB4283-30F3-0A8A-1A03-360E64FC67B6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\synapse\libs\synapse\example\callback_api">
-      <UniqueIdentifier>{26EA7159-1F5C-3D11-3DA4-7C0658FF306B}</UniqueIdentifier>
+    <Filter Include="synapse\src">
+      <UniqueIdentifier>{4F270A5F-62EB-7AE0-4DA5-4718006A32A4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

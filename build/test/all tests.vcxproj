@@ -9,10 +9,6 @@
       <Configuration>release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="release-assert|Win32">
-      <Configuration>release-assert</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup>
     <BaseIntermediateOutputPath>$(SolutionDir)..\..\..\..\..\bld\msvc\$(SolutionName)\$(ProjectName)</BaseIntermediateOutputPath>
@@ -26,11 +22,6 @@
     <Keyword>MakeFileProj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release-assert|Win32'" Label="Configuration">
-    <ConfigurationType>Makefile</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug|Win32'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
@@ -43,9 +34,6 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='release-assert|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -76,8 +64,8 @@
     <LibraryWPath />
     <SourcePath />
     <ExcludePath />
-    <NMakeBuildCommandLine>cd $(ProjectDir)..\..\test &amp;&amp; $(SolutionDir)..\..\..\..\..\munch\ide\bld.bat msvc-12.0 $(Configuration)</NMakeBuildCommandLine>
-    <NMakeReBuildCommandLine>cd $(ProjectDir)..\..\test &amp;&amp; $(SolutionDir)..\..\..\..\..\munch\ide\bld.bat msvc-12.0 $(Configuration) -a</NMakeReBuildCommandLine>
+    <NMakeBuildCommandLine>$(SolutionDir)..\..\..\b2 address-model=64 variant=$(configuration) toolset=msvc-14.0</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>$(SolutionDir)..\..\..\b2 address-model=64 variant=$(configuration) toolset=msvc-14.0 -a</NMakeReBuildCommandLine>
     <NMakeCleanCommandLine>
     </NMakeCleanCommandLine>
   </PropertyGroup>
@@ -103,35 +91,8 @@
     <LibraryWPath />
     <SourcePath />
     <ExcludePath />
-    <NMakeBuildCommandLine>cd $(ProjectDir)..\..\test &amp;&amp; $(SolutionDir)..\..\..\..\..\munch\ide\bld.bat msvc-12.0 $(Configuration)</NMakeBuildCommandLine>
-    <NMakeReBuildCommandLine>cd $(ProjectDir)..\..\test &amp;&amp; $(SolutionDir)..\..\..\..\..\munch\ide\bld.bat msvc-12.0 $(Configuration) -a</NMakeReBuildCommandLine>
-    <NMakeCleanCommandLine>
-    </NMakeCleanCommandLine>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release-assert|Win32'">
-    <!-- reverge_begin defines(release-assert) -->
-    <NMakePreprocessorDefinitions>
-    </NMakePreprocessorDefinitions>
-    <!-- reverge_end defines(release-assert) -->
-    <!-- reverge_begin includes(release-assert) -->
-    <NMakeIncludeSearchPath>
-    </NMakeIncludeSearchPath>
-    <!-- reverge_end includes(release-assert) -->
-    <!-- reverge_begin options(release-assert) -->
-    <AdditionalOptions>
-    </AdditionalOptions>
-    <!-- reverge_end options(release-assert) -->
-    <OutDir>$(SolutionDir)..\..\..\..\..\bld\lib\$(SolutionName)\libs\$(SolutionName)\test\$(ProjectName).test\msvc-12.0\$(Configuration)\address-model-64\link-static\threading-multi\</OutDir>
-    <IntDir>$(SolutionDir)..\..\..\..\..\bld\lib\$(SolutionName)\libs\$(SolutionName)\test\$(ProjectName).test\msvc-12.0\$(Configuration)\address-model-64\link-static\threading-multi\</IntDir>
-    <ExecutablePath>$(PATH)</ExecutablePath>
-    <IncludePath />
-    <ReferencePath />
-    <LibraryPath />
-    <LibraryWPath />
-    <SourcePath />
-    <ExcludePath />
-    <NMakeBuildCommandLine>cd $(ProjectDir)..\..\test &amp;&amp; $(SolutionDir)..\..\..\..\..\munch\ide\bld.bat msvc-12.0 $(Configuration)</NMakeBuildCommandLine>
-    <NMakeReBuildCommandLine>cd $(ProjectDir)..\..\test &amp;&amp; $(SolutionDir)..\..\..\..\..\munch\ide\bld.bat msvc-12.0 $(Configuration) -a</NMakeReBuildCommandLine>
+    <NMakeBuildCommandLine>$(SolutionDir)..\..\..\b2 address-model=64 variant=$(configuration) toolset=msvc-14.0</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>$(SolutionDir)..\..\..\b2 address-model=64 variant=$(configuration) toolset=msvc-14.0 -a</NMakeReBuildCommandLine>
     <NMakeCleanCommandLine>
     </NMakeCleanCommandLine>
   </PropertyGroup>

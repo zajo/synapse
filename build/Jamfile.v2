@@ -5,8 +5,6 @@
 
 project
     : source-location ../src
-    : usage-requirements <include>../include
-    : requirements <include>../include <use>/boost//headers   
     ;
 
 alias headers ;
