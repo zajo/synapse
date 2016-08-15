@@ -6,8 +6,7 @@
 #ifndef UUID_0D8C8B64070111E5BC3187D81D5D46B0
 #define UUID_0D8C8B64070111E5BC3187D81D5D46B0
 
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include <boost/synapse/dep/smart_ptr.hpp>
 
 namespace
 boost

@@ -365,28 +365,24 @@ boost
                     }
                 };
             int
-            emit_impl( weak_ptr<connection_list> const & wcl, weak_ptr<synapse_detail::blocked_list> const & wbl, void const * e, synapse_detail::emit_binder_base const & b )
+            emit_impl( weak_ptr<connection_list> const & wcl, weak_ptr<synapse_detail::blocked_list> const & wbl, synapse_detail::emitter_blocked_t * check_blocked, void const * e, synapse_detail::emit_binder_base const & b )
                 {
+				BOOST_ASSERT(check_blocked!=0);
                 BOOST_ASSERT(e!=0);
-                if( !synapse_detail::emitter_blocked_()(wbl,e) )
+                if( !check_blocked(wbl,e) )
                     if( shared_ptr<connection_list> cl=wcl.lock() )
                         return cl->emit_from_emitter(e,b);
                 return 0;
-                }
-            void
-            syn_init()
-                {
-                synapse_detail::emit_() = &emit_impl;
                 }
             }
         namespace
         synapse_detail
             {
             shared_ptr<connection>
-            connect_( weak_ptr<connection_list> & wcl, weak_store const & e, shared_ptr<void const> const & fn, weak_ptr<void const> const & lifetime, int(*emit_meta_connected)(connection &,unsigned) )
+            connect_( emit_t * & emit_ptr, weak_ptr<connection_list> & wcl, weak_store const & e, shared_ptr<void const> const & fn, weak_ptr<void const> const & lifetime, int(*emit_meta_connected)(connection &,unsigned) )
                 {
                 BOOST_ASSERT(fn);
-                syn_init();
+				emit_ptr=&emit_impl;
                 shared_ptr<connection_impl> c(new connection_impl(wcl,get_connection_list_(wcl),emit_meta_connected));
                 c->connect(conn_rec(e,is_empty(lifetime)?c:lifetime,fn));
                 return c;

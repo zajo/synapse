@@ -42,7 +42,7 @@ namespace
     bool
     emitter_blocked( void const * e )
         {
-        return synapse::synapse_detail::emitter_blocked_()(synapse::synapse_detail::get_blocked_list<Signal>(),e);
+        return synapse::synapse_detail::emitter_blocked_<Signal>()(synapse::synapse_detail::get_blocked_list<Signal>(),e);
         }
     template <class Signal>
     meta_data &

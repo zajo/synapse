@@ -162,21 +162,16 @@ boost
                 else
                     return false;
                 }
-            void
-            blk_init()
-                {
-                synapse_detail::emitter_blocked_() = &emitter_blocked_impl;
-                }
             }
         namespace
         synapse_detail
             {
             shared_ptr<blocker>
-            block_( weak_ptr<blocked_list> & wbl, weak_store const & e, int(*emit_meta_block)(blocker &,bool) )
+            block_( emitter_blocked_t * & blocked_ptr, weak_ptr<blocked_list> & wbl, weak_store const & e, int(*emit_meta_block)(blocker &,bool) )
                 {
                 if( shared_ptr<void const> sp=e.maybe_lock<void const>() )
                     {
-                    blk_init();
+					blocked_ptr=&emitter_blocked_impl;
                     shared_ptr<blocked_list> bl=get_blocked_list_(wbl);
                     return bl->block(e,sp,wbl,bl,emit_meta_block);
                     }

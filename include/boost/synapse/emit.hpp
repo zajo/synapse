@@ -118,7 +118,7 @@ boost
         typename synapse_detail::enable_if<signal_traits<Signal>::arity==0,int>::type
         emit( void const * e )
             {
-            return e? synapse_detail::emit_()(synapse_detail::get_connection_list<Signal>(),synapse_detail::get_blocked_list<Signal>(),e,
+            return e? synapse_detail::emit_<Signal>()(synapse_detail::get_connection_list<Signal>(),synapse_detail::get_blocked_list<Signal>(),synapse_detail::emitter_blocked_<Signal>(),e,
                 synapse_detail::emit_binder<typename signal_traits<Signal>::signal_type>()) : 0;
             }
         template <class Signal>
@@ -126,7 +126,7 @@ boost
         emit( void const * e,
                 typename signal_traits<Signal>::arg1_type a1 )
             {
-            return e? synapse_detail::emit_()(synapse_detail::get_connection_list<Signal>(),synapse_detail::get_blocked_list<Signal>(),e,
+            return e? synapse_detail::emit_<Signal>()(synapse_detail::get_connection_list<Signal>(),synapse_detail::get_blocked_list<Signal>(),synapse_detail::emitter_blocked_<Signal>(),e,
                 synapse_detail::emit_binder<typename signal_traits<Signal>::signal_type>(a1)) : 0;
             }
         template <class Signal>
@@ -135,7 +135,7 @@ boost
                 typename signal_traits<Signal>::arg1_type a1,
                 typename signal_traits<Signal>::arg2_type a2 )
             {
-            return e? synapse_detail::emit_()(synapse_detail::get_connection_list<Signal>(),synapse_detail::get_blocked_list<Signal>(),e,
+            return e? synapse_detail::emit_<Signal>()(synapse_detail::get_connection_list<Signal>(),synapse_detail::get_blocked_list<Signal>(),synapse_detail::emitter_blocked_<Signal>(),e,
                 synapse_detail::emit_binder<typename signal_traits<Signal>::signal_type>(a1,a2)) : 0;
             }
         template <class Signal>
@@ -145,7 +145,7 @@ boost
                 typename signal_traits<Signal>::arg2_type a2,
                 typename signal_traits<Signal>::arg3_type a3 )
             {
-            return e? synapse_detail::emit_()(synapse_detail::get_connection_list<Signal>(),synapse_detail::get_blocked_list<Signal>(),e,
+            return e? synapse_detail::emit_<Signal>()(synapse_detail::get_connection_list<Signal>(),synapse_detail::get_blocked_list<Signal>(),synapse_detail::emitter_blocked_<Signal>(),e,
                 synapse_detail::emit_binder<typename signal_traits<Signal>::signal_type>(a1,a2,a3)) : 0;
             }
         template <class Signal>
@@ -156,7 +156,7 @@ boost
                 typename signal_traits<Signal>::arg3_type a3,
                 typename signal_traits<Signal>::arg4_type a4 )
             {
-            return e? synapse_detail::emit_()(synapse_detail::get_connection_list<Signal>(),synapse_detail::get_blocked_list<Signal>(),e,
+            return e? synapse_detail::emit_<Signal>()(synapse_detail::get_connection_list<Signal>(),synapse_detail::get_blocked_list<Signal>(),synapse_detail::emitter_blocked_<Signal>(),e,
                 synapse_detail::emit_binder<typename signal_traits<Signal>::signal_type>(a1,a2,a3,a4)) : 0;
             }
         } 

@@ -110,6 +110,7 @@ boost
                 {
                 typedef translate_binder<OriginalSignal,TranslatedSignal> translator;
                 return connect_(
+					synapse_detail::emit_<OriginalSignal>(),
                     get_connection_list<OriginalSignal>(),
                     weak_store(original_emitter,px),
                     shared_ptr<void const>(new typename translator::function_type(translator::bind_(translated_emitter))),

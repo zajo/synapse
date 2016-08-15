@@ -53,14 +53,14 @@ boost
         namespace
         synapse_detail
             {
-            shared_ptr<blocker> block_( weak_ptr<blocked_list> &, weak_store const &, int(*)(blocker &,bool) );
+            shared_ptr<blocker> block_( emitter_blocked_t * &, weak_ptr<blocked_list> &, weak_store const &, int(*)(blocker &,bool) );
             template <class Signal> int emit_meta_blocked( blocker &, bool );
             ////////////////////////////////////////////////////////
             template <class Signal,class Emitter>
             shared_ptr<blocker>
             block_fwd( weak_ptr<Emitter> const & e, Emitter * px )
                 {
-                return block_(get_blocked_list<Signal>(),weak_store(e,px),&emit_meta_blocked<Signal>);
+                return block_(emitter_blocked_<Signal>(),get_blocked_list<Signal>(),weak_store(e,px),&emit_meta_blocked<Signal>);
                 }
             }
         template <class Signal,class Emitter>

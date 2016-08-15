@@ -7,6 +7,7 @@
 #define UUID_A098543F9C6D4BEC8CE41B576AA69BA6
 
 #include <boost/synapse/signal_traits.hpp>
+#include <boost/synapse/dep/thread_local.hpp>
 #include <boost/weak_ptr.hpp>
 
 namespace
@@ -23,37 +24,39 @@ boost
             struct emit_binder_base;
             ///////////////////////////////////////////////////////////////////
             template <class Signal>
-            weak_ptr<connection_list> &
-            get_connection_list()
-                {
-                static weak_ptr<connection_list> cl;
-                return cl;
-                }
-            typedef  int emit_t( weak_ptr<connection_list> const &, weak_ptr<blocked_list> const &, void const *, emit_binder_base const & );
-            inline int emit_stub( weak_ptr<connection_list> const &, weak_ptr<blocked_list> const &, void const *, emit_binder_base const & ) { return 0; }
-            inline
-            emit_t * &
-            emit_()
-                {
-                static emit_t * psyn=&emit_stub;
-                return psyn;
-                }
-            ///////////////////////////////////////////////////////////////////
-            template <class Signal>
             weak_ptr<blocked_list> &
             get_blocked_list()
                 {
-                static weak_ptr<blocked_list> cl;
+                BOOST_SYNAPSE_STATIC_THREAD_LOCAL(weak_ptr<blocked_list>,cl);
                 return cl;
                 }
             typedef bool emitter_blocked_t( weak_ptr<blocked_list> const &, void const * );
             inline bool emitter_blocked_stub( weak_ptr<blocked_list> const &, void const * ) { return false; }
+            template <class Signal>
             inline
             emitter_blocked_t * &
             emitter_blocked_()
                 {
-                static emitter_blocked_t * pblk=&emitter_blocked_stub;
+                BOOST_SYNAPSE_STATIC_THREAD_LOCAL_INIT(emitter_blocked_t *,pblk,&emitter_blocked_stub);
                 return pblk;
+                }
+            ///////////////////////////////////////////////////////////////////
+            template <class Signal>
+            weak_ptr<connection_list> &
+            get_connection_list()
+                {
+                BOOST_SYNAPSE_STATIC_THREAD_LOCAL(weak_ptr<connection_list>,cl);
+                return cl;
+                }
+            typedef  int emit_t( weak_ptr<connection_list> const &, weak_ptr<blocked_list> const &, emitter_blocked_t *, void const *, emit_binder_base const & );
+            inline int emit_stub( weak_ptr<connection_list> const &, weak_ptr<blocked_list> const &, emitter_blocked_t *, void const *, emit_binder_base const & ) { return 0; }
+			template <class Signal>
+            inline
+            emit_t * &
+            emit_()
+                {
+                BOOST_SYNAPSE_STATIC_THREAD_LOCAL_INIT(emit_t *,psyn,&emit_stub);
+                return psyn;
                 }
             ///////////////////////////////////////////////////////////////////
             }
