@@ -70,6 +70,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "weak_store_test", "test\wea
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "args_connect_test", "test\args_connect_test.vcxproj", "{29BF1BB4-4377-33FB-48F5-3CAC57083F1C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "connect_emit_test", "test\connect_emit_test.vcxproj", "{217E4437-0073-2839-7E63-2AA214205DA2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug|Win32 = debug|Win32
@@ -140,6 +142,10 @@ Global
 		{29BF1BB4-4377-33FB-48F5-3CAC57083F1C}.debug|Win32.Build.0 = debug|Win32
 		{29BF1BB4-4377-33FB-48F5-3CAC57083F1C}.release|Win32.ActiveCfg = release|Win32
 		{29BF1BB4-4377-33FB-48F5-3CAC57083F1C}.release|Win32.Build.0 = release|Win32
+		{217E4437-0073-2839-7E63-2AA214205DA2}.debug|Win32.ActiveCfg = debug|Win32
+		{217E4437-0073-2839-7E63-2AA214205DA2}.debug|Win32.Build.0 = debug|Win32
+		{217E4437-0073-2839-7E63-2AA214205DA2}.release|Win32.ActiveCfg = release|Win32
+		{217E4437-0073-2839-7E63-2AA214205DA2}.release|Win32.Build.0 = release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -165,5 +171,6 @@ Global
 		{700B3AEA-408A-199C-3A81-55B143F44D68} = {2AE860B8-2A40-4C37-9A4A-202B7D5457B0}
 		{152C1058-153B-724E-6B14-17343C294B3B} = {2AE860B8-2A40-4C37-9A4A-202B7D5457B0}
 		{29BF1BB4-4377-33FB-48F5-3CAC57083F1C} = {2AE860B8-2A40-4C37-9A4A-202B7D5457B0}
+		{217E4437-0073-2839-7E63-2AA214205DA2} = {2AE860B8-2A40-4C37-9A4A-202B7D5457B0}
 	EndGlobalSection
 EndGlobal

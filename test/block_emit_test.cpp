@@ -6,7 +6,7 @@
 #include <boost/synapse/block.hpp>
 #include <boost/synapse/blocker.hpp>
 #include <boost/synapse/connect.hpp>
-#include <boost/bind.hpp>
+#include <boost/synapse/dep/bind.hpp>
 #include <boost/detail/lightweight_test.hpp>
 
 namespace synapse=boost::synapse;
@@ -40,7 +40,7 @@ main( int argc, char const * argv[] )
     BOOST_TEST(emitter_blocked<my_signal>(&e1));
     BOOST_TEST(emitter_blocked<my_signal>(&e2));
     int count=0;
-    boost::shared_ptr<synapse::connection> c=synapse::connect<my_signal>(&e1,boost::bind(&inc,boost::ref(count)));
+    boost::shared_ptr<synapse::connection> c=synapse::connect<my_signal>(&e1,synapse::bind(&inc,synapse::ref(count)));
     BOOST_TEST(synapse::emit<my_signal>(&e1)==0);
     BOOST_TEST(count==0);
     b1.reset();

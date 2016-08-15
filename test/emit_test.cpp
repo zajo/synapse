@@ -4,7 +4,7 @@
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/synapse/connect.hpp>
-#include <boost/bind.hpp>
+#include <boost/synapse/dep/bind.hpp>
 #include <boost/detail/lightweight_test.hpp>
 
 namespace synapse=boost::synapse;
@@ -31,9 +31,9 @@ namespace
         my_emitter_type e;
         int count0=0, count1=0, count2=0;
         boost::shared_ptr<synapse::connection> c1;
-        boost::shared_ptr<synapse::connection> c0=synapse::connect<my_signal>(&e,boost::bind(&disconnect<synapse::connection>,boost::ref(c1),boost::ref(count0)));
-        c1=synapse::connect<my_signal>(&e,boost::bind(&inc,boost::ref(count1)));
-        boost::shared_ptr<synapse::connection> c2=synapse::connect<my_signal>(&e,boost::bind(&inc,boost::ref(count2)));
+        boost::shared_ptr<synapse::connection> c0=synapse::connect<my_signal>(&e,synapse::bind(&disconnect<synapse::connection>,synapse::ref(c1),synapse::ref(count0)));
+        c1=synapse::connect<my_signal>(&e,synapse::bind(&inc,synapse::ref(count1)));
+        boost::shared_ptr<synapse::connection> c2=synapse::connect<my_signal>(&e,synapse::bind(&inc,synapse::ref(count2)));
         BOOST_TEST(synapse::emit<my_signal>(&e)==3);
         BOOST_TEST(c1);
         BOOST_TEST(count0==1);
@@ -56,9 +56,9 @@ namespace
         my_emitter_type e;
         int count0=0, count1=0, count2=0;
         boost::shared_ptr<void> lifetime(new int);
-        boost::shared_ptr<synapse::connection> c0=synapse::connect<my_signal>(&e,boost::bind(&disconnect<void>,boost::ref(lifetime),boost::ref(count0)));
-        boost::shared_ptr<synapse::connection>c1=synapse::connect<my_signal>(&e,boost::bind(&inc,boost::ref(count1)),lifetime);
-        boost::shared_ptr<synapse::connection> c2=synapse::connect<my_signal>(&e,boost::bind(&inc,boost::ref(count2)));
+        boost::shared_ptr<synapse::connection> c0=synapse::connect<my_signal>(&e,synapse::bind(&disconnect<void>,synapse::ref(lifetime),synapse::ref(count0)));
+        boost::shared_ptr<synapse::connection>c1=synapse::connect<my_signal>(&e,synapse::bind(&inc,synapse::ref(count1)),lifetime);
+        boost::shared_ptr<synapse::connection> c2=synapse::connect<my_signal>(&e,synapse::bind(&inc,synapse::ref(count2)));
         BOOST_TEST(synapse::emit<my_signal>(&e)==3);
         BOOST_TEST(lifetime);
         BOOST_TEST(count0==1);
@@ -82,12 +82,12 @@ namespace
         my_emitter_type e2;
         int n1=0;
         boost::shared_ptr<my_emitter_type> e1(&e2,null_deleter());
-        boost::shared_ptr<synapse::connection> c1=synapse::connect<my_signal>(e1,boost::bind(&inc,boost::ref(n1)));
+        boost::shared_ptr<synapse::connection> c1=synapse::connect<my_signal>(e1,synapse::bind(&inc,synapse::ref(n1)));
         BOOST_TEST(synapse::emit<my_signal>(&e2)==1);
         BOOST_TEST(n1==1);
         e1.reset();
         int n2=0;
-        boost::shared_ptr<synapse::connection> c2=synapse::connect<my_signal>(&e2,boost::bind(&inc,boost::ref(n2)));
+        boost::shared_ptr<synapse::connection> c2=synapse::connect<my_signal>(&e2,synapse::bind(&inc,synapse::ref(n2)));
         BOOST_TEST(synapse::emit<my_signal>(&e2)==1);
         BOOST_TEST(n1==1);
         BOOST_TEST(n2==1);

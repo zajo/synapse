@@ -7,6 +7,7 @@
 #define UUID_0D8C8B64070111E5BC3187D81D5D46B0
 
 #include <boost/synapse/dep/smart_ptr.hpp>
+#include <boost/synapse/dep/assert.hpp>
 
 namespace
 boost
@@ -47,8 +48,8 @@ boost
                     px_=w_.lock()?0:px;
                     type_=&type<T>;
                     ctype_=&type<T const>;
-                    BOOST_ASSERT(px_!=0 || w_.lock());
-                    BOOST_ASSERT(!empty());
+                    BOOST_SYNAPSE_ASSERT(px_!=0 || w_.lock());
+                    BOOST_SYNAPSE_ASSERT(!empty());
                     }
                 template <class T>
                 void
@@ -58,8 +59,8 @@ boost
                     px_=w_.lock()?0:px;
                     type_=0;
                     ctype_=&type<T const>;
-                    BOOST_ASSERT(px_!=0 || w_.lock());
-                    BOOST_ASSERT(!empty());
+                    BOOST_SYNAPSE_ASSERT(px_!=0 || w_.lock());
+                    BOOST_SYNAPSE_ASSERT(!empty());
                     }
                 void
                 clear()

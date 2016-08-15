@@ -15,6 +15,8 @@ boost
 	synapse
 		{
 		using boost::bind;
+		using boost::ref;
+		using boost::cref;
 		}
 	}
 

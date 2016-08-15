@@ -7,7 +7,7 @@
 #include <boost/synapse/connect.hpp>
 #include <boost/synapse/connection.hpp>
 #include <boost/synapse/synapse_detail/weak_store.hpp>
-#include <boost/bind.hpp>
+#include <boost/synapse/dep/bind.hpp>
 #include <boost/any.hpp>
 #include <vector>
 
@@ -49,8 +49,8 @@ boost
                     fn_(fn),
                     next_(-1)
                     {
-                    BOOST_ASSERT(ep_!=0);
-                    BOOST_ASSERT(fn);
+                    BOOST_SYNAPSE_ASSERT(ep_!=0);
+                    BOOST_SYNAPSE_ASSERT(fn);
                     }
                 weak_store const &
                 emitter() const
@@ -66,49 +66,49 @@ boost
                 is_free() const
                     {
                     bool fr=(ep_==0);
-                    BOOST_ASSERT(e_.empty()==fr);
-                    BOOST_ASSERT(!fn_==fr);
-                    BOOST_ASSERT(connection_lifetime_.expired() || !fr);
+                    BOOST_SYNAPSE_ASSERT(e_.empty()==fr);
+                    BOOST_SYNAPSE_ASSERT(!fn_==fr);
+                    BOOST_SYNAPSE_ASSERT(connection_lifetime_.expired() || !fr);
                     return fr;
                     }
                 bool
                 has_expired() const
                     {
-                    BOOST_ASSERT(!is_free());
+                    BOOST_SYNAPSE_ASSERT(!is_free());
                     return connection_lifetime_.expired();
                     }
                 void
                 clear( int first_free )
                     {
-                    BOOST_ASSERT(first_free==-1 || first_free>=0);
-                    BOOST_ASSERT(!is_free());
+                    BOOST_SYNAPSE_ASSERT(first_free==-1 || first_free>=0);
+                    BOOST_SYNAPSE_ASSERT(!is_free());
                     e_.clear();
                     ep_=0;
                     connection_lifetime_.reset();
                     fn_.reset();
                     next_=first_free;
-                    BOOST_ASSERT(is_free());
+                    BOOST_SYNAPSE_ASSERT(is_free());
                     }
                 int const &
                 next() const
                     {
-                    BOOST_ASSERT(next_==-1 || next_>=0);
+                    BOOST_SYNAPSE_ASSERT(next_==-1 || next_>=0);
                     return next_;
                     }
                 int &
                 next()
                     {
-                    BOOST_ASSERT(next_==-1 || next_>=0);
+                    BOOST_SYNAPSE_ASSERT(next_==-1 || next_>=0);
                     return next_;
                     }
                 bool
                 emit( void const * e, synapse_detail::emit_binder_base const & b ) const
                     {
-                    BOOST_ASSERT(!is_free());
-                    BOOST_ASSERT(e!=0);
+                    BOOST_SYNAPSE_ASSERT(!is_free());
+                    BOOST_SYNAPSE_ASSERT(e!=0);
                     if( ep_==e && !e_.expired() )
                         {
-                        BOOST_ASSERT(ep_==e_.maybe_lock<void const>().get());
+                        BOOST_SYNAPSE_ASSERT(ep_==e_.maybe_lock<void const>().get());
                         if( shared_ptr<void const> lk=connection_lifetime_.lock() )
                             {
                             b.call(fn_.get());
@@ -133,11 +133,11 @@ boost
                     {
                     if( debug )
                         {
-                        BOOST_ASSERT(*last_next_==-1);
+                        BOOST_SYNAPSE_ASSERT(*last_next_==-1);
                         int count1=0;
                         for( int i=first_free_; i!=-1; i=conn_[i].next() )
                             {
-                            BOOST_ASSERT(conn_[i].is_free());
+                            BOOST_SYNAPSE_ASSERT(conn_[i].is_free());
                             ++count1;
                             }
                         int count2=0;
@@ -149,16 +149,16 @@ boost
                              if( *i==-1 )
                                  break;
                             conn_rec const & cr=conn_[*i];
-                            BOOST_ASSERT(!cr.is_free());
+                            BOOST_SYNAPSE_ASSERT(!cr.is_free());
                             ++count2;
                             i=&cr.next();
                             }
-                        BOOST_ASSERT(found_last_next);
+                        BOOST_SYNAPSE_ASSERT(found_last_next);
                         int count3=0;
                         for( std::vector<conn_rec>::const_iterator i=conn_.begin(),ie=conn_.end(); i!=ie; ++i )
                             count3 += i->is_free();
-                        BOOST_ASSERT(count1==count3);
-                        BOOST_ASSERT(count1+count2==conn_.size());
+                        BOOST_SYNAPSE_ASSERT(count1==count3);
+                        BOOST_SYNAPSE_ASSERT(count1+count2==conn_.size());
                         }
                     }
                 bool
@@ -194,10 +194,10 @@ boost
                     int idx;
                     if( first_free_!=-1 )
                         {
-                        BOOST_ASSERT(idx_valid(first_free_));
+                        BOOST_SYNAPSE_ASSERT(idx_valid(first_free_));
                         idx=first_free_;
                         conn_rec & cr=conn_[idx];
-                        BOOST_ASSERT(cr.is_free());
+                        BOOST_SYNAPSE_ASSERT(cr.is_free());
                         first_free_=cr.next();
                         cr=r;
                         *last_next_=idx;
@@ -209,8 +209,8 @@ boost
                         conn_.push_back(r);
                         }
                     last_next_=&conn_[idx].next();
-                    BOOST_ASSERT(first_free_!=idx);
-                    BOOST_ASSERT(!conn_[idx].is_free());
+                    BOOST_SYNAPSE_ASSERT(first_free_!=idx);
+                    BOOST_SYNAPSE_ASSERT(!conn_[idx].is_free());
                     check_invariants();
                     return idx;
                     }
@@ -218,19 +218,19 @@ boost
                 remove( int idx )
                     {
                     check_invariants();
-                    BOOST_ASSERT(idx_valid(idx));
-                    BOOST_ASSERT(first_free_!=idx);
+                    BOOST_SYNAPSE_ASSERT(idx_valid(idx));
+                    BOOST_SYNAPSE_ASSERT(first_free_!=idx);
                     if( emit_conn_ptr_ && emit_conn_ptr_->empty() )
                         *emit_conn_ptr_=conn_;
                     conn_rec & cr=conn_[idx];
-                    BOOST_ASSERT(!cr.is_free());
+                    BOOST_SYNAPSE_ASSERT(!cr.is_free());
                     int * i;
                     for( i=&first_rec_; *i!=-1 && *i!=idx; i=&conn_[*i].next() )
                         { }
                     int const j=(*i=cr.next());
                     if( j==-1 )
                         {
-                        BOOST_ASSERT(last_next_==&cr.next());
+                        BOOST_SYNAPSE_ASSERT(last_next_==&cr.next());
                         last_next_=i;
                         }
                     cr.clear(first_free_);
@@ -266,13 +266,13 @@ boost
                 int
                 emitter_connection_count( void const * e )
                     {
-                    return e==0?0:enumerate_recs(boost::bind(&conn_rec::same_emitter,_1,e));
+                    return e==0?0:enumerate_recs(bind(&conn_rec::same_emitter,_1,e));
                     }
                 int
                 emit_from_emitter( void const * e, synapse_detail::emit_binder_base const & b )
                     {
-                    BOOST_ASSERT(e!=0);
-                    return enumerate_recs(boost::bind(&conn_rec::emit,_1,e,boost::ref(b)));
+                    BOOST_SYNAPSE_ASSERT(e!=0);
+                    return enumerate_recs(bind(&conn_rec::emit,_1,e,ref(b)));
                     }
                 bool
                 purge()
@@ -283,7 +283,7 @@ boost
                     for( i=&first_rec_; *i!=-1; )
                         {
                         conn_rec & cr=conn_[*i];
-                        BOOST_ASSERT(!cr.is_free());
+                        BOOST_SYNAPSE_ASSERT(!cr.is_free());
                         if( cr.has_expired() )
                             {
                             int ff=first_free_;
@@ -297,9 +297,9 @@ boost
                             i=&cr.next();
                             }
                         }
-                    BOOST_ASSERT(*i==-1);
+                    BOOST_SYNAPSE_ASSERT(*i==-1);
                     last_next_=i;
-                    BOOST_ASSERT(c<=conn_.size());
+                    BOOST_SYNAPSE_ASSERT(c<=conn_.size());
                     check_invariants();
                     return c==0;
                     }
@@ -342,7 +342,7 @@ boost
                     wcl_(wcl),
                     cl_(cl)
                     {
-                    BOOST_ASSERT(emit_meta_connected_!=0);
+                    BOOST_SYNAPSE_ASSERT(emit_meta_connected_!=0);
                     }
                 void
                 connect( conn_rec const & cr )
@@ -367,8 +367,8 @@ boost
             int
             emit_impl( weak_ptr<connection_list> const & wcl, weak_ptr<synapse_detail::blocked_list> const & wbl, synapse_detail::emitter_blocked_t * check_blocked, void const * e, synapse_detail::emit_binder_base const & b )
                 {
-				BOOST_ASSERT(check_blocked!=0);
-                BOOST_ASSERT(e!=0);
+				BOOST_SYNAPSE_ASSERT(check_blocked!=0);
+                BOOST_SYNAPSE_ASSERT(e!=0);
                 if( !check_blocked(wbl,e) )
                     if( shared_ptr<connection_list> cl=wcl.lock() )
                         return cl->emit_from_emitter(e,b);
@@ -381,7 +381,7 @@ boost
             shared_ptr<connection>
             connect_( emit_t * & emit_ptr, weak_ptr<connection_list> & wcl, weak_store const & e, shared_ptr<void const> const & fn, weak_ptr<void const> const & lifetime, int(*emit_meta_connected)(connection &,unsigned) )
                 {
-                BOOST_ASSERT(fn);
+                BOOST_SYNAPSE_ASSERT(fn);
 				emit_ptr=&emit_impl;
                 shared_ptr<connection_impl> c(new connection_impl(wcl,get_connection_list_(wcl),emit_meta_connected));
                 c->connect(conn_rec(e,is_empty(lifetime)?c:lifetime,fn));

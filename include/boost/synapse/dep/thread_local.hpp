@@ -9,5 +9,6 @@
 #define BOOST_SYNAPSE_STATIC_THREAD_LOCAL(type,object) static thread_local type object
 #define BOOST_SYNAPSE_STATIC_THREAD_LOCAL_INIT(type,object,init) static thread_local type object=init
 #define BOOST_SYNAPSE_STATIC(type,object) static type object
+#define BOOST_SYNAPSE_STATIC_INIT(type,object,init) static type object=init
 
 #endif

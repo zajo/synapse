@@ -5,6 +5,7 @@
 
 #include <boost/synapse/translate.hpp>
 #include <boost/synapse/connection.hpp>
+#include <boost/synapse/dep/bind.hpp>
 #include <boost/detail/lightweight_test.hpp>
 
 namespace synapse=boost::synapse;
@@ -34,17 +35,17 @@ namespace
         int count=0;
         my_emitter_type e1;
         my_emitter_type e2;
-        boost::shared_ptr<synapse::connection> mc_c0=synapse::connect<synapse::meta::connected<signal0_a0> >(synapse::meta::emitter(),boost::bind(&test_meta_callback_connect_a0,boost::ref(connect_count),&e1,_1,_2));
+        boost::shared_ptr<synapse::connection> mc_c0=synapse::connect<synapse::meta::connected<signal0_a0> >(synapse::meta::emitter(),synapse::bind(&test_meta_callback_connect_a0,synapse::ref(connect_count),&e1,_1,_2));
         BOOST_TEST(connect_count==0);
-        boost::shared_ptr<synapse::connection> mc_c1=synapse::connect<synapse::meta::connected<signal1_a0> >(synapse::meta::emitter(),boost::bind(&test_meta_callback_connect_a0,boost::ref(connect_count),&e1,_1,_2));
+        boost::shared_ptr<synapse::connection> mc_c1=synapse::connect<synapse::meta::connected<signal1_a0> >(synapse::meta::emitter(),synapse::bind(&test_meta_callback_connect_a0,synapse::ref(connect_count),&e1,_1,_2));
         BOOST_TEST(connect_count==0);
-        boost::shared_ptr<synapse::connection> mc_c2=synapse::connect<synapse::meta::connected<signal2_a0> >(synapse::meta::emitter(),boost::bind(&test_meta_callback_connect_a0,boost::ref(connect_count),&e2,_1,_2));
+        boost::shared_ptr<synapse::connection> mc_c2=synapse::connect<synapse::meta::connected<signal2_a0> >(synapse::meta::emitter(),synapse::bind(&test_meta_callback_connect_a0,synapse::ref(connect_count),&e2,_1,_2));
         BOOST_TEST(connect_count==0);
         boost::shared_ptr<synapse::connection> c0=synapse::translate<signal0_a0,signal1_a0>(&e1,&e1);
         BOOST_TEST(connect_count==1);
         boost::shared_ptr<synapse::connection> c1=synapse::translate<signal1_a0,signal2_a0>(&e1,&e2);
         BOOST_TEST(connect_count==2);
-        boost::shared_ptr<synapse::connection> c2=synapse::connect<signal2_a0>(&e2,boost::bind(&test_callback_a0,boost::ref(count)));
+        boost::shared_ptr<synapse::connection> c2=synapse::connect<signal2_a0>(&e2,synapse::bind(&test_callback_a0,synapse::ref(count)));
         BOOST_TEST(connect_count==3);
         BOOST_TEST(synapse::emit<signal0_a0>(&e1)==1);
         BOOST_TEST(count==1);
@@ -96,17 +97,17 @@ namespace
         int count=0;
         my_emitter_type e1;
         my_emitter_type e2;
-        boost::shared_ptr<synapse::connection> mc_c0=synapse::connect<synapse::meta::connected<signal0_a1> >(synapse::meta::emitter(),boost::bind(&test_meta_callback_connect_a1,boost::ref(connect_count),&e1,_1,_2));
+        boost::shared_ptr<synapse::connection> mc_c0=synapse::connect<synapse::meta::connected<signal0_a1> >(synapse::meta::emitter(),synapse::bind(&test_meta_callback_connect_a1,synapse::ref(connect_count),&e1,_1,_2));
         BOOST_TEST(connect_count==0);
-        boost::shared_ptr<synapse::connection> mc_c1=synapse::connect<synapse::meta::connected<signal1_a1> >(synapse::meta::emitter(),boost::bind(&test_meta_callback_connect_a1,boost::ref(connect_count),&e1,_1,_2));
+        boost::shared_ptr<synapse::connection> mc_c1=synapse::connect<synapse::meta::connected<signal1_a1> >(synapse::meta::emitter(),synapse::bind(&test_meta_callback_connect_a1,synapse::ref(connect_count),&e1,_1,_2));
         BOOST_TEST(connect_count==0);
-        boost::shared_ptr<synapse::connection> mc_c2=synapse::connect<synapse::meta::connected<signal2_a1> >(synapse::meta::emitter(),boost::bind(&test_meta_callback_connect_a1,boost::ref(connect_count),&e2,_1,_2));
+        boost::shared_ptr<synapse::connection> mc_c2=synapse::connect<synapse::meta::connected<signal2_a1> >(synapse::meta::emitter(),synapse::bind(&test_meta_callback_connect_a1,synapse::ref(connect_count),&e2,_1,_2));
         BOOST_TEST(connect_count==0);
         boost::shared_ptr<synapse::connection> c0=synapse::translate<signal0_a1,signal1_a1>(&e1,&e1);
         BOOST_TEST(connect_count==1);
         boost::shared_ptr<synapse::connection> c1=synapse::translate<signal1_a1,signal2_a1>(&e1,&e2);
         BOOST_TEST(connect_count==2);
-        boost::shared_ptr<synapse::connection> c2=synapse::connect<signal2_a1>(&e2,boost::bind(&test_callback_a1,boost::ref(count),_1,42));
+        boost::shared_ptr<synapse::connection> c2=synapse::connect<signal2_a1>(&e2,synapse::bind(&test_callback_a1,synapse::ref(count),_1,42));
         BOOST_TEST(connect_count==3);
         BOOST_TEST(synapse::emit<signal0_a1>(&e1,42)==1);
         BOOST_TEST(count==1);
@@ -159,17 +160,17 @@ namespace
         int count=0;
         my_emitter_type e1;
         my_emitter_type e2;
-        boost::shared_ptr<synapse::connection> mc_c0=synapse::connect<synapse::meta::connected<signal0_a2> >(synapse::meta::emitter(),boost::bind(&test_meta_callback_connect_a2,boost::ref(connect_count),&e1,_1,_2));
+        boost::shared_ptr<synapse::connection> mc_c0=synapse::connect<synapse::meta::connected<signal0_a2> >(synapse::meta::emitter(),synapse::bind(&test_meta_callback_connect_a2,synapse::ref(connect_count),&e1,_1,_2));
         BOOST_TEST(connect_count==0);
-        boost::shared_ptr<synapse::connection> mc_c1=synapse::connect<synapse::meta::connected<signal1_a2> >(synapse::meta::emitter(),boost::bind(&test_meta_callback_connect_a2,boost::ref(connect_count),&e1,_1,_2));
+        boost::shared_ptr<synapse::connection> mc_c1=synapse::connect<synapse::meta::connected<signal1_a2> >(synapse::meta::emitter(),synapse::bind(&test_meta_callback_connect_a2,synapse::ref(connect_count),&e1,_1,_2));
         BOOST_TEST(connect_count==0);
-        boost::shared_ptr<synapse::connection> mc_c2=synapse::connect<synapse::meta::connected<signal2_a2> >(synapse::meta::emitter(),boost::bind(&test_meta_callback_connect_a2,boost::ref(connect_count),&e2,_1,_2));
+        boost::shared_ptr<synapse::connection> mc_c2=synapse::connect<synapse::meta::connected<signal2_a2> >(synapse::meta::emitter(),synapse::bind(&test_meta_callback_connect_a2,synapse::ref(connect_count),&e2,_1,_2));
         BOOST_TEST(connect_count==0);
         boost::shared_ptr<synapse::connection> c0=synapse::translate<signal0_a2,signal1_a2>(&e1,&e1);
         BOOST_TEST(connect_count==1);
         boost::shared_ptr<synapse::connection> c1=synapse::translate<signal1_a2,signal2_a2>(&e1,&e2);
         BOOST_TEST(connect_count==2);
-        boost::shared_ptr<synapse::connection> c2=synapse::connect<signal2_a2>(&e2,boost::bind(&test_callback_a2,boost::ref(count),_1,42,_2,42.42f));
+        boost::shared_ptr<synapse::connection> c2=synapse::connect<signal2_a2>(&e2,synapse::bind(&test_callback_a2,synapse::ref(count),_1,42,_2,42.42f));
         BOOST_TEST(connect_count==3);
         BOOST_TEST(synapse::emit<signal0_a2>(&e1,42,42.42)==1);
         BOOST_TEST(count==1);
@@ -223,17 +224,17 @@ namespace
         int count=0;
         my_emitter_type e1;
         my_emitter_type e2;
-        boost::shared_ptr<synapse::connection> mc_c0=synapse::connect<synapse::meta::connected<signal0_a3> >(synapse::meta::emitter(),boost::bind(&test_meta_callback_connect_a3,boost::ref(connect_count),&e1,_1,_2));
+        boost::shared_ptr<synapse::connection> mc_c0=synapse::connect<synapse::meta::connected<signal0_a3> >(synapse::meta::emitter(),synapse::bind(&test_meta_callback_connect_a3,synapse::ref(connect_count),&e1,_1,_2));
         BOOST_TEST(connect_count==0);
-        boost::shared_ptr<synapse::connection> mc_c1=synapse::connect<synapse::meta::connected<signal1_a3> >(synapse::meta::emitter(),boost::bind(&test_meta_callback_connect_a3,boost::ref(connect_count),&e1,_1,_2));
+        boost::shared_ptr<synapse::connection> mc_c1=synapse::connect<synapse::meta::connected<signal1_a3> >(synapse::meta::emitter(),synapse::bind(&test_meta_callback_connect_a3,synapse::ref(connect_count),&e1,_1,_2));
         BOOST_TEST(connect_count==0);
-        boost::shared_ptr<synapse::connection> mc_c2=synapse::connect<synapse::meta::connected<signal2_a3> >(synapse::meta::emitter(),boost::bind(&test_meta_callback_connect_a3,boost::ref(connect_count),&e2,_1,_2));
+        boost::shared_ptr<synapse::connection> mc_c2=synapse::connect<synapse::meta::connected<signal2_a3> >(synapse::meta::emitter(),synapse::bind(&test_meta_callback_connect_a3,synapse::ref(connect_count),&e2,_1,_2));
         BOOST_TEST(connect_count==0);
         boost::shared_ptr<synapse::connection> c0=synapse::translate<signal0_a3,signal1_a3>(&e1,&e1);
         BOOST_TEST(connect_count==1);
         boost::shared_ptr<synapse::connection> c1=synapse::translate<signal1_a3,signal2_a3>(&e1,&e2);
         BOOST_TEST(connect_count==2);
-        boost::shared_ptr<synapse::connection> c2=synapse::connect<signal2_a3>(&e2,boost::bind(&test_callback_a3,boost::ref(count),_1,42,_2,42.42f,_3,"42"));
+        boost::shared_ptr<synapse::connection> c2=synapse::connect<signal2_a3>(&e2,synapse::bind(&test_callback_a3,synapse::ref(count),_1,42,_2,42.42f,_3,"42"));
         BOOST_TEST(connect_count==3);
         BOOST_TEST(synapse::emit<signal0_a3>(&e1,42,42.42f,"42")==1);
         BOOST_TEST(count==1);
@@ -288,18 +289,18 @@ namespace
         int count=0;
         my_emitter_type e1;
         my_emitter_type e2;
-        boost::shared_ptr<synapse::connection> mc_c0=synapse::connect<synapse::meta::connected<signal0_a4> >(synapse::meta::emitter(),boost::bind(&test_meta_callback_connect_a4,boost::ref(connect_count),&e1,_1,_2));
+        boost::shared_ptr<synapse::connection> mc_c0=synapse::connect<synapse::meta::connected<signal0_a4> >(synapse::meta::emitter(),synapse::bind(&test_meta_callback_connect_a4,synapse::ref(connect_count),&e1,_1,_2));
         BOOST_TEST(connect_count==0);
-        boost::shared_ptr<synapse::connection> mc_c1=synapse::connect<synapse::meta::connected<signal1_a4> >(synapse::meta::emitter(),boost::bind(&test_meta_callback_connect_a4,boost::ref(connect_count),&e1,_1,_2));
+        boost::shared_ptr<synapse::connection> mc_c1=synapse::connect<synapse::meta::connected<signal1_a4> >(synapse::meta::emitter(),synapse::bind(&test_meta_callback_connect_a4,synapse::ref(connect_count),&e1,_1,_2));
         BOOST_TEST(connect_count==0);
-        boost::shared_ptr<synapse::connection> mc_c2=synapse::connect<synapse::meta::connected<signal2_a4> >(synapse::meta::emitter(),boost::bind(&test_meta_callback_connect_a4,boost::ref(connect_count),&e2,_1,_2));
+        boost::shared_ptr<synapse::connection> mc_c2=synapse::connect<synapse::meta::connected<signal2_a4> >(synapse::meta::emitter(),synapse::bind(&test_meta_callback_connect_a4,synapse::ref(connect_count),&e2,_1,_2));
         BOOST_TEST(connect_count==0);
         short a4=42;
         boost::shared_ptr<synapse::connection> c0=synapse::translate<signal0_a4,signal1_a4>(&e1,&e1);
         BOOST_TEST(connect_count==1);
         boost::shared_ptr<synapse::connection> c1=synapse::translate<signal1_a4,signal2_a4>(&e1,&e2);
         BOOST_TEST(connect_count==2);
-        boost::shared_ptr<synapse::connection> c2=synapse::connect<signal2_a4>(&e2,boost::bind(&test_callback_a4,boost::ref(count),_1,42,_2,42.42f,_3,"42",_4,boost::ref(a4)));
+        boost::shared_ptr<synapse::connection> c2=synapse::connect<signal2_a4>(&e2,synapse::bind(&test_callback_a4,synapse::ref(count),_1,42,_2,42.42f,_3,"42",_4,synapse::ref(a4)));
         BOOST_TEST(connect_count==3);
         BOOST_TEST(synapse::emit<signal0_a4>(&e1,42,42.42f,"42",a4)==1);
         BOOST_TEST(count==1);

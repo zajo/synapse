@@ -6,7 +6,7 @@
 #include <boost/synapse/block.hpp>
 #include <boost/synapse/blocker.hpp>
 #include <boost/synapse/synapse_detail/weak_store.hpp>
-#include <boost/bind.hpp>
+#include <boost/synapse/dep/bind.hpp>
 #include <vector>
 #include <algorithm>
 
@@ -43,7 +43,7 @@ boost
                     bl_(bl),
                     e_(e)
                     {
-                    BOOST_ASSERT(emit_meta_blocked_!=0);
+                    BOOST_SYNAPSE_ASSERT(emit_meta_blocked_!=0);
                     emit_meta_blocked_(*this,true);
                     }
                 ~blocker_impl();
@@ -69,16 +69,16 @@ boost
                         eb_(eb),
                         ebp_(eb.get())
                         {
-                        BOOST_ASSERT(ep_!=0);
-                        BOOST_ASSERT(eb);
-                        BOOST_ASSERT(ebp_!=0);
+                        BOOST_SYNAPSE_ASSERT(ep_!=0);
+                        BOOST_SYNAPSE_ASSERT(eb);
+                        BOOST_SYNAPSE_ASSERT(ebp_!=0);
                         }
                     bool
                     same_emitter( void const * e ) const
                         {
                         if( e==ep_ && !ebp_->e_.expired() )
                             {
-                            BOOST_ASSERT(ebp_->e_.maybe_lock<void const>().get()==ep_);
+                            BOOST_SYNAPSE_ASSERT(ebp_->e_.maybe_lock<void const>().get()==ep_);
                             return true;
                             }
                         else
@@ -87,7 +87,7 @@ boost
                     bool
                     same_blocker( blocker * eb ) const
                         {
-                        BOOST_ASSERT(eb!=0);
+                        BOOST_SYNAPSE_ASSERT(eb!=0);
                         return ebp_==eb;
                         }
                     };
@@ -99,16 +99,16 @@ boost
                 shared_ptr<blocker>
                 block( weak_store const & e, shared_ptr<void const> const & sp, weak_ptr<blocked_list> & wbl, shared_ptr<blocked_list> const & bl, int (*emit_meta_blocked)(blocker &,bool) )
                     {
-                    BOOST_ASSERT(bl);
-                    BOOST_ASSERT(wbl.lock()==bl);
-                    BOOST_ASSERT(emit_meta_blocked!=0);
-                    BOOST_ASSERT(sp);
-                    BOOST_ASSERT(sp==e.maybe_lock<void const>());
-                    std::vector<bl_rec>::const_iterator i=std::find_if(bl_.begin(),bl_.end(),boost::bind(&bl_rec::same_emitter,_1,sp.get()));
+                    BOOST_SYNAPSE_ASSERT(bl);
+                    BOOST_SYNAPSE_ASSERT(wbl.lock()==bl);
+                    BOOST_SYNAPSE_ASSERT(emit_meta_blocked!=0);
+                    BOOST_SYNAPSE_ASSERT(sp);
+                    BOOST_SYNAPSE_ASSERT(sp==e.maybe_lock<void const>());
+                    std::vector<bl_rec>::const_iterator i=std::find_if(bl_.begin(),bl_.end(),bind(&bl_rec::same_emitter,_1,sp.get()));
                     if( i!=bl_.end() )
                         {
                         shared_ptr<blocker> bb=i->eb_.lock();
-                        BOOST_ASSERT(bb);
+                        BOOST_SYNAPSE_ASSERT(bb);
                         return bb;
                         }
                     else
@@ -121,15 +121,15 @@ boost
                 void
                 unblock( blocker * eb )
                     {
-                    BOOST_ASSERT(eb!=0);
-                    std::vector<bl_rec>::iterator i=std::find_if(bl_.begin(),bl_.end(),boost::bind(&bl_rec::same_blocker,_1,eb));
-                    BOOST_ASSERT(i!=bl_.end());
+                    BOOST_SYNAPSE_ASSERT(eb!=0);
+                    std::vector<bl_rec>::iterator i=std::find_if(bl_.begin(),bl_.end(),bind(&bl_rec::same_blocker,_1,eb));
+                    BOOST_SYNAPSE_ASSERT(i!=bl_.end());
                     bl_.erase(i);
                     }
                 bool
                 is_blocked( void const * e ) const
                     {
-                    return std::find_if(bl_.begin(),bl_.end(),boost::bind(&bl_rec::same_emitter,_1,e))!=bl_.end();
+                    return std::find_if(bl_.begin(),bl_.end(),bind(&bl_rec::same_emitter,_1,e))!=bl_.end();
                     }
                 };
             }
