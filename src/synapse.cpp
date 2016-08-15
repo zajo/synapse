@@ -8,7 +8,6 @@
 #include <boost/synapse/connection.hpp>
 #include <boost/synapse/synapse_detail/weak_store.hpp>
 #include <boost/synapse/dep/bind.hpp>
-#include <boost/any.hpp>
 #include <vector>
 
 namespace
@@ -325,7 +324,6 @@ boost
                 private:
                 connection_impl( connection_impl const & );
                 connection_impl & operator=( connection_impl const & );
-                any user_data_;
                 int (* const emit_meta_connected_)(connection &,unsigned);
                 weak_ptr<connection_list> & wcl_;
                 shared_ptr<connection_list> const cl_;
@@ -337,7 +335,6 @@ boost
                     }
                 public:
                 connection_impl( weak_ptr<connection_list> & wcl, shared_ptr<connection_list> const & cl, int (*emit_meta_connected)(connection &,unsigned) ):
-                    connection(user_data_),
                     emit_meta_connected_(emit_meta_connected),
                     wcl_(wcl),
                     cl_(cl)
@@ -405,11 +402,6 @@ boost
                     me.reset(new int(42));
                 return me;
                 }
-            }
-        connection::
-        connection( any & user_data ):
-            user_data(user_data)
-            {
             }
         connection::
         ~connection()

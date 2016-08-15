@@ -15,7 +15,6 @@
 #include <boost/synapse/connect.hpp>
 #include <boost/synapse/connection.hpp>
 #include <boost/bind.hpp>
-#include <boost/any.hpp>
 #define QT_NO_EMIT //Suppress the #define emit from Qt since it clashes with boost::synapse::emit.
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDialog>
@@ -36,10 +35,10 @@ namespace
         if( flags&synapse::meta::connect_flags::connecting )
             {
             boost::shared_ptr<QPushButton> pb=c.emitter<QPushButton>();
-            c.user_data = QObject::connect(pb.get(),&QPushButton::clicked,boost::bind(&synapse::emit<button_clicked>,pb.get()));
+            c.set_user_data(QObject::connect(pb.get(),&QPushButton::clicked,boost::bind(&synapse::emit<button_clicked>,pb.get())));
             }
         else
-            QObject::disconnect(*boost::any_cast<QMetaObject::Connection>(&c.user_data));
+            QObject::disconnect(*c.get_user_data<QMetaObject::Connection>());
         }
 
     //Call the above function whenever a button_clicked signal is connected or disconnected through Boost Synapse.
