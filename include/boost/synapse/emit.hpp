@@ -7,7 +7,7 @@
 #define UUID_77496C8C9BED485F9C9FCA2DC3027E28
 
 #include <boost/synapse/synapse_detail/common.hpp>
-#include <boost/function.hpp>
+#include <boost/synapse/dep/function.hpp>
 
 namespace
 boost

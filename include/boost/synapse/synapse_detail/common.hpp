@@ -8,7 +8,7 @@
 
 #include <boost/synapse/signal_traits.hpp>
 #include <boost/synapse/dep/thread_local.hpp>
-#include <boost/weak_ptr.hpp>
+#include <boost/synapse/dep/smart_ptr.hpp>
 
 namespace
 boost
