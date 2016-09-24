@@ -4,10 +4,17 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 project
-    : source-location ../src
+    : source-location
+        ../src
     ;
 
-alias headers ;
+obj thread_local_queue : thread_local_queue.cpp ;
+obj interthread_stub : interthread_stub.cpp ;
+obj connect : connect.cpp ;
 obj block : block.cpp ;
-obj synapse : synapse.cpp ;
-alias libsynapse : block synapse ;
+lib synapse_interthread : connect block thread_local_queue ;
+lib synapse_no_interthread : connect block interthread_stub ;
+
+alias emit ;
+alias synapse : synapse_interthread : <threading>multi ;
+alias synapse : synapse_no_interthread : <threading>single ;

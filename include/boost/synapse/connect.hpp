@@ -64,20 +64,16 @@ boost
         namespace
         synapse_detail
             {
-            struct connection_list;
-            shared_ptr<connection> connect_( emit_t * &, weak_ptr<connection_list> &, weak_store const &, shared_ptr<void const> const &, weak_ptr<void const> const &, int(*)(connection &,unsigned) );
-            template <class Signal> weak_ptr<connection_list> & get_connection_list();
-            template <class Signal> int emit_meta_connected( connection &, unsigned );
+            shared_ptr<connection> connect_( shared_ptr<thread_local_signal_data> const &, weak_store const &, shared_ptr<void const> const &, weak_ptr<void const> const &, int(*)(connection &,unsigned) );
             ////////////////////////////////////////////////////////
             template <class Signal,class Emitter>
             shared_ptr<connection>
             connect_fwd( weak_ptr<Emitter> const & e, Emitter * px, function<typename signal_traits<Signal>::signature> const & fn, weak_ptr<void const> const & connection_lifetime )
                 {
                 return connect_(
-					synapse_detail::emit_<Signal>(),
-                    get_connection_list<Signal>(),
+                    get_thread_local_signal_data<Signal>(true),
                     weak_store(e,px),
-                    shared_ptr<void const>(new function<typename signal_traits<Signal>::signature>(fn)),
+                    synapse::make_shared<function<typename signal_traits<Signal>::signature> >(fn),
                     connection_lifetime,
                     &emit_meta_connected<Signal>);
                 }

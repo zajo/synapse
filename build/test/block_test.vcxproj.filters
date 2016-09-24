@@ -10,13 +10,13 @@
   </ItemGroup>
   <ItemGroup>
     <Filter Include="synapse">
-      <UniqueIdentifier>{33E93A00-6C5B-7F9A-1E5F-72367929641A}</UniqueIdentifier>
+      <UniqueIdentifier>{696E79E6-3976-274B-19F0-088A384C08C1}</UniqueIdentifier>
     </Filter>
     <Filter Include="synapse\src">
-      <UniqueIdentifier>{4E5F4EF7-0CEA-5A0E-4B1D-6630232176FC}</UniqueIdentifier>
+      <UniqueIdentifier>{40E401E9-10C1-03F4-4AD7-55AA13EA0572}</UniqueIdentifier>
     </Filter>
     <Filter Include="synapse\test">
-      <UniqueIdentifier>{7BD34AC8-696E-3F16-6CC0-4D8E4CB30DC8}</UniqueIdentifier>
+      <UniqueIdentifier>{12AE5174-7DE6-29B2-1094-640E3C6F3955}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

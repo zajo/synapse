@@ -4,7 +4,10 @@
     <ClInclude Include="..\..\..\..\..\libs\synapse\src\block.cpp">
         <Filter>synapse\src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\libs\synapse\src\synapse.cpp">
+    <ClInclude Include="..\..\..\..\..\libs\synapse\src\connect.cpp">
+        <Filter>synapse\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\libs\synapse\src\thread_local_queue.cpp">
         <Filter>synapse\src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\example\qt\qt_button.cpp">
@@ -13,16 +16,16 @@
   </ItemGroup>
   <ItemGroup>
     <Filter Include="synapse">
-      <UniqueIdentifier>{344E4F90-5F98-6184-7F67-4DB7720F01A0}</UniqueIdentifier>
+      <UniqueIdentifier>{69D30F77-2CB4-0935-7AF7-640B31322647}</UniqueIdentifier>
     </Filter>
     <Filter Include="synapse\example">
-      <UniqueIdentifier>{1DD26679-7B01-5F63-43FE-39D922762A85}</UniqueIdentifier>
+      <UniqueIdentifier>{1057196A-7ED8-0949-43B9-2952133F38FB}</UniqueIdentifier>
     </Filter>
     <Filter Include="synapse\example\qt">
-      <UniqueIdentifier>{2B5001F6-471F-5FC7-5319-203366E65F34}</UniqueIdentifier>
+      <UniqueIdentifier>{422C08A1-5B97-4A63-76ED-36B356A20AC1}</UniqueIdentifier>
     </Filter>
     <Filter Include="synapse\src">
-      <UniqueIdentifier>{4DC50596-75CA-37A7-6E55-7A6E16EA4B8D}</UniqueIdentifier>
+      <UniqueIdentifier>{5D8B56EA-1803-05C5-3F4A-088E10B93C00}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

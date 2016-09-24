@@ -7,7 +7,8 @@
 #define UUID_77496C8C9BED485F9C9FCA2DC3027E28
 
 #include <boost/synapse/synapse_detail/common.hpp>
-#include <boost/synapse/dep/function.hpp>
+#include <boost/synapse/dep/functional.hpp>
+#include <type_traits>
 
 namespace
 boost
@@ -19,21 +20,21 @@ boost
         typename synapse_detail::enable_if<signal_traits<Signal>::arity==0,int>::type
         emit( void const * );
 
-        template <class Signal>
+        template <class Signal,class A1>
         typename synapse_detail::enable_if<signal_traits<Signal>::arity==1,int>::type
-        emit( void const *, typename signal_traits<Signal>::arg1_type );
+        emit( void const *, A1 );
 
-        template <class Signal>
+        template <class Signal,class A1,class A2>
         typename synapse_detail::enable_if<signal_traits<Signal>::arity==2,int>::type
-        emit( void const *, typename signal_traits<Signal>::arg1_type, typename signal_traits<Signal>::arg2_type );
+        emit( void const *, A1, A2 );
 
-        template <class Signal>
+        template <class Signal,class A1,class A2,class A3>
         typename synapse_detail::enable_if<signal_traits<Signal>::arity==3,int>::type
-        emit( void const *, typename signal_traits<Signal>::arg1_type, typename signal_traits<Signal>::arg2_type, typename signal_traits<Signal>::arg3_type );
+        emit( void const *, A1, A2, A3 );
 
-        template <class Signal>
+        template <class Signal,class A1,class A2,class A3,class A4>
         typename synapse_detail::enable_if<signal_traits<Signal>::arity==4,int>::type
-        emit( void const *, typename signal_traits<Signal>::arg1_type, typename signal_traits<Signal>::arg2_type, typename signal_traits<Signal>::arg3_type, typename signal_traits<Signal>::arg4_type );
+        emit( void const *, A1, A2, A3, A4 );
         }
     }
 
@@ -50,114 +51,124 @@ boost
         namespace
         synapse_detail
             {
-            struct
-            emit_binder_base
+            class
+            args_binder_base
                 {
+                public:
+                virtual shared_ptr<args_binder_base> clone() const=0;
                 virtual void call( void const * ) const=0;
+                virtual int call_translated( void const * ) const=0;
                 };
-            template <class Signal> struct emit_binder;
-            template <class SigR>
-            struct
-            emit_binder<SigR(*)()>:
-                emit_binder_base
+            template <class Signal,class=void,class=void,class=void,class=void> class args_binder;
+            template <class SigR,class SigA1,class A1>
+            class
+            args_binder<SigR(*)(SigA1),A1>:
+                public args_binder_base
                 {
-                emit_binder() { }
-                void call( void const * f ) const { (*static_cast<function<void()> const *>(f))(); }
+                A1 a1;
+                shared_ptr<args_binder_base> clone() const { return synapse::make_shared<args_binder>(*this); }
+                void call( void const * f ) const { (*static_cast<function<void(SigA1)> const *>(f))(a1); }
+                int call_translated( void const * f ) const { return (*static_cast<function<int(SigA1)> const *>(f))(a1); }
+                public:
+                explicit args_binder( A1 a1 ): a1(a1) { }
                 };
-            template <class SigR,class A1>
-            struct
-            emit_binder<SigR(*)(A1)>:
-                emit_binder_base
+            template <class SigR,class SigA1,class SigA2,class A1,class A2>
+            class
+            args_binder<SigR(*)(SigA1,SigA2),A1,A2>:
+                public args_binder_base
                 {
-                A1 & a1;
-                explicit emit_binder( A1 & a1 ): a1(a1) { }
-                void call( void const * f ) const { (*static_cast<function<void(A1)> const *>(f))(a1); }
+                A1 a1; A2 a2;
+                shared_ptr<args_binder_base> clone() const { return synapse::make_shared<args_binder>(*this); }
+                void call( void const * f ) const { (*static_cast<function<void(SigA1,SigA2)> const *>(f))(a1,a2); }
+                int call_translated( void const * f ) const { return (*static_cast<function<int(SigA1,SigA2)> const *>(f))(a1,a2); }
+                public:
+                args_binder( A1 a1, A2 a2 ): a1(a1), a2(a2) { }
                 };
-            template <class SigR,class A1,class A2>
-            struct
-            emit_binder<SigR(*)(A1,A2)>:
-                emit_binder_base
+            template <class SigR,class SigA1,class SigA2,class SigA3,class A1,class A2,class A3>
+            class
+            args_binder<SigR(*)(SigA1,SigA2,SigA3),A1,A2,A3>:
+                public args_binder_base
                 {
-                A1 & a1; A2 & a2;
-                explicit emit_binder( A1 & a1, A2 & a2 ): a1(a1), a2(a2) { }
-                void call( void const * f ) const { (*static_cast<function<void(A1,A2)> const *>(f))(a1,a2); }
+                A1 a1; A2 a2; A3 a3;
+                shared_ptr<args_binder_base> clone() const { return synapse::make_shared<args_binder>(*this); }
+                void call( void const * f ) const { (*static_cast<function<void(SigA1,SigA2,SigA3)> const *>(f))(a1,a2,a3); }
+                int call_translated( void const * f ) const { return (*static_cast<function<int(SigA1,SigA2,SigA3)> const *>(f))(a1,a2,a3); }
+                public:
+                args_binder( A1 a1, A2 a2, A3 a3 ): a1(a1), a2(a2), a3(a3) { }
                 };
-            template <class SigR,class A1,class A2,class A3>
-            struct
-            emit_binder<SigR(*)(A1,A2,A3)>:
-                emit_binder_base
+            template <class SigR,class SigA1,class SigA2,class SigA3,class SigA4,class A1,class A2,class A3,class A4>
+            class
+            args_binder<SigR(*)(SigA1,SigA2,SigA3,SigA4),A1,A2,A3,A4>:
+                public args_binder_base
                 {
-                A1 & a1; A2 & a2; A3 & a3;
-                explicit emit_binder( A1 & a1, A2 & a2, A3 & a3 ): a1(a1), a2(a2), a3(a3) { }
-                void call( void const * f ) const { (*static_cast<function<void(A1,A2,A3)> const *>(f))(a1,a2,a3); }
-                };
-            template <class SigR,class A1,class A2,class A3,class A4>
-            struct
-            emit_binder<SigR(*)(A1,A2,A3,A4)>:
-                emit_binder_base
-                {
-                A1 & a1; A2 & a2; A3 & a3; A4 & a4;
-                explicit emit_binder( A1 & a1, A2 & a2, A3 & a3, A4 & a4 ): a1(a1), a2(a2), a3(a3), a4(a4) { }
-                void call( void const * f ) const { (*static_cast<function<void(A1,A2,A3,A4)> const *>(f))(a1,a2,a3,a4); }
+                A1 a1; A2 a2; A3 a3; A4 a4;
+                shared_ptr<args_binder_base> clone() const { return synapse::make_shared<args_binder>(*this); }
+                void call( void const * f ) const { (*static_cast<function<void(SigA1,SigA2,SigA3,SigA4)> const *>(f))(a1,a2,a3,a4); }
+                int call_translated( void const * f ) const { return (*static_cast<function<int(SigA1,SigA2,SigA3,SigA4)> const *>(f))(a1,a2,a3,a4); }
+                public:
+                args_binder( A1 a1, A2 a2, A3 a3, A4 a4 ): a1(a1), a2(a2), a3(a3), a4(a4) { }
                 };
             shared_ptr<void const> & meta_emitter();
             template <class Signal>
             int
             emit_meta_connected( connection & c, unsigned connect_flags )
                 {
-                return emit<meta::connected<Signal> >(meta_emitter().get(),c,connect_flags);
+                return emit<meta::connected<Signal> >(meta_emitter().get(),std::ref(c),connect_flags);
                 }
             template <class Signal>
             int
             emit_meta_blocked( blocker & eb, bool is_blocked )
                 {
-                return emit<meta::blocked<Signal> >(meta_emitter().get(),eb,is_blocked);
+                return emit<meta::blocked<Signal> >(meta_emitter().get(),std::ref(eb),is_blocked);
+                }
+            template <class Signal>
+            int
+            emit_fwd( void const * e, args_binder_base const & args )
+                {
+                if( shared_ptr<thread_local_signal_data> const & tlsd=get_thread_local_signal_data<Signal>(false) )
+                    if( e )
+                        return tlsd->emit_(*tlsd,e,&args);
+                return 0;
+                }
+            template <class Signal>
+            int
+            emit_fwd_no_args( void const * e )
+                {
+                if( shared_ptr<thread_local_signal_data> const & tlsd=get_thread_local_signal_data<Signal>(false) )
+                    if( e )
+                        return tlsd->emit_(*tlsd,e,0);
+                return 0;
                 }
             }
         template <class Signal>
         typename synapse_detail::enable_if<signal_traits<Signal>::arity==0,int>::type
         emit( void const * e )
             {
-            return e? synapse_detail::emit_<Signal>()(synapse_detail::get_connection_list<Signal>(),synapse_detail::get_blocked_list<Signal>(),synapse_detail::emitter_blocked_<Signal>(),e,
-                synapse_detail::emit_binder<typename signal_traits<Signal>::signal_type>()) : 0;
+            return synapse_detail::emit_fwd_no_args<Signal>(e);
             }
-        template <class Signal>
+        template <class Signal,class A1>
         typename synapse_detail::enable_if<signal_traits<Signal>::arity==1,int>::type
-        emit( void const * e,
-                typename signal_traits<Signal>::arg1_type a1 )
+        emit( void const * e, A1 a1 )
             {
-            return e? synapse_detail::emit_<Signal>()(synapse_detail::get_connection_list<Signal>(),synapse_detail::get_blocked_list<Signal>(),synapse_detail::emitter_blocked_<Signal>(),e,
-                synapse_detail::emit_binder<typename signal_traits<Signal>::signal_type>(a1)) : 0;
+            return synapse_detail::emit_fwd<Signal>(e,synapse_detail::args_binder<typename signal_traits<Signal>::signal_type,A1>(a1));
             }
-        template <class Signal>
+        template <class Signal,class A1,class A2>
         typename synapse_detail::enable_if<signal_traits<Signal>::arity==2,int>::type
-        emit( void const * e,
-                typename signal_traits<Signal>::arg1_type a1,
-                typename signal_traits<Signal>::arg2_type a2 )
+        emit( void const * e, A1 a1, A2 a2 )
             {
-            return e? synapse_detail::emit_<Signal>()(synapse_detail::get_connection_list<Signal>(),synapse_detail::get_blocked_list<Signal>(),synapse_detail::emitter_blocked_<Signal>(),e,
-                synapse_detail::emit_binder<typename signal_traits<Signal>::signal_type>(a1,a2)) : 0;
+            return synapse_detail::emit_fwd<Signal>(e,synapse_detail::args_binder<typename signal_traits<Signal>::signal_type,A1,A2>(a1,a2));
             }
-        template <class Signal>
+        template <class Signal,class A1,class A2,class A3>
         typename synapse_detail::enable_if<signal_traits<Signal>::arity==3,int>::type
-        emit( void const * e,
-                typename signal_traits<Signal>::arg1_type a1,
-                typename signal_traits<Signal>::arg2_type a2,
-                typename signal_traits<Signal>::arg3_type a3 )
+        emit( void const * e, A1 a1, A2 a2, A3 a3 )
             {
-            return e? synapse_detail::emit_<Signal>()(synapse_detail::get_connection_list<Signal>(),synapse_detail::get_blocked_list<Signal>(),synapse_detail::emitter_blocked_<Signal>(),e,
-                synapse_detail::emit_binder<typename signal_traits<Signal>::signal_type>(a1,a2,a3)) : 0;
+            return synapse_detail::emit_fwd<Signal>(e,synapse_detail::args_binder<typename signal_traits<Signal>::signal_type,A1,A2,A3>(a1,a2,a3));
             }
-        template <class Signal>
+        template <class Signal,class A1,class A2,class A3,class A4>
         typename synapse_detail::enable_if<signal_traits<Signal>::arity==4,int>::type
-        emit( void const * e,
-                typename signal_traits<Signal>::arg1_type a1,
-                typename signal_traits<Signal>::arg2_type a2,
-                typename signal_traits<Signal>::arg3_type a3,
-                typename signal_traits<Signal>::arg4_type a4 )
+        emit( void const * e, A1 a1, A2 a2, A3 a3, A4 a4 )
             {
-            return e? synapse_detail::emit_<Signal>()(synapse_detail::get_connection_list<Signal>(),synapse_detail::get_blocked_list<Signal>(),synapse_detail::emitter_blocked_<Signal>(),e,
-                synapse_detail::emit_binder<typename signal_traits<Signal>::signal_type>(a1,a2,a3,a4)) : 0;
+            return synapse_detail::emit_fwd<Signal>(e,synapse_detail::args_binder<typename signal_traits<Signal>::signal_type,A1,A2,A3,A4>(a1,a2,a3,a4));
             }
         } 
     }

@@ -132,32 +132,30 @@ namespace
         {
         (void) synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>&lt;synapse_callback&gt;(h,h,v);
         }
-    void
-    handle_meta_signal( synapse::<span class="RenoLink"><a href="connection.html">connection</a></span> &amp; c, unsigned flags )
-        {
-        boost::shared_ptr&lt;api_handle&gt; h=c.emitter&lt;api_handle&gt;();
-        std::cout &lt;&lt; "Detected synapse_callback " &lt;&lt; ((flags&amp;synapse::<span class="RenoLink"><a href="meta_connected.html">meta::connect_flags::connecting</a></span>)?"":"dis") &lt;&lt;
-            "connection on api_handle at 0x" &lt;&lt; h.get();
-        if( flags&amp;synapse::<span class="RenoLink"><a href="meta_connected.html">meta::connect_flags::first_for_this_emitter</a></span> )
-            {
-            assert(flags&amp;synapse::<span class="RenoLink"><a href="meta_connected.html">meta::connect_flags::connecting</a></span>);
-            std::cout &lt;&lt; " (first connection, calling api_set_callback)";
-            api_set_callback(h.get(),&amp;emit_fwd,0);
-            }
-        else if( flags&amp;synapse::<span class="RenoLink"><a href="meta_connected.html">meta::connect_flags::last_for_this_emitter</a></span> )
-            {
-            assert(!(flags&amp;synapse::<span class="RenoLink"><a href="meta_connected.html">meta::connect_flags::connecting</a></span>));
-            std::cout &lt;&lt; " (last connection, calling api_clear_callback)";
-            api_clear_callback(h.get());
-            }
-        std::cout &lt;&lt; std::endl;
-        }
     }
 
 void
 synapsify()
     {
-    static boost::shared_ptr&lt;synapse::<span class="RenoLink"><a href="connection.html">connection</a></span>&gt; c=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;synapse::<span class="RenoLink"><a href="meta_connected.html">meta::connected</a></span>&lt;synapse_callback&gt; &gt;(synapse::<span class="RenoLink"><a href="meta_emitter.html">meta::emitter</a></span>(),&amp;handle_meta_signal);
+    static boost::shared_ptr&lt;synapse::<span class="RenoLink"><a href="connection.html">connection</a></span>&gt; c=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;synapse::meta::connected&lt;synapse_callback&gt; &gt;(synapse::<span class="RenoLink"><a href="meta_emitter.html">meta::emitter</a></span>(),
+        [ ]( synapse::connection &amp; c, unsigned flags )
+            {
+            boost::shared_ptr&lt;api_handle&gt; h=c.<span class="RenoLink"><a href="connection_emitter.html">emitter</a></span>&lt;api_handle&gt;();
+            std::cout &lt;&lt; "Detected synapse_callback " &lt;&lt; ((flags&amp;synapse::meta::connect_flags::connecting)?"":"dis") &lt;&lt; "connection on api_handle at 0x" &lt;&lt; h.get();
+            if( flags&amp;synapse::meta::connect_flags::first_for_this_emitter )
+                {
+                assert(flags&amp;synapse::meta::connect_flags::connecting);
+                std::cout &lt;&lt; " (first connection, calling api_set_callback)";
+                api_set_callback(h.get(),&amp;emit_fwd,0);
+                }
+            else if( flags&amp;synapse::meta::connect_flags::last_for_this_emitter )
+                {
+                assert(!(flags&amp;synapse::meta::connect_flags::connecting));
+                std::cout &lt;&lt; " (last connection, calling api_clear_callback)";
+                api_clear_callback(h.get());
+                }
+            std::cout &lt;&lt; std::endl;
+            } );
     }</pre>
 <p><b>main.cpp</b></p>
 <pre>#include "synapsify.hpp"

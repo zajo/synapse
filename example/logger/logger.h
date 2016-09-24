@@ -7,7 +7,6 @@
 #define UUID_C1FB0C44F61511E4B92291521D5D46B0
 
 namespace boost { template <class> class shared_ptr; }
-namespace boost { template <class> class weak_ptr; }
 
 #include <stdio.h>
 

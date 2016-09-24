@@ -25,12 +25,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug|Win32'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release|Win32'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -55,8 +55,8 @@
     <AdditionalOptions>
     </AdditionalOptions>
     <!-- reverge_end options(debug) -->
-    <OutDir>$(SolutionDir)..\..\..\..\..\bld\lib\$(SolutionName)\libs\$(SolutionName)\test\$(ProjectName).test\msvc-12.0\$(Configuration)\address-model-64\link-static\threading-multi\</OutDir>
-    <IntDir>$(SolutionDir)..\..\..\..\..\bld\lib\$(SolutionName)\libs\$(SolutionName)\test\$(ProjectName).test\msvc-12.0\$(Configuration)\address-model-64\link-static\threading-multi\</IntDir>
+    <OutDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\test</OutDir>
+    <IntDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\test</IntDir>
     <ExecutablePath>$(PATH)</ExecutablePath>
     <IncludePath />
     <ReferencePath />
@@ -82,8 +82,8 @@
     <AdditionalOptions>
     </AdditionalOptions>
     <!-- reverge_end options(release) -->
-    <OutDir>$(SolutionDir)..\..\..\..\..\bld\lib\$(SolutionName)\libs\$(SolutionName)\test\$(ProjectName).test\msvc-12.0\$(Configuration)\address-model-64\link-static\threading-multi\</OutDir>
-    <IntDir>$(SolutionDir)..\..\..\..\..\bld\lib\$(SolutionName)\libs\$(SolutionName)\test\$(ProjectName).test\msvc-12.0\$(Configuration)\address-model-64\link-static\threading-multi\</IntDir>
+    <OutDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\test</OutDir>
+    <IntDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\test</IntDir>
     <ExecutablePath>$(PATH)</ExecutablePath>
     <IncludePath />
     <ReferencePath />

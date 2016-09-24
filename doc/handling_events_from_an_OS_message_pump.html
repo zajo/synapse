@@ -23,7 +23,6 @@
 </div>
 <p>This program demonstrates how Boost Synapse can be used to dispatch <i>WindowProc</i> messages using the <i>HWND</i> object as the emitter argument to <i>synapse::<span class="RenoLink"><a href="emit.html">emit</a></span></i>. It also shows how <i>boost::shared_ptr</i> can be used to control the lifetime of Windows objects.</p>
 <pre>#include &lt;<span class="RenoLink"><a href="boost_synapse_connect_hpp.html">boost/synapse/connect.hpp</a></span>&gt;
-#include &lt;boost/bind.hpp&gt;
 #define NOMINMAX
 #include &lt;windows.h&gt;
 #include &lt;sstream&gt;
@@ -32,7 +31,7 @@ namespace synapse=boost::synapse;
 
 namespace
     {
-    //Define a mouse_move <span class="RenoLink"><a href="Signal.html">signal</a></span> that takes the mouse cursor coordinates.
+    //Define a mouse_move signal that takes the mouse cursor coordinates.
     typedef struct mouse_move_(*mouse_move)( int x, int y );
 
     //Windows handles are pointer typedefs. The code below extracts the pointer type
@@ -105,7 +104,11 @@ WinMain( HINSTANCE hInstance, HINSTANCE, LPSTR, int )
         return 1; //Error
 
     //Connect the mouse_move signal from the hWnd emitter to the print_mouse_position function.
-    boost::shared_ptr&lt;<span class="RenoLink"><a href="connection.html">connection</a></span>&gt; conn=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;mouse_move&gt;(hWnd,boost::bind(&amp;print_mouse_position,hWnd.get(),_1,_2));
+    boost::shared_ptr&lt;synapse::<span class="RenoLink"><a href="connection.html">connection</a></span>&gt; conn=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;mouse_move&gt;(hWnd,
+        [&amp;hWnd]( int x, int y )
+            {
+            print_mouse_position(hWnd.get(),x,y);
+            } );
 
     //Show the window and call print_mouse_position once so it's not empty to begin with.
     ShowWindow(hWnd.get(),SW_SHOW);

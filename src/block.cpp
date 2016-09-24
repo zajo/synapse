@@ -6,7 +6,6 @@
 #include <boost/synapse/block.hpp>
 #include <boost/synapse/blocker.hpp>
 #include <boost/synapse/synapse_detail/weak_store.hpp>
-#include <boost/synapse/dep/bind.hpp>
 #include <vector>
 #include <algorithm>
 
@@ -16,48 +15,37 @@ boost
     namespace
     synapse
         {
-        using synapse_detail::weak_store;
-        using synapse_detail::blocked_list;
-        namespace
-            {
-            struct
-            blocker_impl:
-                blocker
-                {
-                private:
-                blocker_impl( blocker_impl const & );
-                blocker_impl & operator=( blocker_impl const & );
-                int (* const emit_meta_blocked_)(blocker &,bool);
-                weak_ptr<blocked_list> & wbl_;
-                shared_ptr<blocked_list> const bl_;
-                synapse_detail::weak_store const & 
-                emitter_() const
-                    {
-                    return e_;
-                    }
-                public:
-                weak_store e_;
-                blocker_impl( weak_store e, weak_ptr<blocked_list> & wbl, shared_ptr<blocked_list> const & bl, int (*emit_meta_blocked)(blocker &,bool) ):
-                    emit_meta_blocked_(emit_meta_blocked),
-                    wbl_(wbl),
-                    bl_(bl),
-                    e_(e)
-                    {
-                    BOOST_SYNAPSE_ASSERT(emit_meta_blocked_!=0);
-                    emit_meta_blocked_(*this,true);
-                    }
-                ~blocker_impl();
-                };
-            }
         namespace
         synapse_detail
             {
+            namespace
+                {
+                struct
+                blocker_impl:
+                    blocker
+                    {
+                    private:
+                    blocker_impl( blocker_impl const & );
+                    blocker_impl & operator=( blocker_impl const & );
+                    shared_ptr<thread_local_signal_data::blocked_emitters_list> const bl_;
+                    weak_store const & 
+                    emitter_() const
+                        {
+                        return e_;
+                        }
+                    public:
+                    weak_store e_;
+                    blocker_impl( weak_store const &, shared_ptr<thread_local_signal_data::blocked_emitters_list> const & );
+                    ~blocker_impl();
+                    };
+                }
             struct
-            blocked_list
+            thread_local_signal_data::
+            blocked_emitters_list
                 {
                 private:
-                blocked_list( blocked_list const & );
-                blocked_list & operator=( blocked_list const & );
+                blocked_emitters_list( blocked_emitters_list const & );
+                blocked_emitters_list & operator=( blocked_emitters_list const & );
                 struct
                 bl_rec
                     {
@@ -91,20 +79,41 @@ boost
                         return ebp_==eb;
                         }
                     };
+                static
+                bool
+                emitter_blocked_impl( thread_local_signal_data const & tlsd, void const * e )
+                    {
+                    if( shared_ptr<blocked_emitters_list> bl=tlsd.bl_.lock() )
+                        return bl->is_blocked(e);
+                    else
+                        {
+                        BOOST_SYNAPSE_ASSERT(0);
+                        return false;
+                        }
+                    }
+                shared_ptr<thread_local_signal_data> const tlsd_;
                 std::vector<bl_rec> bl_;
                 public:
-                blocked_list()
+                int (* const emit_meta_blocked_)(blocker &,bool);
+                blocked_emitters_list( shared_ptr<thread_local_signal_data> const & tlsd, int (*emit_meta_blocked)(blocker &,bool) ):
+                    tlsd_(tlsd),
+                    emit_meta_blocked_(emit_meta_blocked)
                     {
+                    tlsd_->emitter_blocked_=&emitter_blocked_impl;
+                    BOOST_SYNAPSE_ASSERT(emit_meta_blocked_!=0);
+                    }
+                ~blocked_emitters_list()
+                    {
+                    tlsd_->bl_.reset();
+                    tlsd_->emitter_blocked_=&emitter_blocked_stub;
                     }
                 shared_ptr<blocker>
-                block( weak_store const & e, shared_ptr<void const> const & sp, weak_ptr<blocked_list> & wbl, shared_ptr<blocked_list> const & bl, int (*emit_meta_blocked)(blocker &,bool) )
+                block( shared_ptr<blocked_emitters_list> const & bl, weak_store const & e, shared_ptr<void const> const & sp )
                     {
                     BOOST_SYNAPSE_ASSERT(bl);
-                    BOOST_SYNAPSE_ASSERT(wbl.lock()==bl);
-                    BOOST_SYNAPSE_ASSERT(emit_meta_blocked!=0);
                     BOOST_SYNAPSE_ASSERT(sp);
                     BOOST_SYNAPSE_ASSERT(sp==e.maybe_lock<void const>());
-                    std::vector<bl_rec>::const_iterator i=std::find_if(bl_.begin(),bl_.end(),bind(&bl_rec::same_emitter,_1,sp.get()));
+                    std::vector<bl_rec>::const_iterator i=std::find_if(bl_.begin(),bl_.end(),[&sp](bl_rec const & r) { return r.same_emitter(sp.get()); });
                     if( i!=bl_.end() )
                         {
                         shared_ptr<blocker> bb=i->eb_.lock();
@@ -113,7 +122,7 @@ boost
                         }
                     else
                         {
-                        shared_ptr<blocker_impl> bb(new blocker_impl(e,wbl,bl,emit_meta_blocked));
+                        shared_ptr<blocker_impl> bb=make_shared<blocker_impl>(e,bl);
                         bl_.push_back(bl_rec(sp.get(),bb));
                         return bb;
                         }
@@ -122,58 +131,53 @@ boost
                 unblock( blocker * eb )
                     {
                     BOOST_SYNAPSE_ASSERT(eb!=0);
-                    std::vector<bl_rec>::iterator i=std::find_if(bl_.begin(),bl_.end(),bind(&bl_rec::same_blocker,_1,eb));
+                    std::vector<bl_rec>::iterator i=std::find_if(bl_.begin(),bl_.end(),[eb](bl_rec const & r) { return r.same_blocker(eb); });
                     BOOST_SYNAPSE_ASSERT(i!=bl_.end());
                     bl_.erase(i);
                     }
                 bool
                 is_blocked( void const * e ) const
                     {
-                    return std::find_if(bl_.begin(),bl_.end(),bind(&bl_rec::same_emitter,_1,e))!=bl_.end();
+                    return std::find_if(bl_.begin(),bl_.end(),[e](bl_rec const & r) { return r.same_emitter(e); })!=bl_.end();
                     }
                 };
-            }
-        namespace
-            {
-            blocker_impl::
-            ~blocker_impl()
+            namespace
                 {
-                bl_->unblock(this);
-                if( bl_.unique() )
-                    wbl_.reset();
-                emit_meta_blocked_(*this,false);
-                }
-            shared_ptr<blocked_list>
-            get_blocked_list_( weak_ptr<blocked_list> & wbl )
-                {
-                shared_ptr<blocked_list> bl=wbl.lock();
-                if( !bl )
+                blocker_impl::
+                blocker_impl( weak_store const & e, shared_ptr<thread_local_signal_data::blocked_emitters_list> const & bl ):
+                    bl_(bl),
+                    e_(e)
                     {
-                    shared_ptr<blocked_list>(new blocked_list).swap(bl);
-                    wbl=bl;
+                    BOOST_SYNAPSE_ASSERT(bl_);
+                    BOOST_SYNAPSE_ASSERT(bl_->emit_meta_blocked_!=0);
+                    bl_->emit_meta_blocked_(*this,true);
                     }
-                return bl;
+                blocker_impl::
+                ~blocker_impl()
+                    {
+                    BOOST_SYNAPSE_ASSERT(bl_->emit_meta_blocked_!=0);
+                    bl_->unblock(this);
+                    bl_->emit_meta_blocked_(*this,false);
+                    }
+                shared_ptr<thread_local_signal_data::blocked_emitters_list>
+                get_blocked_list_( shared_ptr<thread_local_signal_data> const & tlsd, int (*emit_meta_blocked)(blocker &,bool) )
+                    {
+                    shared_ptr<thread_local_signal_data::blocked_emitters_list> bl=tlsd->bl_.lock();
+                    if( !bl )
+                        {
+                        make_shared<thread_local_signal_data::blocked_emitters_list>(tlsd,emit_meta_blocked).swap(bl);
+                        tlsd->bl_=bl;
+                        }
+                    return bl;
+                    }
                 }
-            bool
-            emitter_blocked_impl( weak_ptr<blocked_list> const & wbl, void const * e )
-                {
-                if( boost::shared_ptr<blocked_list> bl=wbl.lock() )
-                    return bl->is_blocked(e);
-                else
-                    return false;
-                }
-            }
-        namespace
-        synapse_detail
-            {
             shared_ptr<blocker>
-            block_( emitter_blocked_t * & blocked_ptr, weak_ptr<blocked_list> & wbl, weak_store const & e, int(*emit_meta_block)(blocker &,bool) )
+            block_( shared_ptr<thread_local_signal_data> const & tlsd, weak_store const & e, int(*emit_meta_blocked)(blocker &,bool) )
                 {
                 if( shared_ptr<void const> sp=e.maybe_lock<void const>() )
                     {
-					blocked_ptr=&emitter_blocked_impl;
-                    shared_ptr<blocked_list> bl=get_blocked_list_(wbl);
-                    return bl->block(e,sp,wbl,bl,emit_meta_block);
+                    shared_ptr<thread_local_signal_data::blocked_emitters_list> bl=get_blocked_list_(tlsd,emit_meta_blocked);
+                    return bl->block(bl,e,sp);
                     }
                 else
                     return shared_ptr<blocker>();

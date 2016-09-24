@@ -4,7 +4,10 @@
     <ClInclude Include="..\..\..\..\..\libs\synapse\src\block.cpp">
         <Filter>synapse\src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\libs\synapse\src\synapse.cpp">
+    <ClInclude Include="..\..\..\..\..\libs\synapse\src\connect.cpp">
+        <Filter>synapse\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\libs\synapse\src\interthread_stub.cpp">
         <Filter>synapse\src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\example\win\win_WindowProc.cpp">
@@ -13,16 +16,16 @@
   </ItemGroup>
   <ItemGroup>
     <Filter Include="synapse">
-      <UniqueIdentifier>{341A2FCA-0315-018F-7ABE-584B2F873895}</UniqueIdentifier>
+      <UniqueIdentifier>{69A219AD-15F9-0740-1E99-7DF67AD351CC}</UniqueIdentifier>
     </Filter>
     <Filter Include="synapse\example">
-      <UniqueIdentifier>{15D966BA-043F-5CA2-5C50-2FB337746EE4}</UniqueIdentifier>
+      <UniqueIdentifier>{48DD01A7-0783-06B4-3285-5FCF7EED4113}</UniqueIdentifier>
     </Filter>
     <Filter Include="synapse\example\win">
-      <UniqueIdentifier>{1F300263-54B3-217C-09A1-58A43C7928CB}</UniqueIdentifier>
+      <UniqueIdentifier>{1ECE5107-7052-67FC-5A0C-2B9D66DC6FBE}</UniqueIdentifier>
     </Filter>
     <Filter Include="synapse\src">
-      <UniqueIdentifier>{3D155269-4201-31EC-7DC5-005D5B5B2281}</UniqueIdentifier>
+      <UniqueIdentifier>{05E74EF1-3777-4066-75C3-5E1E60E36585}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

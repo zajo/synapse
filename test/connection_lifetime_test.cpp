@@ -5,10 +5,10 @@
 
 #include <boost/synapse/connect.hpp>
 #include <boost/synapse/connection.hpp>
-#include <boost/synapse/dep/bind.hpp>
 #include <boost/detail/lightweight_test.hpp>
 
 namespace synapse=boost::synapse;
+using synapse::shared_ptr;
 
 namespace
     {
@@ -25,12 +25,12 @@ namespace
         int count1=0, count2=0;
         my_emitter_type e1;
         my_emitter_type e2;
-        boost::shared_ptr<synapse::connection> c1=synapse::connect<my_signal>(&e1,synapse::bind(&inc,synapse::ref(count1)));
-        boost::shared_ptr<synapse::connection> c2=synapse::connect<my_signal>(&e2,synapse::bind(&inc,synapse::ref(count2)));
-        boost::shared_ptr<synapse::connection> c3=synapse::connect<my_signal>(&e1,synapse::bind(&inc,synapse::ref(count1)));
-        boost::shared_ptr<synapse::connection> c4=synapse::connect<my_signal>(&e2,synapse::bind(&inc,synapse::ref(count2)));
-        boost::shared_ptr<synapse::connection> c5=synapse::connect<my_signal>(&e1,synapse::bind(&inc,synapse::ref(count1)));
-        boost::shared_ptr<synapse::connection> c6=synapse::connect<my_signal>(&e2,synapse::bind(&inc,synapse::ref(count2)));
+        shared_ptr<synapse::connection> c1=synapse::connect<my_signal>(&e1,[&count1]() { ++count1; } );
+        shared_ptr<synapse::connection> c2=synapse::connect<my_signal>(&e2,[&count2]() { ++count2; } );
+        shared_ptr<synapse::connection> c3=synapse::connect<my_signal>(&e1,[&count1]() { ++count1; } );
+        shared_ptr<synapse::connection> c4=synapse::connect<my_signal>(&e2,[&count2]() { ++count2; } );
+        shared_ptr<synapse::connection> c5=synapse::connect<my_signal>(&e1,[&count1]() { ++count1; } );
+        shared_ptr<synapse::connection> c6=synapse::connect<my_signal>(&e2,[&count2]() { ++count2; } );
         BOOST_TEST(synapse::emit<my_signal>(&e1)==3);
         BOOST_TEST(count1==3);
         BOOST_TEST(count2==0);
@@ -93,18 +93,18 @@ namespace
         int count1=0, count2=0;
         my_emitter_type e1;
         my_emitter_type e2;
-        boost::shared_ptr<void> lt1(new int);
-        boost::shared_ptr<void> lt2(new int);
-        boost::shared_ptr<void> lt3(new int);
-        boost::shared_ptr<void> lt4(new int);
-        boost::shared_ptr<void> lt5(new int);
-        boost::shared_ptr<void> lt6(new int);
-        boost::shared_ptr<synapse::connection> const c1=synapse::connect<my_signal>(&e1,synapse::bind(&inc,synapse::ref(count1)),lt1);
-        boost::shared_ptr<synapse::connection> const c2=synapse::connect<my_signal>(&e2,synapse::bind(&inc,synapse::ref(count2)),lt2);
-        boost::shared_ptr<synapse::connection> const c3=synapse::connect<my_signal>(&e1,synapse::bind(&inc,synapse::ref(count1)),lt3);
-        boost::shared_ptr<synapse::connection> const c4=synapse::connect<my_signal>(&e2,synapse::bind(&inc,synapse::ref(count2)),lt4);
-        boost::shared_ptr<synapse::connection> const c5=synapse::connect<my_signal>(&e1,synapse::bind(&inc,synapse::ref(count1)),lt5);
-        boost::shared_ptr<synapse::connection> const c6=synapse::connect<my_signal>(&e2,synapse::bind(&inc,synapse::ref(count2)),lt6);
+        shared_ptr<void> lt1(new int);
+        shared_ptr<void> lt2(new int);
+        shared_ptr<void> lt3(new int);
+        shared_ptr<void> lt4(new int);
+        shared_ptr<void> lt5(new int);
+        shared_ptr<void> lt6(new int);
+        shared_ptr<synapse::connection> const c1=synapse::connect<my_signal>(&e1,[&count1]() { ++count1; } ,lt1);
+        shared_ptr<synapse::connection> const c2=synapse::connect<my_signal>(&e2,[&count2]() { ++count2; } ,lt2);
+        shared_ptr<synapse::connection> const c3=synapse::connect<my_signal>(&e1,[&count1]() { ++count1; } ,lt3);
+        shared_ptr<synapse::connection> const c4=synapse::connect<my_signal>(&e2,[&count2]() { ++count2; } ,lt4);
+        shared_ptr<synapse::connection> const c5=synapse::connect<my_signal>(&e1,[&count1]() { ++count1; } ,lt5);
+        shared_ptr<synapse::connection> const c6=synapse::connect<my_signal>(&e2,[&count2]() { ++count2; } ,lt6);
         BOOST_TEST(synapse::emit<my_signal>(&e1)==3);
         BOOST_TEST(count1==3);
         BOOST_TEST(count2==0);
@@ -166,8 +166,8 @@ namespace
         {
         int count=0;
         my_emitter_type e;
-        boost::shared_ptr<my_emitter_type> e1(&e,null_deleter());
-        boost::shared_ptr<synapse::connection> c1=synapse::connect<my_signal>(e1,synapse::bind(&inc,synapse::ref(count)));
+        shared_ptr<my_emitter_type> e1(&e,null_deleter());
+        shared_ptr<synapse::connection> c1=synapse::connect<my_signal>(e1,[&count](){ ++count; });
         e1.reset();
         BOOST_TEST(count==0);
         BOOST_TEST(synapse::emit<my_signal>(&e)==0);

@@ -8,16 +8,18 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 namespace
 boost
-	{
-	namespace
-	synapse
-		{
-		using boost::shared_ptr;
-		using boost::weak_ptr;
-		}
-	}
+    {
+    namespace
+    synapse
+        {
+        using boost::shared_ptr;
+        using boost::weak_ptr;
+        using boost::make_shared;
+        }
+    }
 
 #endif

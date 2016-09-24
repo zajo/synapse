@@ -34,7 +34,6 @@ Message 3, Severity 2
 Message 3, Severity 2</pre>
 <p><b>logger.h:</b></p>
 <pre>namespace boost { template &lt;class&gt; class shared_ptr; }
-namespace boost { template &lt;class&gt; class weak_ptr; }
 
 #include &lt;stdio.h&gt;
 
@@ -50,7 +49,7 @@ void add_log_target( logger &amp;, boost::shared_ptr&lt;FILE&gt; const &amp;, in
 //Get a Boost Synapse emitter based on the message's severity.
 void const * severity( int severity );
 
-//Emit this Boost Synapse <span class="RenoLink"><a href="Signal.html">signal</a></span> to log a message.
+//Emit this Boost Synapse signal to log a message.
 typedef struct log_message_(*log_message)( char const * );</pre>
 <p><b>logger.cpp:</b></p>
 <pre>#include "logger.h"
@@ -125,7 +124,11 @@ add_log_target( logger &amp; l, boost::shared_ptr&lt;FILE&gt; const &amp; target
 
     //Connect the appropriate emitter based on severity. Since signals from higher severity emitters are
     //translated to lower severities, the target will only get the messages with severity &gt;= min_severity.
-    l.connections_.push_back(synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;log_message&gt;(severity_(min_severity),boost::bind(&amp;log_string,target,_1)));
+    l.connections_.push_back(synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;log_message&gt;(severity_(min_severity),
+        [target]( char const * str )
+            {
+            log_string(target,str);
+            } ) );
     }
 
 void const *

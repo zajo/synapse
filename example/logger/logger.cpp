@@ -75,7 +75,11 @@ add_log_target( logger & l, boost::shared_ptr<FILE> const & target, int min_seve
 
     //Connect the appropriate emitter based on severity. Since signals from higher severity emitters are
     //translated to lower severities, the target will only get the messages with severity >= min_severity.
-    l.connections_.push_back(synapse::connect<log_message>(severity_(min_severity),boost::bind(&log_string,target,_1)));
+    l.connections_.push_back(synapse::connect<log_message>(severity_(min_severity),
+        [target]( char const * str )
+            {
+            log_string(target,str);
+            } ) );
     }
 
 void const *

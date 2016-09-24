@@ -7,8 +7,8 @@
 #include <boost/detail/lightweight_test.hpp>
 
 namespace synapse=boost::synapse;
-using boost::shared_ptr;
-using boost::weak_ptr;
+using synapse::shared_ptr;
+using synapse::weak_ptr;
 
 namespace
     {

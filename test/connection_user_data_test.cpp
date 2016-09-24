@@ -8,6 +8,7 @@
 #include <boost/detail/lightweight_test.hpp>
 
 namespace synapse=boost::synapse;
+using synapse::shared_ptr;
 
 namespace
     {
@@ -23,7 +24,7 @@ int
 main( int argc, char const * argv[] )
     {
     my_emitter_type e;
-    boost::shared_ptr<synapse::connection> c=synapse::connect<my_signal>(&e,&noop);
+    shared_ptr<synapse::connection> c=synapse::connect<my_signal>(&e,&noop);
     BOOST_TEST(!c->get_user_data<int>());
     c->set_user_data(42);
     BOOST_TEST(*c->get_user_data<int>()==42);

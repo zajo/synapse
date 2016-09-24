@@ -17,29 +17,28 @@ namespace
         {
         (void) synapse::emit<synapse_callback>(h,h,v);
         }
-    void
-    handle_meta_signal( synapse::connection & c, unsigned flags )
-        {
-        boost::shared_ptr<api_handle> h=c.emitter<api_handle>();
-        std::cout << "Detected synapse_callback " << ((flags&synapse::meta::connect_flags::connecting)?"":"dis") << "connection on api_handle at 0x" << h.get();
-        if( flags&synapse::meta::connect_flags::first_for_this_emitter )
-            {
-            assert(flags&synapse::meta::connect_flags::connecting);
-            std::cout << " (first connection, calling api_set_callback)";
-            api_set_callback(h.get(),&emit_fwd,0);
-            }
-        else if( flags&synapse::meta::connect_flags::last_for_this_emitter )
-            {
-            assert(!(flags&synapse::meta::connect_flags::connecting));
-            std::cout << " (last connection, calling api_clear_callback)";
-            api_clear_callback(h.get());
-            }
-        std::cout << std::endl;
-        }
     }
 
 void
 synapsify()
     {
-    static boost::shared_ptr<synapse::connection> c=synapse::connect<synapse::meta::connected<synapse_callback> >(synapse::meta::emitter(),&handle_meta_signal);
+    static boost::shared_ptr<synapse::connection> c=synapse::connect<synapse::meta::connected<synapse_callback> >(synapse::meta::emitter(),
+        [ ]( synapse::connection & c, unsigned flags )
+            {
+            boost::shared_ptr<api_handle> h=c.emitter<api_handle>();
+            std::cout << "Detected synapse_callback " << ((flags&synapse::meta::connect_flags::connecting)?"":"dis") << "connection on api_handle at 0x" << h.get();
+            if( flags&synapse::meta::connect_flags::first_for_this_emitter )
+                {
+                assert(flags&synapse::meta::connect_flags::connecting);
+                std::cout << " (first connection, calling api_set_callback)";
+                api_set_callback(h.get(),&emit_fwd,0);
+                }
+            else if( flags&synapse::meta::connect_flags::last_for_this_emitter )
+                {
+                assert(!(flags&synapse::meta::connect_flags::connecting));
+                std::cout << " (last connection, calling api_clear_callback)";
+                api_clear_callback(h.get());
+                }
+            std::cout << std::endl;
+            } );
     }

@@ -8,7 +8,6 @@
 //shows how boost::shared_ptr can be used to control the lifetime of Windows objects.
 
 #include <boost/synapse/connect.hpp>
-#include <boost/bind.hpp>
 #define NOMINMAX
 #include <windows.h>
 #include <sstream>
@@ -90,7 +89,11 @@ WinMain( HINSTANCE hInstance, HINSTANCE, LPSTR, int )
         return 1; //Error
 
     //Connect the mouse_move signal from the hWnd emitter to the print_mouse_position function.
-    boost::shared_ptr<synapse::connection> conn=synapse::connect<mouse_move>(hWnd,boost::bind(&print_mouse_position,hWnd.get(),_1,_2));
+    boost::shared_ptr<synapse::connection> conn=synapse::connect<mouse_move>(hWnd,
+        [&hWnd]( int x, int y )
+            {
+            print_mouse_position(hWnd.get(),x,y);
+            } );
 
     //Show the window and call print_mouse_position once so it's not empty to begin with.
     ShowWindow(hWnd.get(),SW_SHOW);

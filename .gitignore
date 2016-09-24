@@ -5,3 +5,5 @@
 *.log
 *.sdf
 *.opensdf
+*.db
+*.opendb

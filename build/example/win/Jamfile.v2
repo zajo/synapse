@@ -5,9 +5,12 @@
 
 project
     : source-location
-		../../../example/win
+        ../../../example/win
+    : requirements
+        <link>static
+        <runtime-link>static
     ;
 
 lib user32 : : <name>user32 ;
 lib gdi32 : : <name>gdi32 ;
-exe win_WindowProc : win_WindowProc.cpp ../..//libsynapse user32 gdi32 : <user-interface>gui ;
+exe win_WindowProc : win_WindowProc.cpp ../..//synapse user32 gdi32 : <user-interface>gui ;

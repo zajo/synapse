@@ -4,7 +4,10 @@
     <ClInclude Include="..\..\..\..\libs\synapse\src\block.cpp">
         <Filter>synapse\src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\libs\synapse\src\synapse.cpp">
+    <ClInclude Include="..\..\..\..\libs\synapse\src\connect.cpp">
+        <Filter>synapse\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\libs\synapse\src\thread_local_queue.cpp">
         <Filter>synapse\src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\test\block_emit_test.cpp">
@@ -13,13 +16,13 @@
   </ItemGroup>
   <ItemGroup>
     <Filter Include="synapse">
-      <UniqueIdentifier>{33F90BEE-4943-5596-67D4-3EE835F32AED}</UniqueIdentifier>
+      <UniqueIdentifier>{697E4BD4-165F-7D47-6365-553C75174F94}</UniqueIdentifier>
     </Filter>
     <Filter Include="synapse\src">
-      <UniqueIdentifier>{10DD56E3-0A06-5AEA-7B83-295C5492499F}</UniqueIdentifier>
+      <UniqueIdentifier>{036209D4-0DDE-04D0-7B3E-18D5455B5814}</UniqueIdentifier>
     </Filter>
     <Filter Include="synapse\test">
-      <UniqueIdentifier>{079D32A6-0D30-0A8E-4BB6-7BEB71F516C9}</UniqueIdentifier>
+      <UniqueIdentifier>{1E783952-21A8-7529-6F8A-126A61B14256}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

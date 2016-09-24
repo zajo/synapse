@@ -7,7 +7,6 @@
 #define UUID_D4AA6341754C44AE9659D0E451945AAD
 
 #include <boost/synapse/connect.hpp>
-#include <boost/bind.hpp>
 
 namespace
 boost
@@ -43,77 +42,79 @@ boost
         namespace
         synapse_detail
             {
+            template <class T> struct wr { static T & ap( T & x ) { return x; } };
+            template <class T> struct wr<T &> { static std::reference_wrapper<T> ap( T & x ) { return std::reference_wrapper<T>(x); } };
             template <class OriginalSignal,class TranslatedSignal> struct translate_binder;
             template <class OrgR,class TrR>
             struct
             translate_binder<OrgR(*)(),TrR(*)()>
                 {
-                typedef function<void()> function_type;
+                typedef function<int()> function_type;
                 static
                 function_type
-                bind_( void const * e )
+                bind_emit( void const * e )
                     {
-                    return bind(&emit<TrR(*)()>,e);
+                    return [e]() { return emit<TrR(*)()>(e); };
                     }
                 };
             template <class OrgR,class OrgA1,class TrR,class TrA1>
             struct
             translate_binder<OrgR(*)(OrgA1),TrR(*)(TrA1)>
                 {
-                typedef function<void(OrgA1)> function_type;
+                typedef function<int(OrgA1)> function_type;
                 static
                 function_type
-                bind_( void const * e )
+                bind_emit( void const * e )
                     {
-                    return bind(&emit<TrR(*)(TrA1)>,e,_1);
+                    return [e](TrA1 a1) { return emit<TrR(*)(TrA1)>(e,wr<TrA1>::ap(a1)); };
                     }
                 };
             template <class OrgR,class OrgA1,class OrgA2,class TrR,class TrA1,class TrA2>
             struct
             translate_binder<OrgR(*)(OrgA1,OrgA2),TrR(*)(TrA1,TrA2)>
                 {
-                typedef function<void(OrgA1,OrgA2)> function_type;
+                typedef function<int(OrgA1,OrgA2)> function_type;
                 static
                 function_type
-                bind_( void const * e )
+                bind_emit( void const * e )
                     {
-                    return bind(&emit<TrR(*)(TrA1,TrA2)>,e,_1,_2);
+                    return [e](TrA1 a1,TrA2 a2) { return emit<TrR(*)(TrA1,TrA2)>(e,wr<TrA1>::ap(a1),wr<TrA2>::ap(a2)); };
                     }
                 };
             template <class OrgR,class OrgA1,class OrgA2,class OrgA3,class TrR,class TrA1,class TrA2,class TrA3>
             struct
             translate_binder<OrgR(*)(OrgA1,OrgA2,OrgA3),TrR(*)(TrA1,TrA2,TrA3)>
                 {
-                typedef function<void(OrgA1,OrgA2,OrgA3)> function_type;
+                typedef function<int(OrgA1,OrgA2,OrgA3)> function_type;
                 static
                 function_type
-                bind_( void const * e )
+                bind_emit( void const * e )
                     {
-                    return bind(&emit<TrR(*)(TrA1,TrA2,TrA3)>,e,_1,_2,_3);
+                    return [e](TrA1 a1,TrA2 a2,TrA3 a3) { return emit<TrR(*)(TrA1,TrA2,TrA3)>(e,wr<TrA1>::ap(a1),wr<TrA2>::ap(a2),wr<TrA3>::ap(a3)); };
                     }
                 };
             template <class OrgR,class OrgA1,class OrgA2,class OrgA3,class OrgA4,class TrR,class TrA1,class TrA2,class TrA3,class TrA4>
             struct
             translate_binder<OrgR(*)(OrgA1,OrgA2,OrgA3,OrgA4),TrR(*)(TrA1,TrA2,TrA3,TrA4)>
                 {
-                typedef function<void(OrgA1,OrgA2,OrgA3,OrgA4)> function_type;
+                typedef function<int(OrgA1,OrgA2,OrgA3,OrgA4)> function_type;
                 static
                 function_type
-                bind_( void const * e )
+                bind_emit( void const * e )
                     {
-                    return bind(&emit<TrR(*)(TrA1,TrA2,TrA3,TrA4)>,e,_1,_2,_3,_4);
+                    return [e](TrA1 a1,TrA2 a2,TrA3 a3,TrA4 a4) { return emit<TrR(*)(TrA1,TrA2,TrA3,TrA4)>(e,wr<TrA1>::ap(a1),wr<TrA2>::ap(a2),wr<TrA3>::ap(a3),wr<TrA4>::ap(a4)); };
                     }
                 };
+            shared_ptr<connection> connect_translated_( shared_ptr<thread_local_signal_data> const &, weak_store const &, shared_ptr<void const> const &, weak_ptr<void const> const &, int(*)(connection &,unsigned) );
             template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter>
             shared_ptr<connection>
             translate_fwd( weak_ptr<OriginalEmitter> const & original_emitter, OriginalEmitter * px, void const * translated_emitter, weak_ptr<void const> const & connection_lifetime )
                 {
                 typedef translate_binder<OriginalSignal,TranslatedSignal> translator;
-                return connect_(
-					synapse_detail::emit_<OriginalSignal>(),
-                    get_connection_list<OriginalSignal>(),
+                return connect_translated_(
+                    get_thread_local_signal_data<OriginalSignal>(true),
                     weak_store(original_emitter,px),
-                    shared_ptr<void const>(new typename translator::function_type(translator::bind_(translated_emitter))),
+                    synapse::make_shared<typename translator::function_type>(translator::bind_emit(translated_emitter)),
                     connection_lifetime,
                     &emit_meta_connected<OriginalSignal>);
                 }

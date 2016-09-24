@@ -5,7 +5,10 @@
 
 project
     : source-location
-		../../../example/logger
+        ../../../example/logger
+    : requirements
+        <link>static
+        <runtime-link>static
     ;
 
-exe logger : main.cpp logger.cpp ../..//libsynapse ;
+exe logger : main.cpp logger.cpp ../..//synapse ;

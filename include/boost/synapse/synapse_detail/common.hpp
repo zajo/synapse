@@ -9,6 +9,7 @@
 #include <boost/synapse/signal_traits.hpp>
 #include <boost/synapse/dep/thread_local.hpp>
 #include <boost/synapse/dep/smart_ptr.hpp>
+#include <atomic>
 
 namespace
 boost
@@ -19,46 +20,71 @@ boost
         namespace
         synapse_detail
             {
-            struct connection_list;
-            struct blocked_list;
-            struct emit_binder_base;
-            ///////////////////////////////////////////////////////////////////
-            template <class Signal>
-            weak_ptr<blocked_list> &
-            get_blocked_list()
+            class connection_list_list;
+            struct thread_local_signal_data;
+            class args_binder_base;
+            typedef int emit_fn( thread_local_signal_data const &, void const *, args_binder_base const * );
+            typedef bool emitter_blocked_fn( thread_local_signal_data const &, void const * );
+            inline bool emitter_blocked_stub( thread_local_signal_data const &, void const * ) { return false; }
+            int emit_stub( thread_local_signal_data const &, void const *, args_binder_base const * );
+            class
+            interthread_interface
                 {
-                BOOST_SYNAPSE_STATIC_THREAD_LOCAL(weak_ptr<blocked_list>,cl);
-                return cl;
-                }
-            typedef bool emitter_blocked_t( weak_ptr<blocked_list> const &, void const * );
-            inline bool emitter_blocked_stub( weak_ptr<blocked_list> const &, void const * ) { return false; }
-            template <class Signal>
+                public:
+                virtual void notify_connection_list_created( shared_ptr<thread_local_signal_data> const & )=0;
+                virtual int emit( thread_local_signal_data const &, void const *, args_binder_base const * )=0;
+                };
+            struct
+            thread_local_signal_data
+                {
+                private:
+                thread_local_signal_data( thread_local_signal_data const & );
+                thread_local_signal_data & operator=( thread_local_signal_data const & );
+                public:
+                emit_fn * emit_;
+                emitter_blocked_fn * emitter_blocked_;
+                struct connection_list; weak_ptr<connection_list> cl_;
+                struct blocked_emitters_list; weak_ptr<blocked_emitters_list> bl_;
+                struct posted_signals; shared_ptr<posted_signals> ps_;
+                shared_ptr<connection_list_list> const & (* const get_cll_)( shared_ptr<connection_list_list> (*)() );
+                std::atomic<int> & cl_count_;
+                std::atomic<interthread_interface *> & interthread_;
+                thread_local_signal_data( shared_ptr<connection_list_list> const & (*get_cll)( shared_ptr<connection_list_list> (*)() ), std::atomic<int> & cl_count, std::atomic<interthread_interface *> & interthread ):
+                    emit_(&emit_stub),
+                    emitter_blocked_(&emitter_blocked_stub),
+                    get_cll_(get_cll),
+                    cl_count_(cl_count),
+                    interthread_(interthread)
+                    {
+                    }
+                };
             inline
-            emitter_blocked_t * &
-            emitter_blocked_()
+            int
+            emit_stub( thread_local_signal_data const & tlsd, void const * e, args_binder_base const * args )
                 {
-                BOOST_SYNAPSE_STATIC_THREAD_LOCAL_INIT(emitter_blocked_t *,pblk,&emitter_blocked_stub);
-                return pblk;
+                if( tlsd.cl_count_ )
+                    if( interthread_interface * interthread=tlsd.interthread_.load() )
+                        return interthread->emit(tlsd,e,args);
+                return 0;
                 }
-            ///////////////////////////////////////////////////////////////////
             template <class Signal>
-            weak_ptr<connection_list> &
-            get_connection_list()
+            shared_ptr<connection_list_list> const &
+            get_connection_list_list( shared_ptr<connection_list_list> (*create_connection_list_list)() )
                 {
-                BOOST_SYNAPSE_STATIC_THREAD_LOCAL(weak_ptr<connection_list>,cl);
-                return cl;
+                BOOST_SYNAPSE_STATIC_INIT(shared_ptr<connection_list_list>,obj,(create_connection_list_list()));
+                return obj;
                 }
-            typedef  int emit_t( weak_ptr<connection_list> const &, weak_ptr<blocked_list> const &, emitter_blocked_t *, void const *, emit_binder_base const & );
-            inline int emit_stub( weak_ptr<connection_list> const &, weak_ptr<blocked_list> const &, emitter_blocked_t *, void const *, emit_binder_base const & ) { return 0; }
-			template <class Signal>
-            inline
-            emit_t * &
-            emit_()
+            template <class Signal>
+            shared_ptr<thread_local_signal_data> const &
+            get_thread_local_signal_data( bool allocate )
                 {
-                BOOST_SYNAPSE_STATIC_THREAD_LOCAL_INIT(emit_t *,psyn,&emit_stub);
-                return psyn;
+                BOOST_SYNAPSE_STATIC(std::atomic<int>,count);
+                BOOST_SYNAPSE_STATIC(std::atomic<interthread_interface *>,interthread);
+                BOOST_SYNAPSE_THREAD_LOCAL(shared_ptr<thread_local_signal_data>,obj);
+                if( !obj && (allocate || interthread.load()) )
+                    obj=synapse::make_shared<thread_local_signal_data>(&get_connection_list_list<Signal>,count,interthread);
+                return obj;
                 }
-            ///////////////////////////////////////////////////////////////////
             }
         } 
     }

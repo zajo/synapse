@@ -8,27 +8,34 @@ import path ;
 
 project
     : source-location
-		../../test
+        ../../test
+    : requirements
+        <link>static
+        <runtime-link>static
+    : default-build
+        <threading>multi
     ;
 
-#build-project ../example ;
+build-project ../example ;
 
-compile compile_blocker_hpp.cpp ;
 compile compile_block_hpp.cpp ;
-compile compile_connection_hpp.cpp ;
+compile compile_blocker_hpp.cpp ;
 compile compile_connect_hpp.cpp ;
+compile compile_connection_hpp.cpp ;
+compile compile_thread_local_queue_hpp.cpp ;
 compile compile_emit_hpp.cpp ;
 compile compile_signal_traits_hpp.cpp ;
 compile compile_translate_hpp.cpp ;
 
 run weak_store_test.cpp ;
-run circular_list_test.cpp ;
 run connect_emit_test.cpp ..//synapse ;
 run block_test.cpp ..//block ;
-run block_emit_test.cpp ..//libsynapse ;
+run block_emit_test.cpp ..//synapse ;
 run args_connect_test.cpp ..//synapse ;
-run args_translate_test.cpp ..//synapse  ;
-run connection_lifetime_test.cpp ..//synapse  ;
-run connection_user_data_test.cpp ..//synapse  ;
-run emit_test.cpp ..//synapse  ;
-run emit_stub_test.cpp ..//headers ;
+run args_translate_test.cpp ..//synapse ;
+run connection_lifetime_test.cpp ..//synapse ;
+run connection_user_data_test.cpp ..//synapse ;
+run emit_test.cpp ..//synapse ;
+run emit_stub_test.cpp ..//emit ;
+run ct_basic_test.cpp /boost//thread ..//synapse : : : <threading>multi ;
+run ct_tlq_lifetime_test.cpp /boost//thread ..//synapse : : : <threading>multi ;

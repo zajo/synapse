@@ -25,9 +25,7 @@
 <p>When the user calls <i>synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;button_clicked&gt;</i> passing a QPushButton, <i><span class="RenoLink"><a href="index.html">Boost Synapse</a></span></i> emits the <i>synapse::<span class="RenoLink"><a href="meta_connected.html">meta::connected</a></span>&lt;button_clicked&gt;</i> signal from the <i>synapse::<span class="RenoLink"><a href="meta_emitter.html">meta::emitter</a></span></i>. The <i>handle_button_clicked_connected_meta_signal</i> function responds to this meta signal by connecting (or disconnecting) the Qt-native <i>QPushButton::clicked</i> signal to the <i>synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>&lt;button_clicked&gt;</i> function.</p>
 <pre>#include &lt;<span class="RenoLink"><a href="boost_synapse_connect_hpp.html">boost/synapse/connect.hpp</a></span>&gt;
 #include &lt;<span class="RenoLink"><a href="boost_synapse_connection_hpp.html">boost/synapse/connection.hpp</a></span>&gt;
-#include &lt;boost/bind.hpp&gt;
-#include &lt;boost/any.hpp&gt;
-#define QT_NO_EMIT //Suppress the #define emit from Qt since it clashes with boost::synapse::emit.
+#define QT_NO_EMIT //Suppress the #define emit from Qt since it clashes with synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>.
 #include &lt;QtWidgets/QApplication&gt;
 #include &lt;QtWidgets/QDialog&gt;
 #include &lt;QtWidgets/QPushButton&gt;
@@ -39,25 +37,20 @@ namespace
     //Define a Boost Synapse signal
     typedef struct button_clicked_(*button_clicked)();
 
-    //Connect the QPushButton::clicked Qt signal to boost::synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>&lt;button_clicked&gt;.
-    //Store the QMetaObject::Connection object into the boost::synapse::<span class="RenoLink"><a href="connection.html">connection</a></span> object.
-    void
-    handle_button_clicked_connected_meta_signal( synapse::<span class="RenoLink"><a href="connection.html">connection</a></span> &amp; c, unsigned flags )
-        {
-        if( flags&amp;synapse::<span class="RenoLink"><a href="meta_connected.html">meta::connect_flags::connecting</a></span> )
-            {
-            boost::shared_ptr&lt;QPushButton&gt; pb=c.<span class="RenoLink"><a href="connection_emitter.html">emitter</a></span>&lt;QPushButton&gt;();
-            c.<span class="RenoLink"><a href="connection_user_data.html">user_data</a></span> = QObject::connect(pb.get(),&amp;QPushButton::clicked,
-                boost::bind(&amp;synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>&lt;button_clicked&gt;,pb.get()));
-            }
-        else
-            QObject::disconnect(*boost::any_cast&lt;QMetaObject::Connection&gt;(&amp;c.<span class="RenoLink"><a href="connection_user_data.html">user_data</a></span>));
-        }
-
-    //Call the above function whenever a button_clicked signal is connected or disconnected through Boost Synapse.
-    boost::shared_ptr&lt;<span class="RenoLink"><a href="connection.html">connection</a></span>&gt; meta_conn=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;synapse::meta::connected&lt;button_clicked&gt; &gt;(
+    //Connect the QPushButton::clicked Qt signal to synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>&lt;button_clicked&gt;.
+    //Store the QMetaObject::Connection object into the synapse::<span class="RenoLink"><a href="connection.html">connection</a></span> object.
+    boost::shared_ptr&lt;synapse::<span class="RenoLink"><a href="connection.html">connection</a></span>&gt; meta_conn=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;synapse::<span class="RenoLink"><a href="meta_connected.html">meta::connected</a></span>&lt;button_clicked&gt; &gt;(
         synapse::<span class="RenoLink"><a href="meta_emitter.html">meta::emitter</a></span>(),
-        &amp;handle_button_clicked_connected_meta_signal );
+        [ ]( synapse::<span class="RenoLink"><a href="connection.html">connection</a></span> &amp; c, unsigned flags )
+            {
+            if( flags&amp;synapse::meta::connect_flags::connecting )
+                {
+                QPushButton * pb=c.<span class="RenoLink"><a href="connection_emitter.html">emitter</a></span>&lt;QPushButton&gt;().get();
+                c.<span class="RenoLink"><a href="connection_set_user_data.html">set_user_data</a></span>( QObject::connect( pb, &amp;QPushButton::clicked, [pb]() { synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>&lt;button_clicked&gt;(pb); } ) );
+                }
+            else
+                QObject::disconnect(*c.<span class="RenoLink"><a href="connection_get_user_data.html">get_user_data</a></span>&lt;QMetaObject::Connection&gt;());
+            } );
     }
 
 int
@@ -69,7 +62,7 @@ main( int argc, char const * argv[ ] )
     boost::shared_ptr&lt;QPushButton&gt; pb(new QPushButton("OK",&amp;qd));
 
     //accept() the QDialog when pb is clicked.
-    boost::shared_ptr&lt;<span class="RenoLink"><a href="connection.html">connection</a></span>&gt; c=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;button_clicked&gt;(pb,boost::bind(&amp;QDialog::accept,&amp;qd));
+    boost::shared_ptr&lt;synapse::<span class="RenoLink"><a href="connection.html">connection</a></span>&gt; c=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;button_clicked&gt;( pb, [&amp;qd]() { qd.accept(); } );
 
     qd.exec();
     return 0;

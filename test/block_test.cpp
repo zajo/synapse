@@ -8,6 +8,8 @@
 #include <boost/detail/lightweight_test.hpp>
 
 namespace synapse=boost::synapse;
+using synapse::shared_ptr;
+using synapse::weak_ptr;
 
 namespace
     {
@@ -15,7 +17,7 @@ namespace
     struct
     meta_data
         {
-        boost::shared_ptr<my_emitter_type> e;
+        shared_ptr<my_emitter_type> e;
         my_emitter_type * ep;
         synapse::blocker * eb;
         int count;
@@ -34,15 +36,16 @@ namespace
             }
         };
     bool
-    does_not_own( boost::shared_ptr<void const> const & e )
+    does_not_own( shared_ptr<void const> const & e )
         {
-        return !(e<boost::shared_ptr<void const>()) && !(boost::shared_ptr<void const>()<e);
+        return !(e<shared_ptr<void const>()) && !(shared_ptr<void const>()<e);
         }
     template <class Signal>
     bool
     emitter_blocked( void const * e )
         {
-        return synapse::synapse_detail::emitter_blocked_<Signal>()(synapse::synapse_detail::get_blocked_list<Signal>(),e);
+        shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<Signal>(false);
+        return tlsd && tlsd->emitter_blocked_(*tlsd,e);
         }
     template <class Signal>
     meta_data &
@@ -93,10 +96,10 @@ namespace
             BOOST_TEST(!emitter_blocked<signal2>(&e1));
             BOOST_TEST(!emitter_blocked<signal1>(&e2));
             BOOST_TEST(!emitter_blocked<signal2>(&e2));
-            boost::shared_ptr<synapse::blocker> eb1=synapse::block<signal1>(&e1);
+            shared_ptr<synapse::blocker> eb1=synapse::block<signal1>(&e1);
                 {
-                boost::shared_ptr<synapse::blocker> b1=synapse::block<signal1>(&e1);
-                boost::shared_ptr<synapse::blocker> b2=synapse::block<signal1>(&e1);
+                shared_ptr<synapse::blocker> b1=synapse::block<signal1>(&e1);
+                shared_ptr<synapse::blocker> b2=synapse::block<signal1>(&e1);
                 BOOST_TEST(eb1==b1);
                 BOOST_TEST(eb1==b2);
                 }
@@ -109,10 +112,10 @@ namespace
             BOOST_TEST(!emitter_blocked<signal2>(&e1));
             BOOST_TEST(!emitter_blocked<signal1>(&e2));
             BOOST_TEST(!emitter_blocked<signal2>(&e2));
-            boost::shared_ptr<synapse::blocker> eb2=synapse::block<signal2>(&e1);
+            shared_ptr<synapse::blocker> eb2=synapse::block<signal2>(&e1);
                 {
-                boost::shared_ptr<synapse::blocker> b1=synapse::block<signal2>(&e1);
-                boost::shared_ptr<synapse::blocker> b2=synapse::block<signal2>(&e1);
+                shared_ptr<synapse::blocker> b1=synapse::block<signal2>(&e1);
+                shared_ptr<synapse::blocker> b2=synapse::block<signal2>(&e1);
                 BOOST_TEST(eb2==b1);
                 BOOST_TEST(eb2==b2);
                 }
@@ -125,10 +128,10 @@ namespace
             BOOST_TEST(emitter_blocked<signal2>(&e1));
             BOOST_TEST(!emitter_blocked<signal1>(&e2));
             BOOST_TEST(!emitter_blocked<signal2>(&e2));
-            boost::shared_ptr<synapse::blocker> eb3=synapse::block<signal1>(&e2);
+            shared_ptr<synapse::blocker> eb3=synapse::block<signal1>(&e2);
                 {
-                boost::shared_ptr<synapse::blocker> b1=synapse::block<signal1>(&e2);
-                boost::shared_ptr<synapse::blocker> b2=synapse::block<signal1>(&e2);
+                shared_ptr<synapse::blocker> b1=synapse::block<signal1>(&e2);
+                shared_ptr<synapse::blocker> b2=synapse::block<signal1>(&e2);
                 BOOST_TEST(eb3==b1);
                 BOOST_TEST(eb3==b2);
                 }
@@ -141,10 +144,10 @@ namespace
             BOOST_TEST(emitter_blocked<signal2>(&e1));
             BOOST_TEST(emitter_blocked<signal1>(&e2));
             BOOST_TEST(!emitter_blocked<signal2>(&e2));
-            boost::shared_ptr<synapse::blocker> eb4=synapse::block<signal2>(&e2);
+            shared_ptr<synapse::blocker> eb4=synapse::block<signal2>(&e2);
                 {
-                boost::shared_ptr<synapse::blocker> b1=synapse::block<signal2>(&e2);
-                boost::shared_ptr<synapse::blocker> b2=synapse::block<signal2>(&e2);
+                shared_ptr<synapse::blocker> b1=synapse::block<signal2>(&e2);
+                shared_ptr<synapse::blocker> b2=synapse::block<signal2>(&e2);
                 BOOST_TEST(eb4==b1);
                 BOOST_TEST(eb4==b2);
                 }
@@ -160,7 +163,7 @@ namespace
                 {
                 synapse::blocker * eb=eb1.get();
                 eb1.reset();
-                BOOST_TEST(!synapse::synapse_detail::get_blocked_list<signal1>().expired());
+                BOOST_TEST(!synapse::synapse_detail::get_thread_local_signal_data<signal1>(false)->bl_.expired());
                 BOOST_TEST(does_not_own(the_meta_data<signal1>().e));
                 BOOST_TEST(the_meta_data<signal1>().ep==&e1);
                 BOOST_TEST(the_meta_data<signal1>().eb==eb);
@@ -174,8 +177,8 @@ namespace
                 {
                 synapse::blocker * eb=eb3.get();
                 eb3.reset();
-                BOOST_TEST(synapse::synapse_detail::get_blocked_list<signal1>().expired());
-                BOOST_TEST(!(boost::weak_ptr<synapse::synapse_detail::blocked_list>()<synapse::synapse_detail::get_blocked_list<signal1>()) && !(synapse::synapse_detail::get_blocked_list<signal1>()<boost::weak_ptr<synapse::synapse_detail::blocked_list>()));
+                BOOST_TEST(synapse::synapse_detail::get_thread_local_signal_data<signal1>(false)->bl_.expired());
+                BOOST_TEST(!(weak_ptr<synapse::synapse_detail::thread_local_signal_data::blocked_emitters_list>()<synapse::synapse_detail::get_thread_local_signal_data<signal1>(false)->bl_) && !(synapse::synapse_detail::get_thread_local_signal_data<signal1>(false)->bl_<weak_ptr<synapse::synapse_detail::thread_local_signal_data::blocked_emitters_list>()));
                 BOOST_TEST(does_not_own(the_meta_data<signal1>().e));
                 BOOST_TEST(the_meta_data<signal1>().ep==&e2);
                 BOOST_TEST(the_meta_data<signal1>().eb==eb);
@@ -189,7 +192,7 @@ namespace
                 {
                 synapse::blocker * eb=eb2.get();
                 eb2.reset();
-                BOOST_TEST(!synapse::synapse_detail::get_blocked_list<signal2>().expired());
+                BOOST_TEST(!synapse::synapse_detail::get_thread_local_signal_data<signal2>(false)->bl_.expired());
                 BOOST_TEST(does_not_own(the_meta_data<signal2>().e));
                 BOOST_TEST(the_meta_data<signal2>().ep==&e1);
                 BOOST_TEST(the_meta_data<signal2>().eb==eb);
@@ -203,8 +206,8 @@ namespace
                 {
                 synapse::blocker * eb=eb4.get();
                 eb4.reset();
-                BOOST_TEST(synapse::synapse_detail::get_blocked_list<signal2>().expired());
-                BOOST_TEST(!(boost::weak_ptr<synapse::synapse_detail::blocked_list>()<synapse::synapse_detail::get_blocked_list<signal2>()) && !(synapse::synapse_detail::get_blocked_list<signal2>()<boost::weak_ptr<synapse::synapse_detail::blocked_list>()));
+                BOOST_TEST(synapse::synapse_detail::get_thread_local_signal_data<signal2>(false)->bl_.expired());
+                BOOST_TEST(!(weak_ptr<synapse::synapse_detail::thread_local_signal_data::blocked_emitters_list>()<synapse::synapse_detail::get_thread_local_signal_data<signal2>(false)->bl_) && !(synapse::synapse_detail::get_thread_local_signal_data<signal2>(false)->bl_<weak_ptr<synapse::synapse_detail::thread_local_signal_data::blocked_emitters_list>()));
                 BOOST_TEST(does_not_own(the_meta_data<signal2>().e));
                 BOOST_TEST(the_meta_data<signal2>().ep==&e2);
                 BOOST_TEST(the_meta_data<signal2>().eb==eb);
@@ -218,13 +221,13 @@ namespace
             }
 
             {
-            boost::shared_ptr<my_emitter_type> e(new my_emitter_type);
+            shared_ptr<my_emitter_type> e(new my_emitter_type);
             BOOST_TEST(!emitter_blocked<signal1>(e.get()));
             BOOST_TEST(the_meta_data<signal1>().count==0);
-            boost::shared_ptr<synapse::blocker> eb=synapse::block<signal1>(e);
+            shared_ptr<synapse::blocker> eb=synapse::block<signal1>(e);
                 {
-                boost::shared_ptr<synapse::blocker> b1=synapse::block<signal1>(e);
-                boost::shared_ptr<synapse::blocker> b2=synapse::block<signal1>(e);
+                shared_ptr<synapse::blocker> b1=synapse::block<signal1>(e);
+                shared_ptr<synapse::blocker> b2=synapse::block<signal1>(e);
                 BOOST_TEST(eb==b1);
                 BOOST_TEST(eb==b2);
                 }
@@ -251,13 +254,13 @@ namespace
             }
 
             {
-            boost::shared_ptr<my_emitter_type> e(new my_emitter_type);
+            shared_ptr<my_emitter_type> e(new my_emitter_type);
             BOOST_TEST(!emitter_blocked<signal1>(e.get()));
             BOOST_TEST(the_meta_data<signal1>().count==0);
-            boost::shared_ptr<synapse::blocker> eb=synapse::block<signal1>(boost::weak_ptr<my_emitter_type>(e));
+            shared_ptr<synapse::blocker> eb=synapse::block<signal1>(weak_ptr<my_emitter_type>(e));
                 {
-                boost::shared_ptr<synapse::blocker> b1=synapse::block<signal1>(e);
-                boost::shared_ptr<synapse::blocker> b2=synapse::block<signal1>(e);
+                shared_ptr<synapse::blocker> b1=synapse::block<signal1>(e);
+                shared_ptr<synapse::blocker> b2=synapse::block<signal1>(e);
                 BOOST_TEST(eb==b1);
                 BOOST_TEST(eb==b2);
                 }
@@ -288,13 +291,13 @@ namespace
     emitter_address_reuse_test()
         {
         my_emitter_type e2;
-        boost::shared_ptr<my_emitter_type> e1(&e2,null_deleter());
-        boost::shared_ptr<synapse::blocker> b1=synapse::block<signal1>(e1);
+        shared_ptr<my_emitter_type> e1(&e2,null_deleter());
+        shared_ptr<synapse::blocker> b1=synapse::block<signal1>(e1);
         BOOST_TEST(emitter_blocked<signal1>(&e2));
         BOOST_TEST(b1.use_count()==1);
         e1.reset();
         the_meta_data<signal1>().reset();
-        boost::shared_ptr<synapse::blocker> b2=synapse::block<signal1>(&e2);
+        shared_ptr<synapse::blocker> b2=synapse::block<signal1>(&e2);
         BOOST_TEST(emitter_blocked<signal1>(&e2));
         BOOST_TEST(b2.use_count()==1);
         the_meta_data<signal1>().reset();

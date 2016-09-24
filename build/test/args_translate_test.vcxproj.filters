@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\libs\synapse\src\synapse.cpp">
+    <ClInclude Include="..\..\..\..\libs\synapse\src\block.cpp">
+        <Filter>synapse\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\libs\synapse\src\connect.cpp">
+        <Filter>synapse\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\libs\synapse\src\thread_local_queue.cpp">
         <Filter>synapse\src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\test\args_translate_test.cpp">
@@ -10,13 +16,13 @@
   </ItemGroup>
   <ItemGroup>
     <Filter Include="synapse">
-      <UniqueIdentifier>{34095DDC-262C-2B93-3149-0B9A72BD71C1}</UniqueIdentifier>
+      <UniqueIdentifier>{698E1DC2-7348-5344-2CD9-21EE31E11668}</UniqueIdentifier>
     </Filter>
     <Filter Include="synapse\src">
-      <UniqueIdentifier>{535B5ECE-0723-5BC6-2BEA-6C8806031C41}</UniqueIdentifier>
+      <UniqueIdentifier>{45E011C0-0AFA-05AC-2BA4-5C0176CC2AB7}</UniqueIdentifier>
     </Filter>
     <Filter Include="synapse\test">
-      <UniqueIdentifier>{13661A85-30F2-5605-2AAB-2A4717371FCA}</UniqueIdentifier>
+      <UniqueIdentifier>{2A422130-4569-40A0-4E7F-40C706F34B56}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

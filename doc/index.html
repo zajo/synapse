@@ -22,9 +22,10 @@
 <div class="RenoIncludeDIV"><h3>Introduction</h3>
 <p>(Note: Boost Synapse is not part of <span class="RenoLink"><a href="http://www.boost.org">Boost</a></span>. Please post questions and suggestions on the <span class="RenoLink"><a href="http://www.boost.org/community/groups.html#main">Boost Developers Mailing List</a></span>).</p>
 <p><i><span class="RenoLink">Boost Synapse</span></i> is a C++ <span class="RenoLink"><a href="http://en.wikipedia.org/wiki/Signal_programming">signal programming</a></span> library. It can be used to define communication channels between many different entities in a dynamic object environment. Sometimes such libraries are part of a larger API, but independent alternatives like <span class="RenoLink"><a href="http://www.boost.org/doc/libs/release/doc/html/signals2.html">Boost Signals 2</a></span> or <span class="RenoLink"><a href="http://libsigc.sourceforge.net">libsigc++</a></span> are available as well.</p>
-<p>The advantage of <i><span class="RenoLink">Boost Synapse</span></i> over other approaches is that it is non-intrusive: it allows any object of any type whatsoever to be used as a signal emitter.</p>
+<p>The advantage of <i><span class="RenoLink">Boost Synapse</span></i> over other similar libraries is that it is non-intrusive: it allows any object of any type whatsoever to be used as a signal emitter.</p>
 <h3>Contents</h3>
 <div><ul><li> <span class="RenoLink"><a href="Tutorial.html">Tutorial</a></span></li>
+<li> <span class="RenoLink"><a href="Building.html">Building</a></span></li>
 <li> <span class="RenoLink"><a href="questions_and_answers.html">Questions and Answers</a></span></li>
 <li> <span class="RenoLink"><a href="Synopsis.html">Synopsis</a></span></li>
 <li> <span class="RenoLink"><a href="Index_of_headers.html">Index of Headers</a></span></li>
@@ -39,17 +40,8 @@
 <a href="using_meta_signals_to_connect_to_a_C-style_callback_API.html">Using Meta Signals to Connect to a C-Style Callback API</a><br/>
 <a href="using_meta_signals_to_respond_to_signals_being_blocked_or_unblocked.html">Using Meta Signals to Respond to Signals Being Blocked or Unblocked</a><br/>
 <a href="using_meta_signals_with_QPushButton.html">Using Meta Signals with QPushButton</a></div>
-<h3>Thread Safety</h3>
-<p><i><span class="RenoLink">Boost Synapse</span></i> is not yet thread-safe.</p>
-<h3>Building</h3>
-<p><i><span class="RenoLink">Boost Synapse</span></i> has been formatted to be submitted for a Boost review, so its directory structure follows the common directory structure for Boost libraries—and it's built with Boost Build.</p>
-<p>Alternatively, just put <i>synapse.cpp</i> into your favorite build system. If your program uses the <i><span class="RenoLink"><a href="block.html">block</a></span></i> function, you also need to compile and link <i>block.cpp</i>.</p>
-<p>The following header-only Boost components are also needed:</p>
-<div><ul><li> bind</li>
-<li> function</li>
-<li> shared_ptr</li>
-<li> weak_ptr</li>
-</ul></div>
+<h3>Multi-threading support</h3>
+<p>Most of the <i><span class="RenoLink">Boost Synapse</span></i> functionality is implemented using thread-local data structures, so by default signals are propagated independently within each user thread. In addition, thread-local queues can be created in any thread, to synchronously receive queued signals emitted asynchronously by other threads; see <span class="RenoLink"><a href="interthread_communication_support.html">Interthread Communication Support</a></span>.</p>
 <h3>Download</h3>
 <p>See <span class="RenoLink"><a href="https://github.com/zajo/boost-synapse">this</a></span> github repo.</p>
 </div><!-- Copyright (c) 2008-2013 Emil Dotchevski and Reverge Studios, Inc. -->

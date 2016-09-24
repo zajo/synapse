@@ -27,67 +27,67 @@
 <p>Below is the same example, modified to use <i><span class="RenoLink"><a href="index.html">Boost Synapse</a></span></i> to implement the custom <i>counterReached</i> signal. This approach does not require running the Qt Meta Object Compiler.</p>
 <p>The changes made to the original program are marked with //&lt;--.</p>
 <pre>#include &lt;<span class="RenoLink"><a href="boost_synapse_connect_hpp.html">boost/synapse/connect.hpp</a></span>&gt;
-#include &lt;boost/bind.hpp&gt;
-#define QT_NO_EMIT //Suppress the #define emit from Qt since it clashes with boost::synapse::emit.
+#define QT_NO_EMIT //Suppress the #define emit from Qt since it clashes with synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>.
 #include &lt;QtWidgets/QApplication&gt;
 #include &lt;QtWidgets/QPushButton&gt;
 
-namespace synapse = boost::synapse;
+namespace synapse=boost::synapse;
 
 class Window : public QWidget
 {
 public:
- explicit Window(QWidget *parent = 0);
-signals: //&lt;-- Not needed with Synapse but okay
- typedef struct counterReached_(*counterReached)(); //&lt;-- Was: void counterReached();
+    explicit Window(QWidget *parent = 0);
+    signals: //&lt;-- Not needed with Synapse but okay
+    typedef struct counterReached_(*counterReached)(); //&lt;-- Was: void counterReached();
 private slots: //&lt;-- Not needed with Synapse but okay
- void slotButtonClicked(bool checked);
+    void slotButtonClicked(bool checked);
 private:
- int m_counter;
- QPushButton *m_button;
- boost::shared_ptr&lt;synapse::<span class="RenoLink"><a href="connection.html">connection</a></span>&gt; c_; //&lt;-- Needed to keep the synapse connection afloat.
+    int m_counter;
+    QPushButton *m_button;
+    boost::shared_ptr&lt;synapse::<span class="RenoLink"><a href="connection.html">connection</a></span>&gt; c_; //&lt;-- Needed to keep the synapse connection afloat.
 };
 
 Window::Window(QWidget *parent) :
- QWidget(parent)
+    QWidget(parent)
 {
- // Set size of the window
- setFixedSize(100, 50);
- 
- // Create and position the button
- m_button = new QPushButton("Hello World", this);
- m_button-&gt;setGeometry(10, 10, 80, 30);
- m_button-&gt;setCheckable(true);
- 
- // Set the counter to 0
- m_counter = 0;
- 
- connect(m_button,&amp;QPushButton::clicked,boost::bind(&amp;Window::slotButtonClicked,this,_1)); //&lt;-- Was: connect(m_button, SIGNAL (clicked(bool)), this, SLOT (slotButtonClicked(bool)));
- c_=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;counterReached&gt;(this,&amp;QApplication::quit); //&lt;-- Was: connect(this, SIGNAL (counterReached()), QApplication::instance(), SLOT (quit()));
+     // Set size of the window
+     setFixedSize(100, 50);
+
+    // Create and position the button
+    m_button = new QPushButton("Hello World", this);
+    m_button-&gt;setGeometry(10, 10, 80, 30);
+    m_button-&gt;setCheckable(true);
+
+    // Set the counter to 0
+    m_counter = 0;
+
+    connect(m_button,&amp;QPushButton::clicked,
+        [this]( bool checked )
+        {
+            slotButtonClicked(checked);
+        } ); //&lt;-- Was: connect(m_button, SIGNAL (clicked(bool)), this, SLOT (slotButtonClicked(bool)));
+    c_=synapse::<span class="RenoLink"><a href="connect.html">connect</a></span>&lt;counterReached&gt;(this,&amp;QApplication::quit); //&lt;-- Was: connect(this, SIGNAL (counterReached()), QApplication::instance(), SLOT (quit()));
 }
- 
+
 void Window::slotButtonClicked(bool checked)
 {
- if (checked) {
- m_button-&gt;setText("Checked");
- } else {
- m_button-&gt;setText("Hello World");
- }
- 
- m_counter ++;
- if (m_counter == 10) {
- synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>&lt;counterReached&gt;(this); //&lt;-- Was: emit counterReached();
- }
+    if (checked)
+        m_button-&gt;setText("Checked");
+    else
+        m_button-&gt;setText("Hello World");
+    m_counter ++;
+    if (m_counter == 10)
+        synapse::<span class="RenoLink"><a href="emit.html">emit</a></span>&lt;counterReached&gt;(this); //&lt;-- Was: emit counterReached();
 }
 
 int main(int argc, char **argv)
 {
- QApplication app (argc, argv);
- 
- Window window;
- window.show();
- 
- return app.exec();
+    QApplication app (argc, argv);
+
+    Window window;
+    window.show();
+
+    return app.exec();
 }</pre>
 </div><div class="RenoAutoDIV"><div class="RenoHR"><hr/></div>
 See also: <span class="RenoPageList"><a href="Tutorial.html">Tutorial</a></span>

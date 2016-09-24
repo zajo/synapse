@@ -4,7 +4,10 @@
     <ClInclude Include="..\..\..\..\..\libs\synapse\src\block.cpp">
         <Filter>synapse\src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\libs\synapse\src\synapse.cpp">
+    <ClInclude Include="..\..\..\..\..\libs\synapse\src\connect.cpp">
+        <Filter>synapse\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\libs\synapse\src\interthread_stub.cpp">
         <Filter>synapse\src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\example\callback_api\callback_api.c">
@@ -19,16 +22,16 @@
   </ItemGroup>
   <ItemGroup>
     <Filter Include="synapse">
-      <UniqueIdentifier>{346B4970-53A1-2F7E-6A06-57C45F7B1AB7}</UniqueIdentifier>
+      <UniqueIdentifier>{69F43353-6685-352E-0DE1-7D6E2AC733EF}</UniqueIdentifier>
     </Filter>
     <Filter Include="synapse\example">
-      <UniqueIdentifier>{624E0E54-75CE-60EF-4E50-7F8D2EA80C10}</UniqueIdentifier>
+      <UniqueIdentifier>{15532942-7911-0B02-2485-2FA976215E40}</UniqueIdentifier>
     </Filter>
     <Filter Include="synapse\example\callback_api">
-      <UniqueIdentifier>{5A2209B9-077B-1AD1-646C-407476C455D0}</UniqueIdentifier>
+      <UniqueIdentifier>{59BF585E-231A-6151-34D8-136C21271CC3}</UniqueIdentifier>
     </Filter>
     <Filter Include="synapse\src">
-      <UniqueIdentifier>{4F270A5F-62EB-7AE0-4DA5-4718006A32A4}</UniqueIdentifier>
+      <UniqueIdentifier>{17F906E6-5861-095A-45A3-24D905F375A7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

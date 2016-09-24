@@ -6,10 +6,10 @@
 #include <boost/synapse/block.hpp>
 #include <boost/synapse/blocker.hpp>
 #include <boost/synapse/connect.hpp>
-#include <boost/synapse/dep/bind.hpp>
 #include <boost/detail/lightweight_test.hpp>
 
 namespace synapse=boost::synapse;
+using synapse::shared_ptr;
 
 namespace
     {
@@ -17,12 +17,8 @@ namespace
     bool
     emitter_blocked( void const * e )
         {
-        return synapse::synapse_detail::emitter_blocked_<Signal>()(synapse::synapse_detail::get_blocked_list<Signal>(),e);
-        }
-    void
-    inc( int & c )
-        {
-        ++c;
+        shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<Signal>(false);
+        return tlsd && tlsd->emitter_blocked_(*tlsd,e);
         }
     typedef struct my_signal_(*my_signal)();
     }
@@ -33,14 +29,14 @@ main( int argc, char const * argv[] )
     int e1, e2;
     BOOST_TEST(!emitter_blocked<my_signal>(&e1));
     BOOST_TEST(!emitter_blocked<my_signal>(&e2));
-    boost::shared_ptr<synapse::blocker> b1=synapse::block<my_signal>(&e1);
+    shared_ptr<synapse::blocker> b1=synapse::block<my_signal>(&e1);
     BOOST_TEST(emitter_blocked<my_signal>(&e1));
     BOOST_TEST(!emitter_blocked<my_signal>(&e2));
-    boost::shared_ptr<synapse::blocker> b2=synapse::block<my_signal>(&e2);
+    shared_ptr<synapse::blocker> b2=synapse::block<my_signal>(&e2);
     BOOST_TEST(emitter_blocked<my_signal>(&e1));
     BOOST_TEST(emitter_blocked<my_signal>(&e2));
     int count=0;
-    boost::shared_ptr<synapse::connection> c=synapse::connect<my_signal>(&e1,synapse::bind(&inc,synapse::ref(count)));
+    shared_ptr<synapse::connection> c=synapse::connect<my_signal>(&e1,[&count]() { ++count; } );
     BOOST_TEST(synapse::emit<my_signal>(&e1)==0);
     BOOST_TEST(count==0);
     b1.reset();

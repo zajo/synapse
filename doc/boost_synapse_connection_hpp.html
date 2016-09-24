@@ -43,7 +43,12 @@ boost
         <span class="RenoIncludeSPAN">    template &lt;class T&gt;
             shared_ptr&lt;T&gt; <span class="RenoLink"><a href="connection_emitter.html">emitter</a></span>() const;</span>        
         
-        <span class="RenoIncludeSPAN">    <span class="RenoLink"><a href="www.boost.org/doc/libs/release/doc/html/any.html">any</a></span> &amp; <span class="RenoLink"><a href="connection_user_data.html">user_data</a></span>;</span>        
+        <span class="RenoIncludeSPAN">    template &lt;class T&gt;
+            void <span class="RenoLink"><a href="connection_set_user_data.html">set_user_data</a></span>( shared_ptr&lt;T&gt; const &amp; data );</span>        
+        
+        <span class="RenoIncludeSPAN">    template &lt;class T&gt;
+            T * <span class="RenoLink"><a href="connection_get_user_data.html">get_user_data</a></span>() const;</span>        
+        
             };</span></span>
         }
     }</pre>

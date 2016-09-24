@@ -5,7 +5,10 @@
 
 project
     : source-location
-		../../../example/callback_api
+        ../../../example/callback_api
+    : requirements
+        <link>static
+        <runtime-link>static
     ;
 
-exe callback_api : main.cpp callback_api.c synapsify.cpp ../..//libsynapse ;
+exe callback_api : main.cpp callback_api.c synapsify.cpp ../..//synapse ;

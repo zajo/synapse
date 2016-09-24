@@ -115,6 +115,37 @@ boost
             weak_ptr&lt;void const&gt; const &amp; connection_lifetime=weak_ptr&lt;void const&gt;() );</span></span>
         }
     }</pre>
+</div><div class="RenoIncludeDIV"><p><span class="RenoEscape">&#35;<!--<wiki>`&#35;</wiki>--></span>include &lt;<span class="RenoLink"><a href="boost_synapse_connection_hpp.html">boost/synapse/connection.hpp</a></span>&gt;</p>
+<pre>namespace
+boost
+    {
+    class <span class="RenoLink"><a href="www.boost.org/doc/libs/release/doc/html/any.html">any</a></span>;
+
+    namespace
+    synapse
+        {
+<span class="RenoIncludeSPAN">        <span class="RenoIncludeSPAN">class
+        <span class="RenoLink"><a href="connection.html">connection</a></span>
+            {
+            protected:
+        
+            connection();
+            ~connection();
+        
+            public:
+        
+        <span class="RenoIncludeSPAN">    template &lt;class T&gt;
+            shared_ptr&lt;T&gt; <span class="RenoLink"><a href="connection_emitter.html">emitter</a></span>() const;</span>        
+        
+        <span class="RenoIncludeSPAN">    template &lt;class T&gt;
+            void <span class="RenoLink"><a href="connection_set_user_data.html">set_user_data</a></span>( shared_ptr&lt;T&gt; const &amp; data );</span>        
+        
+        <span class="RenoIncludeSPAN">    template &lt;class T&gt;
+            T * <span class="RenoLink"><a href="connection_get_user_data.html">get_user_data</a></span>() const;</span>        
+        
+            };</span></span>
+        }
+    }</pre>
 </div><div class="RenoIncludeDIV"><p><span class="RenoEscape">&#35;<!--<wiki>`&#35;</wiki>--></span>include &lt;<span class="RenoLink"><a href="boost_synapse_block_hpp.html">boost/synapse/block.hpp</a></span>&gt;</p>
 <pre>namespace
 boost
@@ -141,32 +172,6 @@ boost
             };</span></span>
         }
     }</pre>
-</div><div class="RenoIncludeDIV"><p><span class="RenoEscape">&#35;<!--<wiki>`&#35;</wiki>--></span>include &lt;<span class="RenoLink"><a href="boost_synapse_connection_hpp.html">boost/synapse/connection.hpp</a></span>&gt;</p>
-<pre>namespace
-boost
-    {
-    class <span class="RenoLink"><a href="www.boost.org/doc/libs/release/doc/html/any.html">any</a></span>;
-
-    namespace
-    synapse
-        {
-<span class="RenoIncludeSPAN">        <span class="RenoIncludeSPAN">class
-        <span class="RenoLink"><a href="connection.html">connection</a></span>
-            {
-            protected:
-        
-            connection();
-            ~connection();
-        
-            public:
-        
-        <span class="RenoIncludeSPAN">    template &lt;class T&gt;
-            shared_ptr&lt;T&gt; <span class="RenoLink"><a href="connection_emitter.html">emitter</a></span>() const;</span>        
-        
-        <span class="RenoIncludeSPAN">    <span class="RenoLink"><a href="www.boost.org/doc/libs/release/doc/html/any.html">any</a></span> &amp; <span class="RenoLink"><a href="connection_user_data.html">user_data</a></span>;</span>        
-            };</span></span>
-        }
-    }</pre>
 </div><div class="RenoIncludeDIV"><p><span class="RenoEscape">&#35;<!--<wiki>`&#35;</wiki>--></span>include &lt;<span class="RenoLink"><a href="boost_synapse_blocker_hpp.html">boost/synapse/blocker.hpp</a></span>&gt;</p>
 <pre>namespace
 boost
@@ -187,6 +192,19 @@ boost
         <span class="RenoIncludeSPAN">    template &lt;class T&gt;
             shared_ptr&lt;T&gt; <span class="RenoLink"><a href="blocker_emitter.html">emitter</a></span>() const;</span>        
             };</span></span>
+        }
+    }</pre>
+</div><div class="RenoIncludeDIV"><p><span class="RenoEscape">&#35;<!--<wiki>`&#35;</wiki>--></span>include &lt;<span class="RenoLink"><a href="boost_synapse_thread_local_queue_hpp.html">boost/synapse/thread_local_queue.hpp</a></span>&gt;</p>
+<pre>namespace
+boost
+    {
+    namespace
+    synapse
+        {
+<span class="RenoIncludeSPAN">        <span class="RenoIncludeSPAN">shared_ptr&lt;thread_local_queue&gt;
+        <span class="RenoLink"><a href="create_thread_local_queue.html">create_thread_local_queue</a></span>();</span>        
+        
+        <span class="RenoIncludeSPAN">int <span class="RenoLink"><a href="poll.html">poll</a></span>( thread_local_queue &amp; q );</span></span>
         }
     }</pre>
 </div></div></div><div class="RenoAutoDIV"><div class="RenoHR"><hr/></div>

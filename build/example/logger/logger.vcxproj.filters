@@ -4,7 +4,10 @@
     <ClInclude Include="..\..\..\..\..\libs\synapse\src\block.cpp">
         <Filter>synapse\src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\libs\synapse\src\synapse.cpp">
+    <ClInclude Include="..\..\..\..\..\libs\synapse\src\connect.cpp">
+        <Filter>synapse\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\libs\synapse\src\interthread_stub.cpp">
         <Filter>synapse\src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\example\logger\logger.cpp">
@@ -16,16 +19,16 @@
   </ItemGroup>
   <ItemGroup>
     <Filter Include="synapse">
-      <UniqueIdentifier>{345B7782-76B9-5982-2091-0B1222B053E3}</UniqueIdentifier>
+      <UniqueIdentifier>{69E36165-099C-5F32-446C-30BD6DFD6D1B}</UniqueIdentifier>
     </Filter>
     <Filter Include="synapse\example">
-      <UniqueIdentifier>{1FD00669-78B1-6013-1DE9-3C627D37396E}</UniqueIdentifier>
+      <UniqueIdentifier>{52D52156-7BF4-0A25-741F-6C7D44B00B9D}</UniqueIdentifier>
     </Filter>
     <Filter Include="synapse\example\logger">
-      <UniqueIdentifier>{4E5821DB-63BA-4F5A-0577-121751824CCF}</UniqueIdentifier>
+      <UniqueIdentifier>{4DF67080-7F58-15DA-55E3-650F7BE513C2}</UniqueIdentifier>
     </Filter>
     <Filter Include="synapse\src">
-      <UniqueIdentifier>{31F13261-42BC-3916-0A78-38F245CE15D0}</UniqueIdentifier>
+      <UniqueIdentifier>{7AC22EE8-3832-4790-0277-16B44B5658D4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

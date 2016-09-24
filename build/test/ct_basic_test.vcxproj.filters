@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\libs\chrono\src\chrono.cpp" />
+    <ClInclude Include="..\..\..\..\libs\chrono\src\process_cpu_clocks.cpp" />
+    <ClInclude Include="..\..\..\..\libs\chrono\src\thread_clock.cpp" />
+    <ClInclude Include="..\..\..\..\libs\synapse\src\block.cpp">
+        <Filter>synapse\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\libs\synapse\src\connect.cpp">
+        <Filter>synapse\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\libs\synapse\src\thread_local_queue.cpp">
+        <Filter>synapse\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\libs\system\src\error_code.cpp" />
+    <ClInclude Include="..\..\..\..\libs\thread\src\future.cpp" />
+    <ClInclude Include="..\..\..\..\libs\thread\src\win32\thread.cpp" />
+    <ClInclude Include="..\..\..\..\libs\thread\src\win32\tss_dll.cpp" />
+    <ClInclude Include="..\..\..\..\libs\thread\src\win32\tss_pe.cpp" />
+    <ClInclude Include="..\..\test\ct_basic_test.cpp">
+        <Filter>synapse\test</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="synapse">
+      <UniqueIdentifier>{68EB6A76-522F-7766-4E49-22FD51FA5224}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="synapse\src">
+      <UniqueIdentifier>{2CF4428B-27DD-7D12-47A4-3C4D0864705E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="synapse\test">
+      <UniqueIdentifier>{345E1283-5FDA-4DF7-18E8-7128125E714D}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

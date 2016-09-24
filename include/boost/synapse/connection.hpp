@@ -6,7 +6,7 @@
 #ifndef UUID_D00C85AF6C3E4AEEA6E0B6AB862B43BD
 #define UUID_D00C85AF6C3E4AEEA6E0B6AB862B43BD
 
-#include <boost/synapse/synapse_detail/common.hpp>
+#include <boost/synapse/dep/smart_ptr.hpp>
 #include <boost/synapse/synapse_detail/weak_store.hpp>
 
 namespace
@@ -24,7 +24,7 @@ boost
             ~connection();
             public:
             template <class T> void set_user_data( T const & );
-            template <class T> T * get_user_data();
+            template <class T> T * get_user_data() const;
             template <class T> shared_ptr<T> emitter() const;
             };
         }
@@ -67,7 +67,7 @@ boost
         template <class T>
         T *
         connection::
-        get_user_data()
+        get_user_data() const
             {
             synapse_detail::deleter_user_data<T> * d=get_deleter<synapse_detail::deleter_user_data<T> >(user_data_);
             return d?&d->value:0;
