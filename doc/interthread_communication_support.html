@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'
+﻿<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'
 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
 <head>
@@ -23,10 +23,10 @@
 </div>
 <p><i><span class="RenoLink"><a href="index.html">Boost Synapse</a></span></i> can be used to implement interthread communication using <span class="RenoLink"><a href="Signal.html">Signals</a></span>. The data structures created by <i><span class="RenoLink"><a href="connect.html">connect</a></span></i> (or <i><span class="RenoLink"><a href="translate.html">translate</a></span></i>) use thread-local storage, so by default calling <i><span class="RenoLink"><a href="emit.html">emit</a></span></i> will call only the functions connected by the calling thread (and will not return until all such functions have been called in order, or one of them throws.)</p>
 <p>The following diagram illustrates that process:</p>
-<img class="fig" src="fig1.png" />
+<img class="fig" src="fig1.png" alt="Thread-local operation" />
 <p>However, if one or more other threads have created <i>thread_local_queue</i> objects by calling <i><span class="RenoLink"><a href="create_thread_local_queue.html">create_thread_local_queue</a></span></i>, <i><span class="RenoLink"><a href="emit.html">emit</a></span></i> will still immediately call the corresponding functions connected by calls to <i><span class="RenoLink"><a href="connect.html">connect</a></span></i> (or <i><span class="RenoLink"><a href="translate.html">translate</a></span></i>) from within the calling thread as usual, but in addition it will capture the arguments passed to <i><span class="RenoLink"><a href="emit.html">emit</a></span></i> and queue them into all active <i>thread_local_queue</i> objects created by <b>other</b> threads. Each such thread is required to continuously <i><span class="RenoLink"><a href="poll.html">poll</a></span></i> its <i>thread_local_queue</i>, which "emits" (calls the corresponding functions connected by the polling thread) all signals queued since the last polling, erasing them from the queue. The functions will be called in the order they have been emitted by the other threads.</p>
 <p>This is illustrated by the following diagram:</p>
-<img class="fig" src="fig2.png" />
+<img class="fig" src="fig2.png" alt="Interthread operation" />
 </div><div class="RenoAutoDIV"><div class="RenoHR"><hr/></div>
 See also: <span class="RenoPageList"><a href="index.html">Boost Synapse</a>&nbsp;| <a href="Tutorial.html">Tutorial</a></span>
 </div>
