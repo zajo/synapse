@@ -9,11 +9,6 @@ import path ;
 project
     : source-location
         ../../test
-    : requirements
-        <link>static
-        <runtime-link>static
-    : default-build
-        <threading>multi
     ;
 
 build-project ../example ;

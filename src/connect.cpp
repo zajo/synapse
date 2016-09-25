@@ -206,10 +206,10 @@ boost
                 int (* const emit_meta_connected_)( connection &, unsigned );
                 connection_list( shared_ptr<thread_local_signal_data> const & tlsd, int (*emit_meta_connected)( connection &, unsigned ) ):
                     tlsd_(tlsd),
+                    emit_conn_ptr_(0),
                     first_free_(-1),
                     first_rec_(-1),
                     last_next_(&first_rec_),
-                    emit_conn_ptr_(0),
                     emit_meta_connected_(emit_meta_connected)
                     {
                     BOOST_SYNAPSE_ASSERT(emit_meta_connected_!=0);

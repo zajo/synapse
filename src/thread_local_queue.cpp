@@ -6,6 +6,7 @@
 #include <boost/synapse/thread_local_queue.hpp>
 #include <boost/synapse/emit.hpp>
 #include <boost/synapse/dep/assert.hpp>
+#include <thread>
 #include <mutex>
 #include <vector>
 #include <deque>

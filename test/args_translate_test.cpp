@@ -153,13 +153,6 @@ namespace
             }
         }
     //////////////////////////////////////////////////////////////////////////////////////////////////
-    void
-    test_callback_a2( int & count, int a1, int a1_cmp, float a2, float a2_cmp )
-        {
-        BOOST_TEST(a1==a1_cmp);
-        BOOST_TEST(a2==a2_cmp);
-        ++count;
-        }
     typedef struct signal0_a2_(*signal0_a2)(int,double);
     typedef struct signal1_a2_(*signal1_a2)(int,float);
     typedef struct signal2_a2_(*signal2_a2)(int,float);

@@ -6,14 +6,20 @@
 project
     : source-location
         ../src
+    : requirements
+        <toolset>gcc:<cxxflags>-std=c++11
+        <toolset>clang:<cxxflags>-std=c++11
+    : usage-requirements
+        <toolset>gcc:<cxxflags>-std=c++11
+        <toolset>clang:<cxxflags>-std=c++11
     ;
 
 obj thread_local_queue : thread_local_queue.cpp ;
 obj interthread_stub : interthread_stub.cpp ;
 obj connect : connect.cpp ;
 obj block : block.cpp ;
-lib synapse_interthread : connect block thread_local_queue ;
-lib synapse_no_interthread : connect block interthread_stub ;
+lib synapse_interthread : connect block thread_local_queue : <link>static ;
+lib synapse_no_interthread : connect block interthread_stub : <link>static ;
 
 alias emit ;
 alias synapse : synapse_interthread : <threading>multi ;

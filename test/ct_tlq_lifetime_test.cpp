@@ -13,7 +13,6 @@ using synapse::shared_ptr;
 
 namespace
     {
-    int const iterations=10000;
     int emitter;
     typedef struct signal1_(*signal1)();
     typedef struct signal2_(*signal2)();

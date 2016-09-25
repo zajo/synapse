@@ -24,6 +24,14 @@
 <p><i><span class="RenoLink"><a href="index.html">Boost Synapse</a></span></i> has been formatted to be submitted for a Boost review, so its directory structure follows the common directory structure for Boost libraries—and it's built with Boost Build.</p>
 <p>Alternatively, just put <i>connect.cpp</i> and either <i>thread_local_queue.cpp</i> or <i>interthread_stub.cpp</i> into your favorite build system, depending on whether or not your program calls <i><span class="RenoLink"><a href="create_thread_local_queue.html">create_thread_local_queue</a></span></i>. In addition if your program calls the <i><span class="RenoLink"><a href="block.html">block</a></span></i> function, you also need to compile and link <i>block.cpp</i>.</p>
 <p>However, note that if your program only emits signals (that is, it calls <i><span class="RenoLink"><a href="emit.html">emit</a></span></i> but it never creates any <i><span class="RenoLink"><a href="connection.html">connections</a></span></i>), there is no need to link any <i>.cpp</i> files; that is, <i><span class="RenoLink"><a href="boost_synapse_emit_hpp.html">boost/synapse/emit.hpp</a></span></i> by itself is an independent header-only library. This way libraries that emit signals do not require the user to link <i><span class="RenoLink"><a href="index.html">Boost Synapse</a></span></i>, unless he cares to connect them.</p>
+<h3>Portability</h3>
+<p>Currently <i><span class="RenoLink"><a href="index.html">Boost Synapse</a></span></i> requires compiler support for the following C++11 features:</p>
+<div><ul><li> Thread-safe dynamic initialization of local static objects;</li>
+<li> thread_local objects;</li>
+<li> lambda functions</li>
+<li> &lt;thread&gt;</li>
+<li> &lt;atomic&gt;</li>
+</ul></div>
 </div><div class="RenoAutoDIV"><div class="RenoHR"><hr/></div>
 See also: <span class="RenoPageList"><a href="index.html">Boost Synapse</a></span>
 </div>

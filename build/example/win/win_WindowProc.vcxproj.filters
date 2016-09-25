@@ -1,31 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\libs\synapse\src\block.cpp">
-        <Filter>synapse\src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\libs\synapse\src\connect.cpp">
-        <Filter>synapse\src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\libs\synapse\src\interthread_stub.cpp">
-        <Filter>synapse\src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\example\win\win_WindowProc.cpp">
-        <Filter>synapse\example\win</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="synapse">
-      <UniqueIdentifier>{69A219AD-15F9-0740-1E99-7DF67AD351CC}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="synapse\example">
-      <UniqueIdentifier>{48DD01A7-0783-06B4-3285-5FCF7EED4113}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="synapse\example\win">
-      <UniqueIdentifier>{1ECE5107-7052-67FC-5A0C-2B9D66DC6FBE}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="synapse\src">
-      <UniqueIdentifier>{05E74EF1-3777-4066-75C3-5E1E60E36585}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
 </Project>

@@ -12,7 +12,7 @@ using synapse::weak_ptr;
 
 namespace
     {
-    struct test_type { };
+    struct test_type { test_type() { } };
     bool
     shared( shared_ptr<void const> const & a, shared_ptr<void const> const & b )
         {

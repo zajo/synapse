@@ -11,6 +11,9 @@ project
         <runtime-link>static
     ;
 
-lib user32 : : <name>user32 ;
-lib gdi32 : : <name>gdi32 ;
-exe win_WindowProc : win_WindowProc.cpp ../..//synapse user32 gdi32 : <user-interface>gui ;
+if $(os) == NT
+    {
+    lib user32 : : <name>user32 ;
+    lib gdi32 : : <name>gdi32 ;
+    exe win_WindowProc : win_WindowProc.cpp ../..//synapse user32 gdi32 : <user-interface>gui ;
+    }

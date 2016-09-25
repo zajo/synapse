@@ -12,7 +12,7 @@ boost
         namespace
         synapse_detail
             {
-			class interthread_interface;
+            class interthread_interface;
             interthread_interface * get_interthread_api() { return 0; }
             }
         }

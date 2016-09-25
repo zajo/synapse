@@ -13,11 +13,6 @@ using synapse::shared_ptr;
 namespace
     {
     struct my_emitter_type { };
-    void
-    inc( int & count )
-        {
-        ++count;
-        }
     typedef struct my_signal_(*my_signal)();
     void
     test_reset_connection()

@@ -15,11 +15,6 @@ namespace
     {
     struct my_emitter_type { };
     //////////////////////////////////////////////////////////////////////////////////////////////////
-    void
-    test_callback_a0( int & count )
-        {
-        ++count;
-        }
     typedef struct signal1_a0_(*signal1_a0)();
     typedef struct signal2_a0_(*signal2_a0)();
     void
