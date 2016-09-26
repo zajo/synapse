@@ -45,6 +45,8 @@ boost
 <p>As if:</p>
 <pre>return <span class="RenoLink"><a href="connect.html">connect</a></span>&lt;<span class="RenoLink"><a href="Signal.html">OriginalSignal</a></span>&gt;(original_emitter,boost::bind(&amp;<span class="RenoLink"><a href="emit.html">emit</a></span>&lt;<span class="RenoLink"><a href="Signal.html">TranslatedSignal</a></span>&gt;,translated_emitter,_1,_2,...),connection_lifetime)</pre>
 <p>This function can be used to translate one signal into another signal, as long as their arguments are compatible. For example, if we have a button <i>btn</i> and a dialog <i>dlg</i>, <i><span class="RenoLink">translate</span>&lt;button_on_click,dialog_confirmed&gt;(btn,dlg)</i> can be used to confirm the dialog when the button is clicked.</p>
+<h4>Note:</h4>
+<p>The returned connection itself does not count towards the return value of <i><span class="RenoLink"><a href="emit.html">emit</a></span>&lt;OriginalSignal&gt;</i>; that is, the return value of <i><span class="RenoLink"><a href="emit.html">emit</a></span>&lt;OriginalSignal&gt;</i> is as if <i><span class="RenoLink"><a href="emit.html">emit</a></span>&lt;TranslatedSignal&gt;</i> was called instead.</p>
 </div><div class="RenoAutoDIV"><div class="RenoHR"><hr/></div>
 See also: <span class="RenoPageList"><a href="building_a_simple_logging_system.html">Building a Simple Logging System</a>&nbsp;| <a href="boost_synapse_translate_hpp.html">boost/synapse/translate.hpp</a>&nbsp;| <a href="connection.html">connection</a>&nbsp;| <a href="connection_emitter.html">connection::emitter</a>&nbsp;| <a href="emit.html">emit</a>&nbsp;| <a href="interthread_communication_support.html">Interthread Communication Support</a>&nbsp;| <a href="meta_connected.html">meta::connected</a></span>
 </div>
