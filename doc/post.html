@@ -3,7 +3,7 @@
 <html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
 <head>
 	<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
-	<title>Index of functions</title>
+	<title>post</title>
 	<link href='reno.css' type='text/css' rel='stylesheet'/>
 </head>
 <body>
@@ -16,29 +16,24 @@
 <!-- Copyright (c) 2015 Emil Dotchevski and Reverge Studios, Inc. -->
 <!-- Distributed under the Boost Software License, Version 1.0. (See accompanying -->
 <!-- file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt) -->
-<div class="RenoIncludeDIV"><div class="RenoAutoDIV"><h3>Index of Functions</h3>
+<div class="RenoIncludeDIV"><div class="RenoAutoDIV"><h3>post</h3>
 </div>
-<div class="RenoIndex"><h3>b</h3>
-<p><a href="block.html">block</a></p>
-<p><a href="blocker_emitter.html">blocker::emitter</a></p>
-<h3>c</h3>
-<p><a href="connect.html">connect</a></p>
-<p><a href="connection_emitter.html">connection::emitter</a></p>
-<p><a href="connection_get_user_data.html">connection::get_user_data</a></p>
-<p><a href="connection_set_user_data.html">connection::set_user_data</a></p>
-<p><a href="create_thread_local_queue.html">create_thread_local_queue</a></p>
-<h3>e</h3>
-<p><a href="emit.html">emit</a></p>
-<h3>m</h3>
-<p><a href="meta_emitter.html">meta::emitter</a></p>
-<h3>p</h3>
-<p><a href="poll.html">poll</a></p>
-<p><a href="post.html">post</a></p>
-<h3>t</h3>
-<p><a href="translate.html">translate</a></p>
-</div>
+<div class="RenoIncludeDIV"><p><span class="RenoEscape">&#35;<!--<wiki>`&#35;</wiki>--></span>include &lt;<span class="RenoLink"><a href="boost_synapse_thread_local_queue_hpp.html">boost/synapse/thread_local_queue.hpp</a></span>&gt;</p>
+<pre>namespace
+boost
+    {
+    namespace
+    synapse
+        {
+<span class="RenoIncludeSPAN">        void <span class="RenoLink">post</span>( thread_local_queue &amp; q, function&lt;void()&gt; const &amp; f );</span>
+        }
+    }</pre>
+</div><h4>Effects:</h4>
+<p>Queues <i>f</i> to be called next time <i>q</i> is <i><span class="RenoLink"><a href="poll.html">polled</a></span></i>; that is, <i>f</i> will be executed synchronously in the thread that has created <i>q</i>.</p>
+<h4>Note:</h4>
+<p>While <i><span class="RenoLink"><a href="poll.html">poll</a></span></i> must be called from the thread that created the <i>thread_local_queue</i> object, <i><span class="RenoLink">post</span></i> may be called from any thread. </p>
 </div><div class="RenoAutoDIV"><div class="RenoHR"><hr/></div>
-See also: <span class="RenoPageList"><a href="index.html">Boost Synapse</a></span>
+See also: <span class="RenoPageList"><a href="boost_synapse_thread_local_queue_hpp.html">boost/synapse/thread_local_queue.hpp</a>&nbsp;| <a href="interthread_communication_support.html">Interthread Communication Support</a></span>
 </div>
 <!-- Copyright (c) 2008-2013 Emil Dotchevski and Reverge Studios, Inc. -->
 <!-- Distributed under the Boost Software License, Version 1.0. (See accompanying -->

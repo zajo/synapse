@@ -54,8 +54,8 @@
     <!-- reverge_begin options(debug) -->
     <AdditionalOptions>-TP -c /EHs /GR /MDd /Ob0 /Od /W3 /Z7 /Zc:forScope /Zc:wchar_t /favor:blend /wd4675 </AdditionalOptions>
     <!-- reverge_end options(debug) -->
-    <OutDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\test\$(ProjectName).test\msvc-14.0\$(Configuration)\address-model-64\link-static\runtime-link-static</OutDir>
-    <IntDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\test\$(ProjectName).test\msvc-14.0\$(Configuration)\address-model-64\link-static\runtime-link-static</IntDir>
+    <OutDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\test\$(ProjectName).test\msvc-14.0\$(Configuration)\address-model-64\link-static\threading-multi</OutDir>
+    <IntDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\test\$(ProjectName).test\msvc-14.0\$(Configuration)\address-model-64\link-static\threading-multi</IntDir>
     <ExecutablePath>$(PATH)</ExecutablePath>
     <IncludePath />
     <ReferencePath />
@@ -77,8 +77,8 @@
     <!-- reverge_begin options(release) -->
     <AdditionalOptions>-TP -c /EHs /GR /MD /O2 /Ob2 /W3 /Zc:forScope /Zc:wchar_t /favor:blend /wd4675 </AdditionalOptions>
     <!-- reverge_end options(release) -->
-    <OutDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\test\$(ProjectName).test\msvc-14.0\$(Configuration)\address-model-64\link-static\runtime-link-static</OutDir>
-    <IntDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\test\$(ProjectName).test\msvc-14.0\$(Configuration)\address-model-64\link-static\runtime-link-static</IntDir>
+    <OutDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\test\$(ProjectName).test\msvc-14.0\$(Configuration)\address-model-64\link-static\threading-multi</OutDir>
+    <IntDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\test\$(ProjectName).test\msvc-14.0\$(Configuration)\address-model-64\link-static\threading-multi</IntDir>
     <ExecutablePath>$(PATH)</ExecutablePath>
     <IncludePath />
     <ReferencePath />

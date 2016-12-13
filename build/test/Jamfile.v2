@@ -9,6 +9,8 @@ import path ;
 project
     : source-location
         ../../test
+    : requirements
+        <link>static
     ;
 
 build-project ../example ;
@@ -34,3 +36,4 @@ run emit_test.cpp ..//synapse ;
 run emit_stub_test.cpp ..//emit ;
 run ct_basic_test.cpp /boost//thread ..//synapse : : : <threading>multi ;
 run ct_tlq_lifetime_test.cpp /boost//thread ..//synapse : : : <threading>multi ;
+run ct_lambda_test.cpp /boost//thread ..//synapse : : : <threading>multi ;

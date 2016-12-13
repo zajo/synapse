@@ -30,7 +30,7 @@
     <!-- reverge_end cpps -->
   </ItemGroup>
   <PropertyGroup Label="Globals">
-<ProjectGuid>{29C2216F-4DB7-3CA1-4B90-26EC6ACD11FB}</ProjectGuid>
+    <ProjectGuid>{29C2216F-4DB7-3CA1-4B90-26EC6ACD11FB}</ProjectGuid>
     <Keyword>MakeFileProj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -64,8 +64,8 @@
     <!-- reverge_begin options(debug) -->
     <AdditionalOptions>-TP -c /EHs /GR /MDd /Ob0 /Od /W3 /W4 /Z7 /Zc:forScope /Zc:wchar_t /favor:blend /wd4100 /wd4512 /wd4675 /wd6246 </AdditionalOptions>
     <!-- reverge_end options(debug) -->
-    <OutDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\test\$(ProjectName).test\msvc-14.0\$(Configuration)\address-model-64\link-static\runtime-link-static</OutDir>
-    <IntDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\test\$(ProjectName).test\msvc-14.0\$(Configuration)\address-model-64\link-static\runtime-link-static</IntDir>
+    <OutDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\test\$(ProjectName).test\msvc-14.0\$(Configuration)\address-model-64\link-static\threading-multi</OutDir>
+    <IntDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\test\$(ProjectName).test\msvc-14.0\$(Configuration)\address-model-64\link-static\threading-multi</IntDir>
     <ExecutablePath>$(PATH)</ExecutablePath>
     <IncludePath />
     <ReferencePath />
@@ -87,8 +87,8 @@
     <!-- reverge_begin options(release) -->
     <AdditionalOptions>-TP -c /EHs /GR /MD /O2 /Ob2 /W3 /W4 /Zc:forScope /Zc:wchar_t /favor:blend /wd4100 /wd4512 /wd4675 /wd6246 </AdditionalOptions>
     <!-- reverge_end options(release) -->
-    <OutDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\test\$(ProjectName).test\msvc-14.0\$(Configuration)\address-model-64\link-static\runtime-link-static</OutDir>
-    <IntDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\test\$(ProjectName).test\msvc-14.0\$(Configuration)\address-model-64\link-static\runtime-link-static</IntDir>
+    <OutDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\test\$(ProjectName).test\msvc-14.0\$(Configuration)\address-model-64\link-static\threading-multi</OutDir>
+    <IntDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\test\$(ProjectName).test\msvc-14.0\$(Configuration)\address-model-64\link-static\threading-multi</IntDir>
     <ExecutablePath>$(PATH)</ExecutablePath>
     <IncludePath />
     <ReferencePath />

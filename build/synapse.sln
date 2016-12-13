@@ -78,6 +78,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ct_tlq_lifetime_test", "tes
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "all tests (st)", "test\all tests (st).vcxproj", "{707D4622-0CD2-301A-35AC-166220EF386E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ct_lambda_test", "test\ct_lambda_test.vcxproj", "{1EE46E04-75C0-2625-095B-60F97B0C1BFF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug|Win32 = debug|Win32
@@ -164,6 +166,10 @@ Global
 		{707D4622-0CD2-301A-35AC-166220EF386E}.debug|Win32.Build.0 = debug|Win32
 		{707D4622-0CD2-301A-35AC-166220EF386E}.release|Win32.ActiveCfg = release|Win32
 		{707D4622-0CD2-301A-35AC-166220EF386E}.release|Win32.Build.0 = release|Win32
+		{1EE46E04-75C0-2625-095B-60F97B0C1BFF}.debug|Win32.ActiveCfg = debug|Win32
+		{1EE46E04-75C0-2625-095B-60F97B0C1BFF}.debug|Win32.Build.0 = debug|Win32
+		{1EE46E04-75C0-2625-095B-60F97B0C1BFF}.release|Win32.ActiveCfg = release|Win32
+		{1EE46E04-75C0-2625-095B-60F97B0C1BFF}.release|Win32.Build.0 = release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -193,5 +199,6 @@ Global
 		{29C2216F-4DB7-3CA1-4B90-26EC6ACD11FB} = {2AE860B8-2A40-4C37-9A4A-202B7D5457B0}
 		{211D673C-02EC-2AA6-3449-015F56CE7058} = {2AE860B8-2A40-4C37-9A4A-202B7D5457B0}
 		{707D4622-0CD2-301A-35AC-166220EF386E} = {2AE860B8-2A40-4C37-9A4A-202B7D5457B0}
+		{1EE46E04-75C0-2625-095B-60F97B0C1BFF} = {2AE860B8-2A40-4C37-9A4A-202B7D5457B0}
 	EndGlobalSection
 EndGlobal

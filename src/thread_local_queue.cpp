@@ -4,7 +4,7 @@
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/synapse/thread_local_queue.hpp>
-#include <boost/synapse/emit.hpp>
+#include <boost/synapse/connect.hpp>
 #include <boost/synapse/dep/assert.hpp>
 #include <thread>
 #include <mutex>
@@ -293,6 +293,10 @@ boost
                 return &impl;
                 }
             }
+        namespace
+            {
+            typedef struct bare_lambda_(*bare_lambda)( function<void()> const & );
+            }
         struct
         thread_local_queue
             {
@@ -301,10 +305,19 @@ boost
             thread_local_queue & operator=( thread_local_queue const & );
             std::thread::id const tid_;
             shared_ptr<synapse_detail::thread_local_connection_list_list> const tlcll_;
+            shared_ptr<connection const> const conn_bare_lambda_;
+            static
+            void
+            call_bare_lambda( function<void()> const & f )
+                {
+                BOOST_SYNAPSE_ASSERT(f);
+                f();
+                }
             public:
             thread_local_queue():
                 tid_(std::this_thread::get_id()),
-                tlcll_(synapse_detail::get_thread_local_connection_list_list())
+                tlcll_(synapse_detail::get_thread_local_connection_list_list()),
+                conn_bare_lambda_(connect<bare_lambda>(this,&call_bare_lambda))
                 {
                 tlcll_->enable_tlq();
                 }
@@ -318,6 +331,12 @@ boost
                 BOOST_SYNAPSE_ASSERT(tid_==std::this_thread::get_id());
                 return tlcll_->poll();
                 }
+            void
+            post( function<void()> const & f )
+                {
+                BOOST_SYNAPSE_ASSERT(f);
+                emit<bare_lambda>(this,f);
+                }
             };
         shared_ptr<thread_local_queue>
         create_thread_local_queue()
@@ -328,6 +347,11 @@ boost
         poll( thread_local_queue & tlq )
             {
             return tlq.poll();
+            }
+        void
+        post( thread_local_queue & tlq, function<void()> const & f )
+            {
+            tlq.post(f);
             }
         }
     }
