@@ -31,7 +31,7 @@ boost
 </div><h4>Effects:</h4>
 <p>Queues <i>f</i> to be called next time <i>q</i> is <i><span class="RenoLink"><a href="poll.html">polled</a></span></i>; that is, <i>f</i> will be executed synchronously in the thread that has created <i>q</i>.</p>
 <h4>Note:</h4>
-<p>While <i><span class="RenoLink"><a href="poll.html">poll</a></span></i> must be called from the thread that created the <i>thread_local_queue</i> object, <i><span class="RenoLink">post</span></i> may be called from any thread. </p>
+<p>While <i><span class="RenoLink"><a href="poll.html">poll</a></span></i> (or <i><span class="RenoLink"><a href="wait.html">wait</a></span></i>) must be called from the thread that created the <i>thread_local_queue</i> object, <i><span class="RenoLink">post</span></i> may be called from any thread. </p>
 </div><div class="RenoAutoDIV"><div class="RenoHR"><hr/></div>
 See also: <span class="RenoPageList"><a href="boost_synapse_thread_local_queue_hpp.html">boost/synapse/thread_local_queue.hpp</a>&nbsp;| <a href="interthread_communication_support.html">Interthread Communication Support</a></span>
 </div>
