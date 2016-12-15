@@ -37,3 +37,4 @@ run emit_stub_test.cpp ..//emit ;
 run ct_basic_test.cpp /boost//thread ..//synapse : : : <threading>multi ;
 run ct_tlq_lifetime_test.cpp /boost//thread ..//synapse : : : <threading>multi ;
 run ct_lambda_test.cpp /boost//thread ..//synapse : : : <threading>multi ;
+run ct_wait_test.cpp /boost//thread ..//synapse : : : <threading>multi ;

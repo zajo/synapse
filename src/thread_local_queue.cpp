@@ -50,11 +50,14 @@ boost
                 std::thread::id const thread_id_;
                 std::mutex mut_;
                 std::deque<posted> q_;
+                std::mutex & wait_mut_;
+                std::condition_variable & wait_cond_;
                 public:
-                explicit
-                posted_signals( std::atomic<unsigned> & emit_serial_number ):
+                posted_signals( std::atomic<unsigned> & emit_serial_number, std::mutex & wait_mut, std::condition_variable & wait_cond ):
                     emit_serial_number_(emit_serial_number),
-                    thread_id_(std::this_thread::get_id())
+                    thread_id_(std::this_thread::get_id()),
+                    wait_mut_(wait_mut),
+                    wait_cond_(wait_cond)
                     {
                     }
                 bool
@@ -68,8 +71,14 @@ boost
                         shared_ptr<args_binder_base> a;
                         if( args )
                             a=args->clone();
+                        {
                         std::lock_guard<std::mutex> lk(mut_);
                         q_.push_back(posted(emit_serial_number_++,e,a));
+                        }
+                        {
+                        std::unique_lock<std::mutex> lk(wait_mut_);
+                        wait_cond_.notify_one();
+                        }
                         return true;
                         }
                     }
@@ -175,6 +184,8 @@ boost
                     std::atomic<unsigned> emit_serial_number_;
                     unsigned last_poll_serial_number_;
                     std::vector<cl_rec> same_thread_different_signals_;
+                    std::mutex wait_mut_;
+                    std::condition_variable wait_cond_;
                     public:
                     thread_local_connection_list_list():
                         has_tlq_(false),
@@ -187,7 +198,7 @@ boost
                         {
                         if( has_tlq_ )
                             {
-                            shared_ptr<thread_local_signal_data::posted_signals> ps=synapse::make_shared<thread_local_signal_data::posted_signals>(emit_serial_number_);
+                            shared_ptr<thread_local_signal_data::posted_signals> ps=synapse::make_shared<thread_local_signal_data::posted_signals>(emit_serial_number_,wait_mut_,wait_cond_);
                                 {
                                 std::lock_guard<std::mutex> lk(tlsd->get_cll_(&create_connection_list_list)->mut_);
                                 tlsd->ps_.swap(ps);
@@ -205,7 +216,7 @@ boost
                                 {
                                 if( shared_ptr<thread_local_signal_data> sp=r.lock() )
                                     {
-                                    shared_ptr<thread_local_signal_data::posted_signals> ps=synapse::make_shared<thread_local_signal_data::posted_signals>(emit_serial_number_);
+                                    shared_ptr<thread_local_signal_data::posted_signals> ps=synapse::make_shared<thread_local_signal_data::posted_signals>(emit_serial_number_,wait_mut_,wait_cond_);
                                         {
                                         std::lock_guard<std::mutex> lk(sp->get_cll_(&create_connection_list_list)->mut_);
                                         sp->ps_.swap(ps);
@@ -261,6 +272,15 @@ boost
                             BOOST_SYNAPSE_ASSERT(found);
                             }
                         return count;
+                        }
+                    int
+                    wait()
+                        {
+                        for( std::unique_lock<std::mutex> lk(wait_mut_); ; )
+                            if( int n=poll() )
+                                return n;
+                            else
+                                wait_cond_.wait(lk);
                         }
                     };
                 shared_ptr<thread_local_connection_list_list>
@@ -331,6 +351,12 @@ boost
                 BOOST_SYNAPSE_ASSERT(tid_==std::this_thread::get_id());
                 return tlcll_->poll();
                 }
+            int
+            wait()
+                {
+                BOOST_SYNAPSE_ASSERT(tid_==std::this_thread::get_id());
+                return tlcll_->wait();
+                }
             void
             post( function<void()> const & f )
                 {
@@ -347,6 +373,11 @@ boost
         poll( thread_local_queue & tlq )
             {
             return tlq.poll();
+            }
+        int
+        wait( thread_local_queue & tlq )
+            {
+            return tlq.wait();
             }
         void
         post( thread_local_queue & tlq, function<void()> const & f )

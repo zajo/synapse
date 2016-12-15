@@ -3,7 +3,7 @@
 <html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
 <head>
 	<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
-	<title>boost/synapse/thread_local_queue.hpp</title>
+	<title>wait</title>
 	<link href='reno.css' type='text/css' rel='stylesheet'/>
 </head>
 <body>
@@ -16,25 +16,24 @@
 <!-- Copyright (c) 2015 Emil Dotchevski and Reverge Studios, Inc. -->
 <!-- Distributed under the Boost Software License, Version 1.0. (See accompanying -->
 <!-- file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt) -->
-<div class="RenoIncludeDIV"><div class="RenoAutoDIV"><h3>boost/synapse/thread_local_queue.hpp</h3>
+<div class="RenoIncludeDIV"><div class="RenoAutoDIV"><h3>wait</h3>
 </div>
-<div class="RenoIncludeDIV"><p><span class="RenoEscape">&#35;<!--<wiki>`&#35;</wiki>--></span>include &lt;<span class="RenoLink">boost/synapse/thread_local_queue.hpp</span>&gt;</p>
+<div class="RenoIncludeDIV"><p><span class="RenoEscape">&#35;<!--<wiki>`&#35;</wiki>--></span>include &lt;<span class="RenoLink"><a href="boost_synapse_thread_local_queue_hpp.html">boost/synapse/thread_local_queue.hpp</a></span>&gt;</p>
 <pre>namespace
 boost
     {
     namespace
     synapse
         {
-<span class="RenoIncludeSPAN">        <span class="RenoIncludeSPAN">shared_ptr&lt;thread_local_queue&gt;
-        <span class="RenoLink"><a href="create_thread_local_queue.html">create_thread_local_queue</a></span>();</span>        
-        
-        <span class="RenoIncludeSPAN">int <span class="RenoLink"><a href="poll.html">poll</a></span>( thread_local_queue &amp; q );</span>        
-        <span class="RenoIncludeSPAN">int <span class="RenoLink"><a href="wait.html">wait</a></span>( thread_local_queue &amp; q );</span>        
-        <span class="RenoIncludeSPAN">void <span class="RenoLink"><a href="post.html">post</a></span>( thread_local_queue &amp; q, function&lt;void()&gt; const &amp; f );</span></span>
+<span class="RenoIncludeSPAN">        int <span class="RenoLink">wait</span>( thread_local_queue &amp; q );</span>
         }
     }</pre>
-</div></div><div class="RenoAutoDIV"><div class="RenoHR"><hr/></div>
-See also: <span class="RenoPageList"><a href="create_thread_local_queue.html">create_thread_local_queue</a>&nbsp;| <a href="poll.html">poll</a>&nbsp;| <a href="post.html">post</a>&nbsp;| <a href="Synopsis.html">Synopsis</a>&nbsp;| <a href="wait.html">wait</a></span>
+</div><h4>Effects:</h4>
+<p>The same as <i><span class="RenoLink"><a href="poll.html">poll</a></span>(q)</i>, except that it blocks and does not return until at least one signal was delivered.</p>
+<h4>Returns:</h4>
+<p>The total number of signals emitted (always greater than 1).</p>
+</div><div class="RenoAutoDIV"><div class="RenoHR"><hr/></div>
+See also: <span class="RenoPageList"><a href="boost_synapse_thread_local_queue_hpp.html">boost/synapse/thread_local_queue.hpp</a></span>
 </div>
 <!-- Copyright (c) 2008-2013 Emil Dotchevski and Reverge Studios, Inc. -->
 <!-- Distributed under the Boost Software License, Version 1.0. (See accompanying -->
