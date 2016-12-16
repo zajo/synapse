@@ -36,7 +36,7 @@ namespace
         int counter2=0; shared_ptr<synapse::connection const> c2=synapse::connect<sig2>(&counter2,[&counter2](){++counter2;});
         boost::thread th1(boost::bind(&emitting_thread<sig1>,boost::ref(counter1)));
         boost::thread th2(boost::bind(&emitting_thread<sig2>,boost::ref(counter2)));
-        while( counter1!=iteration_count && counter2!=iteration_count )
+        while( counter1!=iteration_count || counter2!=iteration_count )
             {
             int n=wait(*tlq);
             BOOST_TEST(n>0);
