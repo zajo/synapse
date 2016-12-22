@@ -105,6 +105,54 @@ boost
                     return [e](TrA1 a1,TrA2 a2,TrA3 a3,TrA4 a4) { return emit<TrR(*)(TrA1,TrA2,TrA3,TrA4)>(e,wr<TrA1>::ap(a1),wr<TrA2>::ap(a2),wr<TrA3>::ap(a3),wr<TrA4>::ap(a4)); };
                     }
                 };
+            template <class OrgR,class OrgA1,class OrgA2,class OrgA3,class OrgA4,class OrgA5,class TrR,class TrA1,class TrA2,class TrA3,class TrA4,class TrA5>
+            struct
+            translate_binder<OrgR(*)(OrgA1,OrgA2,OrgA3,OrgA4,OrgA5),TrR(*)(TrA1,TrA2,TrA3,TrA4,TrA5)>
+                {
+                typedef function<int(OrgA1,OrgA2,OrgA3,OrgA4,OrgA5)> function_type;
+                static
+                function_type
+                bind_emit( void const * e )
+                    {
+                    return [e](TrA1 a1,TrA2 a2,TrA3 a3,TrA4 a4, TrA5 a5) { return emit<TrR(*)(TrA1,TrA2,TrA3,TrA4,TrA5)>(e,wr<TrA1>::ap(a1),wr<TrA2>::ap(a2),wr<TrA3>::ap(a3),wr<TrA4>::ap(a4),wr<TrA5>::ap(a5)); };
+                    }
+                };
+            template <class OrgR,class OrgA1,class OrgA2,class OrgA3,class OrgA4,class OrgA5,class OrgA6,class TrR,class TrA1,class TrA2,class TrA3,class TrA4,class TrA5,class TrA6>
+            struct
+            translate_binder<OrgR(*)(OrgA1,OrgA2,OrgA3,OrgA4,OrgA5,OrgA6),TrR(*)(TrA1,TrA2,TrA3,TrA4,TrA5,TrA6)>
+                {
+                typedef function<int(OrgA1,OrgA2,OrgA3,OrgA4,OrgA5,OrgA6)> function_type;
+                static
+                function_type
+                bind_emit( void const * e )
+                    {
+                    return [e](TrA1 a1,TrA2 a2,TrA3 a3,TrA4 a4, TrA5 a5, TrA6 a6) { return emit<TrR(*)(TrA1,TrA2,TrA3,TrA4,TrA5,TrA6)>(e,wr<TrA1>::ap(a1),wr<TrA2>::ap(a2),wr<TrA3>::ap(a3),wr<TrA4>::ap(a4),wr<TrA5>::ap(a5),wr<TrA6>::ap(a6)); };
+                    }
+                };
+            template <class OrgR,class OrgA1,class OrgA2,class OrgA3,class OrgA4,class OrgA5,class OrgA6,class OrgA7,class TrR,class TrA1,class TrA2,class TrA3,class TrA4,class TrA5,class TrA6,class TrA7>
+            struct
+            translate_binder<OrgR(*)(OrgA1,OrgA2,OrgA3,OrgA4,OrgA5,OrgA6,OrgA7),TrR(*)(TrA1,TrA2,TrA3,TrA4,TrA5,TrA6,TrA7)>
+                {
+                typedef function<int(OrgA1,OrgA2,OrgA3,OrgA4,OrgA5,OrgA6,OrgA7)> function_type;
+                static
+                function_type
+                bind_emit( void const * e )
+                    {
+                    return [e](TrA1 a1,TrA2 a2,TrA3 a3,TrA4 a4, TrA5 a5, TrA6 a6, TrA7 a7) { return emit<TrR(*)(TrA1,TrA2,TrA3,TrA4,TrA5,TrA6,TrA7)>(e,wr<TrA1>::ap(a1),wr<TrA2>::ap(a2),wr<TrA3>::ap(a3),wr<TrA4>::ap(a4),wr<TrA5>::ap(a5),wr<TrA6>::ap(a6),wr<TrA7>::ap(a7)); };
+                    }
+                };
+            template <class OrgR,class OrgA1,class OrgA2,class OrgA3,class OrgA4,class OrgA5,class OrgA6,class OrgA7,class OrgA8,class TrR,class TrA1,class TrA2,class TrA3,class TrA4,class TrA5,class TrA6,class TrA7,class TrA8>
+            struct
+            translate_binder<OrgR(*)(OrgA1,OrgA2,OrgA3,OrgA4,OrgA5,OrgA6,OrgA7,OrgA8),TrR(*)(TrA1,TrA2,TrA3,TrA4,TrA5,TrA6,TrA7,TrA8)>
+                {
+                typedef function<int(OrgA1,OrgA2,OrgA3,OrgA4,OrgA5,OrgA6,OrgA7,OrgA8)> function_type;
+                static
+                function_type
+                bind_emit( void const * e )
+                    {
+                    return [e](TrA1 a1,TrA2 a2,TrA3 a3,TrA4 a4, TrA5 a5, TrA6 a6, TrA7 a7, TrA8 a8) { return emit<TrR(*)(TrA1,TrA2,TrA3,TrA4,TrA5,TrA6,TrA7,TrA8)>(e,wr<TrA1>::ap(a1),wr<TrA2>::ap(a2),wr<TrA3>::ap(a3),wr<TrA4>::ap(a4),wr<TrA5>::ap(a5),wr<TrA6>::ap(a6),wr<TrA7>::ap(a7),wr<TrA8>::ap(a7)); };
+                    }
+                };
             shared_ptr<connection> connect_translated_( shared_ptr<thread_local_signal_data> const &, weak_store const &, shared_ptr<void const> const &, weak_ptr<void const> const &, int(*)(connection &,unsigned) );
             template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter>
             shared_ptr<connection>

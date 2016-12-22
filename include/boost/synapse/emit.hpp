@@ -35,6 +35,22 @@ boost
         template <class Signal,class A1,class A2,class A3,class A4>
         typename synapse_detail::enable_if<signal_traits<Signal>::arity==4,int>::type
         emit( void const *, A1, A2, A3, A4 );
+
+        template <class Signal,class A1,class A2,class A3,class A4,class A5>
+        typename synapse_detail::enable_if<signal_traits<Signal>::arity==5,int>::type
+        emit( void const *, A1, A2, A3, A4, A5 );
+
+        template <class Signal,class A1,class A2,class A3,class A4,class A5,class A6>
+        typename synapse_detail::enable_if<signal_traits<Signal>::arity==6,int>::type
+        emit( void const *, A1, A2, A3, A4, A5, A6 );
+
+        template <class Signal,class A1,class A2,class A3,class A4,class A5,class A6,class A7>
+        typename synapse_detail::enable_if<signal_traits<Signal>::arity==7,int>::type
+        emit( void const *, A1, A2, A3, A4, A5, A6, A7 );
+
+        template <class Signal,class A1,class A2,class A3,class A4,class A5,class A6,class A7,class A8>
+        typename synapse_detail::enable_if<signal_traits<Signal>::arity==8,int>::type
+        emit( void const *, A1, A2, A3, A4, A5, A6, A7, A8 );
         }
     }
 
@@ -108,6 +124,54 @@ boost
                 public:
                 args_binder( A1 a1, A2 a2, A3 a3, A4 a4 ): a1(a1), a2(a2), a3(a3), a4(a4) { }
                 };
+            template <class SigR,class SigA1,class SigA2,class SigA3,class SigA4,class SigA5,class A1,class A2,class A3,class A4,class A5>
+            class
+            args_binder<SigR(*)(SigA1,SigA2,SigA3,SigA4,SigA5),void(*)(A1,A2,A3,A4,A5)>:
+                public args_binder_base
+                {
+                A1 a1; A2 a2; A3 a3; A4 a4; A5 a5;
+                shared_ptr<args_binder_base> clone() const { return synapse::make_shared<args_binder>(*this); }
+                void call( void const * f ) const { (*static_cast<function<void(SigA1,SigA2,SigA3,SigA4,SigA5)> const *>(f))(a1,a2,a3,a4,a5); }
+                int call_translated( void const * f ) const { return (*static_cast<function<int(SigA1,SigA2,SigA3,SigA4,SigA5)> const *>(f))(a1,a2,a3,a4,a5); }
+                public:
+                args_binder( A1 a1, A2 a2, A3 a3, A4 a4, A5 a5 ): a1(a1), a2(a2), a3(a3), a4(a4), a5(a5) { }
+                };
+            template <class SigR,class SigA1,class SigA2,class SigA3,class SigA4,class SigA5,class SigA6,class A1,class A2,class A3,class A4,class A5,class A6>
+            class
+            args_binder<SigR(*)(SigA1,SigA2,SigA3,SigA4,SigA5,SigA6),void(*)(A1,A2,A3,A4,A5,A6)>:
+                public args_binder_base
+                {
+                A1 a1; A2 a2; A3 a3; A4 a4; A5 a5; A6 a6;
+                shared_ptr<args_binder_base> clone() const { return synapse::make_shared<args_binder>(*this); }
+                void call( void const * f ) const { (*static_cast<function<void(SigA1,SigA2,SigA3,SigA4,SigA5,SigA6)> const *>(f))(a1,a2,a3,a4,a5,a6); }
+                int call_translated( void const * f ) const { return (*static_cast<function<int(SigA1,SigA2,SigA3,SigA4,SigA5,SigA6)> const *>(f))(a1,a2,a3,a4,a5,a6); }
+                public:
+                args_binder( A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6 ): a1(a1), a2(a2), a3(a3), a4(a4), a5(a5), a6(a6) { }
+                };
+            template <class SigR,class SigA1,class SigA2,class SigA3,class SigA4,class SigA5,class SigA6,class SigA7,class A1,class A2,class A3,class A4,class A5,class A6,class A7>
+            class
+            args_binder<SigR(*)(SigA1,SigA2,SigA3,SigA4,SigA5,SigA6,SigA7),void(*)(A1,A2,A3,A4,A5,A6,A7)>:
+                public args_binder_base
+                {
+                A1 a1; A2 a2; A3 a3; A4 a4; A5 a5; A6 a6; A7 a7;
+                shared_ptr<args_binder_base> clone() const { return synapse::make_shared<args_binder>(*this); }
+                void call( void const * f ) const { (*static_cast<function<void(SigA1,SigA2,SigA3,SigA4,SigA5,SigA6,SigA7)> const *>(f))(a1,a2,a3,a4,a5,a6,a7); }
+                int call_translated( void const * f ) const { return (*static_cast<function<int(SigA1,SigA2,SigA3,SigA4,SigA5,SigA6,SigA7)> const *>(f))(a1,a2,a3,a4,a5,a6,a7); }
+                public:
+                args_binder( A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7 ): a1(a1), a2(a2), a3(a3), a4(a4), a5(a5), a6(a6), a7(a7) { }
+                };
+            template <class SigR,class SigA1,class SigA2,class SigA3,class SigA4,class SigA5,class SigA6,class SigA7,class SigA8,class A1,class A2,class A3,class A4,class A5,class A6,class A7,class A8>
+            class
+            args_binder<SigR(*)(SigA1,SigA2,SigA3,SigA4,SigA5,SigA6,SigA7,SigA8),void(*)(A1,A2,A3,A4,A5,A6,A7,A8)>:
+                public args_binder_base
+                {
+                A1 a1; A2 a2; A3 a3; A4 a4; A5 a5; A6 a6; A7 a7; A8 a8;
+                shared_ptr<args_binder_base> clone() const { return synapse::make_shared<args_binder>(*this); }
+                void call( void const * f ) const { (*static_cast<function<void(SigA1,SigA2,SigA3,SigA4,SigA5,SigA6,SigA7,SigA8)> const *>(f))(a1,a2,a3,a4,a5,a6,a7,a8); }
+                int call_translated( void const * f ) const { return (*static_cast<function<int(SigA1,SigA2,SigA3,SigA4,SigA5,SigA6,SigA7,SigA8)> const *>(f))(a1,a2,a3,a4,a5,a6,a7,a8); }
+                public:
+                args_binder( A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7 ): a1(a1), a2(a2), a3(a3), a4(a4), a5(a5), a6(a6), a7(a7), a8(a8) { }
+                };
             shared_ptr<void const> & meta_emitter();
             template <class Signal>
             int
@@ -169,6 +233,30 @@ boost
         emit( void const * e, A1 a1, A2 a2, A3 a3, A4 a4 )
             {
             return synapse_detail::emit_fwd<Signal>(e,synapse_detail::args_binder<typename signal_traits<Signal>::signal_type,void(*)(A1,A2,A3,A4)>(a1,a2,a3,a4));
+            }
+        template <class Signal,class A1,class A2,class A3,class A4,class A5>
+        typename synapse_detail::enable_if<signal_traits<Signal>::arity==5,int>::type
+        emit( void const * e, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5 )
+            {
+            return synapse_detail::emit_fwd<Signal>(e,synapse_detail::args_binder<typename signal_traits<Signal>::signal_type,void(*)(A1,A2,A3,A4,A5)>(a1,a2,a3,a4,a5));
+            }
+        template <class Signal,class A1,class A2,class A3,class A4,class A5,class A6>
+        typename synapse_detail::enable_if<signal_traits<Signal>::arity==6,int>::type
+        emit( void const * e, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6 )
+            {
+            return synapse_detail::emit_fwd<Signal>(e,synapse_detail::args_binder<typename signal_traits<Signal>::signal_type,void(*)(A1,A2,A3,A4,A5,A6)>(a1,a2,a3,a4,a5,a6));
+            }
+        template <class Signal,class A1,class A2,class A3,class A4,class A5,class A6,class A7>
+        typename synapse_detail::enable_if<signal_traits<Signal>::arity==7,int>::type
+        emit( void const * e, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7 )
+            {
+            return synapse_detail::emit_fwd<Signal>(e,synapse_detail::args_binder<typename signal_traits<Signal>::signal_type,void(*)(A1,A2,A3,A4,A5,A6,A7)>(a1,a2,a3,a4,a5,a6,a7));
+            }
+        template <class Signal,class A1,class A2,class A3,class A4,class A5,class A6,class A7,class A8>
+        typename synapse_detail::enable_if<signal_traits<Signal>::arity==8,int>::type
+        emit( void const * e, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8 )
+            {
+            return synapse_detail::emit_fwd<Signal>(e,synapse_detail::args_binder<typename signal_traits<Signal>::signal_type,void(*)(A1,A2,A3,A4,A5,A6,A7,A8)>(a1,a2,a3,a4,a5,a6,a7,a8));
             }
         } 
     }
