@@ -17,7 +17,7 @@
     <!-- reverge_begin cpps -->
     <ClInclude Include="..\..\..\..\..\libs\synapse\src\block.cpp" />
     <ClInclude Include="..\..\..\..\..\libs\synapse\src\connect.cpp" />
-    <ClInclude Include="..\..\..\..\..\libs\synapse\src\interthread_stub.cpp" />
+    <ClInclude Include="..\..\..\..\..\libs\synapse\src\thread_local_queue.cpp" />
     <ClInclude Include="..\..\..\example\logger\logger.cpp" />
     <ClInclude Include="..\..\..\example\logger\main.cpp" />
     <!-- reverge_end cpps -->

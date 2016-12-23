@@ -56,7 +56,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug|Win32'">
     <!-- reverge_begin defines(debug) -->
-    <NMakePreprocessorDefinitions>BOOST_ALL_DYN_LINK=1;BOOST_ALL_NO_LIB=1;BOOST_CHRONO_DYN_LINK=1;BOOST_SYSTEM_DYN_LINK=1;BOOST_SYSTEM_NO_DEPRECATED;BOOST_THREAD_BUILD_DLL=1;BOOST_THREAD_USES_CHRONO;BOOST_THREAD_USE_DLL=1;BOOST_USE_WINDOWS_H;WIN32_LEAN_AND_MEAN;</NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>BOOST_ALL_NO_LIB=1;BOOST_All_STATIC_LINK=1;BOOST_CHRONO_STATIC_LINK=1;BOOST_SYSTEM_NO_DEPRECATED;BOOST_SYSTEM_STATIC_LINK=1;BOOST_THREAD_BUILD_LIB=1;BOOST_THREAD_USES_CHRONO;BOOST_THREAD_USE_LIB=1;BOOST_USE_WINDOWS_H;WIN32_LEAN_AND_MEAN;</NMakePreprocessorDefinitions>
     <!-- reverge_end defines(debug) -->
     <!-- reverge_begin includes(debug) -->
     <NMakeIncludeSearchPath>C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\INCLUDE;C:\Program Files (x86)\Windows Kits\10\include\10.0.10240.0\ucrt;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\include\um;C:\Program Files (x86)\Windows Kits\8.1\include\\shared;C:\Program Files (x86)\Windows Kits\8.1\include\\um;C:\Program Files (x86)\Windows Kits\8.1\include\\winrt;$(ProjectDir)..\..\..\..</NMakeIncludeSearchPath>
@@ -79,7 +79,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
     <!-- reverge_begin defines(release) -->
-    <NMakePreprocessorDefinitions>BOOST_ALL_DYN_LINK=1;BOOST_ALL_NO_LIB=1;BOOST_CHRONO_DYN_LINK=1;BOOST_SYSTEM_DYN_LINK=1;BOOST_SYSTEM_NO_DEPRECATED;BOOST_THREAD_BUILD_DLL=1;BOOST_THREAD_USES_CHRONO;BOOST_THREAD_USE_DLL=1;BOOST_USE_WINDOWS_H;NDEBUG;WIN32_LEAN_AND_MEAN;</NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>BOOST_ALL_NO_LIB=1;BOOST_All_STATIC_LINK=1;BOOST_CHRONO_STATIC_LINK=1;BOOST_SYSTEM_NO_DEPRECATED;BOOST_SYSTEM_STATIC_LINK=1;BOOST_THREAD_BUILD_LIB=1;BOOST_THREAD_USES_CHRONO;BOOST_THREAD_USE_LIB=1;BOOST_USE_WINDOWS_H;NDEBUG;WIN32_LEAN_AND_MEAN;</NMakePreprocessorDefinitions>
     <!-- reverge_end defines(release) -->
     <!-- reverge_begin includes(release) -->
     <NMakeIncludeSearchPath>C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\INCLUDE;C:\Program Files (x86)\Windows Kits\10\include\10.0.10240.0\ucrt;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\include\um;C:\Program Files (x86)\Windows Kits\8.1\include\\shared;C:\Program Files (x86)\Windows Kits\8.1\include\\um;C:\Program Files (x86)\Windows Kits\8.1\include\\winrt;$(ProjectDir)..\..\..\..</NMakeIncludeSearchPath>

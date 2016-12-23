@@ -64,8 +64,8 @@
     <LibraryWPath />
     <SourcePath />
     <ExcludePath />
-    <NMakeBuildCommandLine>$(SolutionDir)..\..\..\b2 address-model=64 variant=$(configuration) toolset=msvc-14.0 threading=single</NMakeBuildCommandLine>
-    <NMakeReBuildCommandLine>$(SolutionDir)..\..\..\b2 address-model=64 variant=$(configuration) toolset=msvc-14.0 threading=single -a</NMakeReBuildCommandLine>
+    <NMakeBuildCommandLine>$(SolutionDir)..\..\..\b2 address-model=64 variant=$(configuration) toolset=msvc-14.0 threading=single define=BOOST_DISABLE_THREADS</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>$(SolutionDir)..\..\..\b2 address-model=64 variant=$(configuration) toolset=msvc-14.0 threading=single define=BOOST_DISABLE_THREADS -a</NMakeReBuildCommandLine>
     <NMakeCleanCommandLine>
     </NMakeCleanCommandLine>
   </PropertyGroup>
@@ -91,8 +91,8 @@
     <LibraryWPath />
     <SourcePath />
     <ExcludePath />
-    <NMakeBuildCommandLine>$(SolutionDir)..\..\..\b2 address-model=64 variant=$(configuration) toolset=msvc-14.0 threading=single</NMakeBuildCommandLine>
-    <NMakeReBuildCommandLine>$(SolutionDir)..\..\..\b2 address-model=64 variant=$(configuration) toolset=msvc-14.0 threading=single -a</NMakeReBuildCommandLine>
+    <NMakeBuildCommandLine>$(SolutionDir)..\..\..\b2 address-model=64 variant=$(configuration) toolset=msvc-14.0 threading=single define=BOOST_DISABLE_THREADS</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>$(SolutionDir)..\..\..\b2 address-model=64 variant=$(configuration) toolset=msvc-14.0 threading=single define=BOOST_DISABLE_THREADS -a</NMakeReBuildCommandLine>
     <NMakeCleanCommandLine>
     </NMakeCleanCommandLine>
   </PropertyGroup>

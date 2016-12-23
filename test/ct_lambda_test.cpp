@@ -3,6 +3,18 @@
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+#include <boost/synapse/synapse_detail/config.hpp>
+
+#ifdef BOOST_SYNAPSE_DISABLE_THREADS
+
+int
+main( int argc, char const * argv[ ] )
+	{
+	return 0;
+	}
+
+#else
+
 #include <boost/synapse/thread_local_queue.hpp>
 #include <boost/synapse/connect.hpp>
 #include <boost/thread.hpp>
@@ -53,3 +65,5 @@ main( int argc, char const * argv[] )
     tgr.join_all();
     return boost::report_errors();
     }
+
+#endif

@@ -7,10 +7,10 @@
   </ItemGroup>
   <ItemGroup>
     <Filter Include="synapse">
-      <UniqueIdentifier>{10D64930-0321-4B84-7229-177D51A402FA}</UniqueIdentifier>
+      <UniqueIdentifier>{60AB1AFF-6F7A-3015-1AD5-60CC186C4072}</UniqueIdentifier>
     </Filter>
     <Filter Include="synapse\test">
-      <UniqueIdentifier>{75085C5D-3ECF-1B57-529D-7CE029C30C43}</UniqueIdentifier>
+      <UniqueIdentifier>{5964226E-76DE-6956-0743-3F704B3C0C51}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

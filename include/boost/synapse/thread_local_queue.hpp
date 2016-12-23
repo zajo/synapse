@@ -6,6 +6,11 @@
 #ifndef UUID_D355B31075FB11E684FA1794B53EDEC4
 #define UUID_D355B31075FB11E684FA1794B53EDEC4
 
+#include <boost/synapse/synapse_detail/config.hpp>
+#ifdef BOOST_SYNAPSE_DISABLE_THREADS
+#error To use thread_local_queues, please enable multi threading.
+#endif
+
 #include <boost/synapse/dep/smart_ptr.hpp>
 #include <boost/synapse/dep/functional.hpp>
 
