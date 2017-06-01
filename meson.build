@@ -4,7 +4,7 @@ boost_headers = subproject('boost').get_variable('headers')
 
 includes = include_directories('include')
 
-if get_option('synapse_threads')
+if get_option('thread_local_queue')
 	defines = [ ]
 else
 	defines = [ '-DBOOST_SYNAPSE_DISABLE_THREADS' ]
@@ -12,18 +12,18 @@ endif
 
 emit = declare_dependency( include_directories: includes, compile_args: defines )
 
+thread_local_queue = declare_dependency( include_directories: includes, compile_args: defines, sources:
+	'src/thread_local_queue.cpp',
+	dependencies: [
+		boost_headers ] )
+
 connect = declare_dependency( include_directories: includes, compile_args: defines, sources:
 	'src/connect.cpp',
 	dependencies: [
-		boost_headers ] )
+		thread_local_queue ] )
 
 block = declare_dependency( include_directories: includes, compile_args: defines, sources:
 	'src/block.cpp',
-	dependencies: [
-		boost_headers ] )
-
-thread_local_queue = declare_dependency( include_directories: includes, compile_args: defines, sources:
-	'src/thread_local_queue.cpp',
 	dependencies: [
 		boost_headers ] )
 
