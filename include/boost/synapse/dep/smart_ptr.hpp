@@ -6,6 +6,25 @@
 #ifndef UUID_B5B59E7434FB11E6B092BD38C8C3EC59
 #define UUID_B5B59E7434FB11E6B092BD38C8C3EC59
 
+#ifdef BOOST_SYNAPSE_USE_STD_SMART_PTR
+
+#include <memory>
+
+namespace
+boost
+    {
+    namespace
+    synapse
+        {
+        using std::shared_ptr;
+        using std::weak_ptr;
+		using std::make_shared;
+		using std::get_deleter;
+        }
+    }
+
+#else
+
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -18,8 +37,11 @@ boost
         {
         using boost::shared_ptr;
         using boost::weak_ptr;
-        using boost::make_shared;
+		using boost::make_shared;
+		using boost::get_deleter;
         }
-    }
+	}
+
+#endif
 
 #endif

@@ -32,7 +32,7 @@ boost
                 is_empty( weak_ptr<T> const & a )
                     {
                     weak_ptr<T> b;
-                    return !(a<b) && !(b<a);
+                    return !a.owner_before(b) && !b.owner_before(a);
                     }
                 class
                 conn_rec

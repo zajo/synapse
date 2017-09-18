@@ -6,6 +6,24 @@
 #ifndef UUID_E89FC42234FB11E680D73239C8C3EC59
 #define UUID_E89FC42234FB11E680D73239C8C3EC59
 
+#ifdef BOOST_SYNAPSE_USE_STD_FUNCTION
+
+#include <functional>
+
+namespace
+boost
+    {
+    namespace
+    synapse
+        {
+        using std::function;
+        using std::ref;
+        using std::cref;
+        }
+    }
+
+#else
+
 #include <boost/function.hpp>
 
 namespace
@@ -19,5 +37,7 @@ boost
         using boost::cref;
         }
     }
+
+#endif
 
 #endif
