@@ -4,7 +4,7 @@
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include "callback_api.h"
-#include <malloc.h>
+#include <stdlib.h>
 
 struct
 api_handle
