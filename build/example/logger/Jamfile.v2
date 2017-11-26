@@ -8,7 +8,6 @@ project
         ../../../example/logger
     : requirements
         <link>static
-        <runtime-link>static
     ;
 
 exe logger : main.cpp logger.cpp ../..//synapse ;

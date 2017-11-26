@@ -1,0 +1,27 @@
+{
+    "displayName": "Unit tests",
+    "description": "Unit tests",
+    "isBuildCommand": "true",
+    "command": "sh",
+    "args": [
+        "-c",
+        "cd ${workspaceRoot}/build/test && ../../../../b2"
+    ],
+    "version": "0.1.0",
+    "problemMatcher": {
+        "fileLocation": [
+            "relative",
+            "${workspaceRoot}/bld/debug"
+        ],
+        "owner": "cpp",
+        "pattern": {
+            "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|.*error|note):\\s+(.*)$",
+            "file": 1,
+            "line": 2,
+            "column": 3,
+            "severity": 4,
+            "message": 5
+        }
+    },
+    "chooserIndex": 0
+}

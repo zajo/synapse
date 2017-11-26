@@ -8,7 +8,6 @@ project
         ../../../example/callback_api
     : requirements
         <link>static
-        <runtime-link>static
     ;
 
 exe callback_api : main.cpp callback_api.c synapsify.cpp ../..//synapse ;

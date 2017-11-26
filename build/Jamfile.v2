@@ -8,10 +8,10 @@ project
         ../src
     : requirements
         <toolset>gcc:<cxxflags>-std=c++11
-        <toolset>clang:<cxxflags>-std=c++11
+        <toolset>darwin:<cxxflags>"-std=c++11 -Wno-delete-non-virtual-dtor -Wno-dangling-else"
     : usage-requirements
         <toolset>gcc:<cxxflags>-std=c++11
-        <toolset>clang:<cxxflags>-std=c++11
+        <toolset>darwin:<cxxflags>"-std=c++11 -Wno-delete-non-virtual-dtor -Wno-dangling-else"
     ;
 
 alias emit ;
