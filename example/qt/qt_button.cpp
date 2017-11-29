@@ -1,4 +1,4 @@
-//Copyright (c) 2015 Emil Dotchevski and Reverge Studios, Inc.
+//Copyright (c) 2015-2017 Emil Dotchevski and Reverge Studios, Inc.
 
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -28,7 +28,7 @@ namespace
 
     //Connect the QPushButton::clicked Qt signal to synapse::emit<button_clicked>.
     //Store the QMetaObject::Connection object into the synapse::connection object.
-    boost::shared_ptr<synapse::connection> meta_conn=synapse::connect<synapse::meta::connected<button_clicked> >(
+    boost::shared_ptr<synapse::connection> meta_conn = release( synapse::connect<synapse::meta::connected<button_clicked> >(
         synapse::meta::emitter(),
         [ ]( synapse::connection & c, unsigned flags )
             {
@@ -39,7 +39,7 @@ namespace
                 }
             else
                 QObject::disconnect(*c.get_user_data<QMetaObject::Connection>());
-            } );
+            } ) );
     }
 
 int
@@ -51,7 +51,7 @@ main( int argc, char const * argv[ ] )
     boost::shared_ptr<QPushButton> pb(new QPushButton("OK",&qd));
 
     //accept() the QDialog when pb is clicked.
-    boost::shared_ptr<synapse::connection> c=synapse::connect<button_clicked>( pb, [&qd]() { qd.accept(); } );
+    (void) synapse::connect<button_clicked>( pb, [&qd]() { qd.accept(); } );
 
     qd.exec();
     return 0;

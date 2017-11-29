@@ -1,4 +1,4 @@
-//Copyright (c) 2015 Emil Dotchevski and Reverge Studios, Inc.
+//Copyright (c) 2015-2017 Emil Dotchevski and Reverge Studios, Inc.
 
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -25,7 +25,8 @@ main( int argc, char const * argv[] )
     {
         {
         test_type x;
-        synapse::synapse_detail::weak_store sx=synapse::synapse_detail::weak_store(weak_ptr<test_type>(),&x);
+        synapse::synapse_detail::weak_store sx=synapse::synapse_detail::weak_store(&x);
+        BOOST_TEST(!sx.lockable());
         BOOST_TEST(sx.maybe_lock<void const>().get()==&x);
         BOOST_TEST(sx.maybe_lock<void>().get()==&x);
         BOOST_TEST(sx.maybe_lock<test_type const>().get()==&x);
@@ -42,7 +43,8 @@ main( int argc, char const * argv[] )
         }
         {
         test_type const x;
-        synapse::synapse_detail::weak_store sx=synapse::synapse_detail::weak_store(weak_ptr<test_type const>(),&x);
+        synapse::synapse_detail::weak_store sx=synapse::synapse_detail::weak_store(&x);
+        BOOST_TEST(!sx.lockable());
         BOOST_TEST(sx.maybe_lock<void const>().get()==&x);
         BOOST_TEST(!sx.maybe_lock<void>());
         BOOST_TEST(sx.maybe_lock<test_type const>().get()==&x);
@@ -60,6 +62,7 @@ main( int argc, char const * argv[] )
         {
         shared_ptr<test_type> x(new test_type);
         synapse::synapse_detail::weak_store sx=synapse::synapse_detail::weak_store(weak_ptr<test_type>(x));
+        BOOST_TEST(sx.lockable());
         BOOST_TEST(sx.maybe_lock<void const>()==x);
         BOOST_TEST(sx.maybe_lock<void>()==x);
         BOOST_TEST(sx.maybe_lock<test_type const>()==x);
@@ -84,6 +87,7 @@ main( int argc, char const * argv[] )
         {
         shared_ptr<test_type const> x(new test_type);
         synapse::synapse_detail::weak_store sx=synapse::synapse_detail::weak_store(weak_ptr<test_type const>(x));
+        BOOST_TEST(sx.lockable());
         BOOST_TEST(sx.maybe_lock<void const>()==x);
         BOOST_TEST(!sx.maybe_lock<void>());
         BOOST_TEST(sx.maybe_lock<test_type const>()==x);

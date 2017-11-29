@@ -1,4 +1,4 @@
-//Copyright (c) 2015 Emil Dotchevski and Reverge Studios, Inc.
+//Copyright (c) 2015-2017 Emil Dotchevski and Reverge Studios, Inc.
 
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -88,18 +88,18 @@ namespace
         int count1=0, count2=0;
         my_emitter_type e1;
         my_emitter_type e2;
-        shared_ptr<void> lt1(new int);
-        shared_ptr<void> lt2(new int);
-        shared_ptr<void> lt3(new int);
-        shared_ptr<void> lt4(new int);
-        shared_ptr<void> lt5(new int);
-        shared_ptr<void> lt6(new int);
-        shared_ptr<synapse::connection> const c1=synapse::connect<my_signal>(&e1,[&count1]() { ++count1; } ,lt1);
-        shared_ptr<synapse::connection> const c2=synapse::connect<my_signal>(&e2,[&count2]() { ++count2; } ,lt2);
-        shared_ptr<synapse::connection> const c3=synapse::connect<my_signal>(&e1,[&count1]() { ++count1; } ,lt3);
-        shared_ptr<synapse::connection> const c4=synapse::connect<my_signal>(&e2,[&count2]() { ++count2; } ,lt4);
-        shared_ptr<synapse::connection> const c5=synapse::connect<my_signal>(&e1,[&count1]() { ++count1; } ,lt5);
-        shared_ptr<synapse::connection> const c6=synapse::connect<my_signal>(&e2,[&count2]() { ++count2; } ,lt6);
+        shared_ptr<int> lt1(new int(1));
+        shared_ptr<int> lt2(new int(2));
+        shared_ptr<int> lt3(new int(3));
+        shared_ptr<int> lt4(new int(4));
+        shared_ptr<int> lt5(new int(5));
+        shared_ptr<int> lt6(new int(6));
+        (void) synapse::connect<my_signal>(&e1,lt1,[&count1]( int x ) { BOOST_TEST(x==1); ++count1; });
+        (void) synapse::connect<my_signal>(&e2,lt2,[&count2]( int x ) { BOOST_TEST(x==2); ++count2; });
+        (void) synapse::connect<my_signal>(&e1,lt3,[&count1]( int x ) { BOOST_TEST(x==3); ++count1; });
+        (void) synapse::connect<my_signal>(&e2,lt4,[&count2]( int x ) { BOOST_TEST(x==4); ++count2; });
+        (void) synapse::connect<my_signal>(&e1,lt5,[&count1]( int x ) { BOOST_TEST(x==5); ++count1; });
+        (void) synapse::connect<my_signal>(&e2,lt6,[&count2]( int x ) { BOOST_TEST(x==6); ++count2; });
         BOOST_TEST(synapse::emit<my_signal>(&e1)==3);
         BOOST_TEST(count1==3);
         BOOST_TEST(count2==0);
@@ -162,11 +162,8 @@ namespace
         int count=0;
         my_emitter_type e;
         shared_ptr<my_emitter_type> e1(&e,null_deleter());
-        shared_ptr<synapse::connection> c1=synapse::connect<my_signal>(e1,[&count](){ ++count; });
+        (void) synapse::connect<my_signal>(e1,[&count](){ ++count; });
         e1.reset();
-        BOOST_TEST(count==0);
-        BOOST_TEST(synapse::emit<my_signal>(&e)==0);
-        c1.reset();
         BOOST_TEST(count==0);
         BOOST_TEST(synapse::emit<my_signal>(&e)==0);
         }

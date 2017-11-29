@@ -1,6 +1,6 @@
 {
-    "displayName": "Unit tests",
-    "description": "Unit tests",
+    "displayName": "All unit tests",
+    "description": "All unit tests",
     "isBuildCommand": "true",
     "command": "sh",
     "args": [

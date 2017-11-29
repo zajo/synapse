@@ -1,4 +1,4 @@
-//Copyright (c) 2015 Emil Dotchevski and Reverge Studios, Inc.
+//Copyright (c) 2015-2017 Emil Dotchevski and Reverge Studios, Inc.
 
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -19,15 +19,15 @@ boost
 
         template <class Signal,class Emitter>
         typename synapse_detail::enable_if<is_signal<Signal>::value,shared_ptr<blocker> >::type
+        block( Emitter * );
+
+        template <class Signal,class Emitter>
+        typename synapse_detail::enable_if<is_signal<Signal>::value,shared_ptr<blocker> >::type
         block( weak_ptr<Emitter> const & );
 
         template <class Signal,class Emitter>
         typename synapse_detail::enable_if<is_signal<Signal>::value,shared_ptr<blocker> >::type
         block( shared_ptr<Emitter> const & );
-
-        template <class Signal,class Emitter>
-        typename synapse_detail::enable_if<is_signal<Signal>::value,shared_ptr<blocker> >::type
-        block( Emitter * );
 
         namespace
         meta
@@ -53,33 +53,33 @@ boost
         namespace
         synapse_detail
             {
-            shared_ptr<blocker> block_( shared_ptr<thread_local_signal_data> const &, weak_store const &, int(*)(blocker &,bool) );
+            shared_ptr<blocker> block_( shared_ptr<thread_local_signal_data> const &, weak_store &&, int(*)(blocker &,bool) );
             template <class Signal> int emit_meta_blocked( blocker &, bool );
             ////////////////////////////////////////////////////////
             template <class Signal,class Emitter>
             shared_ptr<blocker>
-            block_fwd( weak_ptr<Emitter> const & e, Emitter * px )
+            block_fwd( weak_store && e )
                 {
-                return block_(get_thread_local_signal_data<Signal>(true),weak_store(e,px),&emit_meta_blocked<Signal>);
+                return block_(get_thread_local_signal_data<Signal>(true),std::move(e),&emit_meta_blocked<Signal>);
                 }
-            }
-        template <class Signal,class Emitter>
-        typename synapse_detail::enable_if<is_signal<Signal>::value,shared_ptr<blocker> >::type
-        block( weak_ptr<Emitter> const & e )
-            {
-            return synapse_detail::block_fwd<Signal,Emitter>(e,e.lock().get());
-            }
-        template <class Signal,class Emitter>
-        typename synapse_detail::enable_if<is_signal<Signal>::value,shared_ptr<blocker> >::type
-        block( shared_ptr<Emitter> const & e )
-            {
-            return synapse_detail::block_fwd<Signal,Emitter>(weak_ptr<Emitter>(e),e.get());
             }
         template <class Signal,class Emitter>
         typename synapse_detail::enable_if<is_signal<Signal>::value,shared_ptr<blocker> >::type
         block( Emitter * e )
             {
-            return synapse_detail::block_fwd<Signal,Emitter>(shared_ptr<Emitter>(shared_ptr<void>(),e),e);
+            return synapse_detail::block_fwd<Signal,Emitter>(e);
+            }
+        template <class Signal,class Emitter>
+        typename synapse_detail::enable_if<is_signal<Signal>::value,shared_ptr<blocker> >::type
+        block( weak_ptr<Emitter> const & e )
+            {
+            return synapse_detail::block_fwd<Signal,Emitter>(e);
+            }
+        template <class Signal,class Emitter>
+        typename synapse_detail::enable_if<is_signal<Signal>::value,shared_ptr<blocker> >::type
+        block( shared_ptr<Emitter> const & e )
+            {
+            return synapse_detail::block_fwd<Signal,Emitter>(e);
             }
         } 
     }

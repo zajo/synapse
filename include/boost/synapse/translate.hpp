@@ -1,4 +1,4 @@
-//Copyright (c) 2015 Emil Dotchevski and Reverge Studios, Inc.
+//Copyright (c) 2015-2017 Emil Dotchevski and Reverge Studios, Inc.
 
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -14,20 +14,41 @@ boost
     namespace
     synapse
         {
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter>
+        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
         typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, shared_ptr<connection> >::type
-        translate( weak_ptr<OriginalEmitter> const & original_emitter, void const * translated_emitter,
-            weak_ptr<void const> const & connection_lifetime=weak_ptr<void const>() );
+        translate( OriginalEmitter *, TranslatedEmitter * );
 
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter>
-        typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, shared_ptr<connection> >::type
-        translate( shared_ptr<OriginalEmitter> const & original_emitter, void const * translated_emitter,
-            weak_ptr<void const> const & connection_lifetime=weak_ptr<void const>() );
+        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
+        typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, weak_ptr<connection> >::type
+        translate( OriginalEmitter *, weak_ptr<TranslatedEmitter> const & );
 
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter>
-        typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, shared_ptr<connection> >::type
-        translate( OriginalEmitter * original_emitter, void const * translated_emitter,
-            weak_ptr<void const> const & connection_lifetime=weak_ptr<void const>() );
+        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
+        typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, weak_ptr<connection> >::type
+        translate( OriginalEmitter *, shared_ptr<TranslatedEmitter> const & );
+
+        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
+        typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, weak_ptr<connection> >::type
+        translate( weak_ptr<OriginalEmitter> const &, TranslatedEmitter * );
+
+        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
+        typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, weak_ptr<connection> >::type
+        translate( weak_ptr<OriginalEmitter> const &, weak_ptr<TranslatedEmitter> const & );
+
+        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
+        typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, weak_ptr<connection> >::type
+        translate( weak_ptr<OriginalEmitter> const &, shared_ptr<TranslatedEmitter> const & );
+
+        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
+        typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, weak_ptr<connection> >::type
+        translate( shared_ptr<OriginalEmitter> const &, TranslatedEmitter * );
+
+        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
+        typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, weak_ptr<connection> >::type
+        translate( shared_ptr<OriginalEmitter> const &, weak_ptr<TranslatedEmitter> const & );
+
+        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
+        typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, weak_ptr<connection> >::type
+        translate( shared_ptr<OriginalEmitter> const &, shared_ptr<TranslatedEmitter> const & );
         }
     }
 
@@ -52,42 +73,78 @@ boost
                 typedef function<int(OrgA...)> function_type;
                 static
                 function_type
-                bind_emit( void const * e )
+                bind_emit( weak_store r )
                     {
-                    return [e](TrA... a) { return emit<TrR(*)(TrA...),TrA...>(e,a...); };
+                    return [r](TrA... a) { return emit<TrR(*)(TrA...),TrA...>(r.maybe_lock<void const>().get(),a...); };
                     }
                 };
-            shared_ptr<connection> connect_translated_( shared_ptr<thread_local_signal_data> const &, weak_store const &, shared_ptr<void const> const &, weak_ptr<void const> const &, int(*)(connection &,unsigned) );
-            template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter>
+            shared_ptr<connection> connect_translated_( shared_ptr<thread_local_signal_data> const &, weak_store && e, weak_store && r, shared_ptr<void const> const &, int(*emit_meta_connected)(connection &,unsigned) );
+            template <class OriginalSignal,class TranslatedSignal>
             shared_ptr<connection>
-            translate_fwd( weak_ptr<OriginalEmitter> const & original_emitter, OriginalEmitter * px, void const * translated_emitter, weak_ptr<void const> const & connection_lifetime )
+            translate_fwd( weak_store && e, weak_store && r )
                 {
                 typedef translate_binder<OriginalSignal,TranslatedSignal> translator;
                 return connect_translated_(
                     get_thread_local_signal_data<OriginalSignal>(true),
-                    weak_store(original_emitter,px),
-                    synapse::make_shared<typename translator::function_type>(translator::bind_emit(translated_emitter)),
-                    connection_lifetime,
+                    std::move(e),
+                    std::move(r),
+                    synapse::make_shared<typename translator::function_type>(translator::bind_emit(r)),
                     &emit_meta_connected<OriginalSignal>);
                 }
             }
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter>
+        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
         typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, shared_ptr<connection> >::type
-        translate( weak_ptr<OriginalEmitter> const & original_emitter, void const * translated_emitter, weak_ptr<void const> const & connection_lifetime )
+        translate( OriginalEmitter * oe, TranslatedEmitter * te )
             {
-            return synapse_detail::translate_fwd<OriginalSignal,TranslatedSignal,OriginalEmitter>(original_emitter,original_emitter.lock().get(),translated_emitter,connection_lifetime);
+            return synapse_detail::translate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
             }
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter>
-        typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, shared_ptr<connection> >::type
-        translate( shared_ptr<OriginalEmitter> const & original_emitter, void const * translated_emitter, weak_ptr<void const> const & connection_lifetime )
+        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
+        typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, weak_ptr<connection> >::type
+        translate( OriginalEmitter * oe, weak_ptr<TranslatedEmitter> const & te )
             {
-            return synapse_detail::translate_fwd<OriginalSignal,TranslatedSignal,OriginalEmitter>(weak_ptr<OriginalEmitter>(original_emitter),original_emitter.get(),translated_emitter,connection_lifetime);
+            return synapse_detail::translate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
             }
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter>
-        typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, shared_ptr<connection> >::type
-        translate( OriginalEmitter * original_emitter, void const * translated_emitter, weak_ptr<void const> const & connection_lifetime )
+        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
+        typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, weak_ptr<connection> >::type
+        translate( OriginalEmitter * oe, shared_ptr<TranslatedEmitter> const & te )
             {
-            return synapse_detail::translate_fwd<OriginalSignal,TranslatedSignal,OriginalEmitter>(shared_ptr<OriginalEmitter>(shared_ptr<void>(),original_emitter),original_emitter,translated_emitter,connection_lifetime);
+            return synapse_detail::translate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
+            }
+        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
+        typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, weak_ptr<connection> >::type
+        translate( weak_ptr<OriginalEmitter> const & oe, TranslatedEmitter * te )
+            {
+            return synapse_detail::translate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
+            }
+        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
+        typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, weak_ptr<connection> >::type
+        translate( weak_ptr<OriginalEmitter> const & oe, weak_ptr<TranslatedEmitter> const & te )
+            {
+            return synapse_detail::translate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
+            }
+        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
+        typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, weak_ptr<connection> >::type
+        translate( weak_ptr<OriginalEmitter> const & oe, shared_ptr<TranslatedEmitter> const & te )
+            {
+            return synapse_detail::translate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
+            }
+        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
+        typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, weak_ptr<connection> >::type
+        translate( shared_ptr<OriginalEmitter> const & oe, TranslatedEmitter * te )
+            {
+            return synapse_detail::translate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
+            }
+        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
+        typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, weak_ptr<connection> >::type
+        translate( shared_ptr<OriginalEmitter> const & oe, weak_ptr<TranslatedEmitter> const & te )
+            {
+            return synapse_detail::translate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
+            }
+        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
+        typename synapse_detail::enable_if<is_signal<OriginalSignal>::value && is_signal<TranslatedSignal>::value, weak_ptr<connection> >::type
+        translate( shared_ptr<OriginalEmitter> const & oe, shared_ptr<TranslatedEmitter> const & te )
+            {
+            return synapse_detail::translate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
             }
         } 
     }

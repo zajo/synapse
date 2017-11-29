@@ -1,4 +1,4 @@
-//Copyright (c) 2015 Emil Dotchevski and Reverge Studios, Inc.
+//Copyright (c) 2015-2017 Emil Dotchevski and Reverge Studios, Inc.
 
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -24,9 +24,11 @@ boost
             struct thread_local_signal_data;
             class args_binder_base;
             typedef int emit_fn( thread_local_signal_data const &, void const *, args_binder_base const * );
+            typedef void cleanup_fn( thread_local_signal_data const & );
             typedef bool emitter_blocked_fn( thread_local_signal_data const &, void const * );
             inline bool emitter_blocked_stub( thread_local_signal_data const &, void const * ) { return false; }
             int emit_stub( thread_local_signal_data const &, void const *, args_binder_base const * );
+            void cleanup_stub( thread_local_signal_data const & );
             class
             interthread_interface
                 {
@@ -42,6 +44,7 @@ boost
                 thread_local_signal_data & operator=( thread_local_signal_data const & );
                 public:
                 emit_fn * emit_;
+                cleanup_fn * cleanup_;
                 emitter_blocked_fn * emitter_blocked_;
                 struct connection_list; weak_ptr<connection_list> cl_;
                 struct blocked_emitters_list; weak_ptr<blocked_emitters_list> bl_;
@@ -51,11 +54,16 @@ boost
                 std::atomic<interthread_interface *> & interthread_;
                 thread_local_signal_data( shared_ptr<connection_list_list> const & (*get_cll)( shared_ptr<connection_list_list> (*)() ), std::atomic<int> & cl_count, std::atomic<interthread_interface *> & interthread ):
                     emit_(&emit_stub),
+                    cleanup_(&cleanup_stub),
                     emitter_blocked_(&emitter_blocked_stub),
                     get_cll_(get_cll),
                     cl_count_(cl_count),
                     interthread_(interthread)
                     {
+                    }
+                ~thread_local_signal_data()
+                    {
+                    cleanup_(*this);
                     }
                 };
             inline
@@ -66,6 +74,11 @@ boost
                     if( interthread_interface * interthread=tlsd.interthread_.load() )
                         return interthread->emit(tlsd,e,args);
                 return 0;
+                }
+            inline
+            void
+            cleanup_stub( thread_local_signal_data const & )
+                {
                 }
             template <class Signal>
             shared_ptr<connection_list_list> const &

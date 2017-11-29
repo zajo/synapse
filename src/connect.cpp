@@ -1,4 +1,4 @@
-//Copyright (c) 2015 Emil Dotchevski and Reverge Studios, Inc.
+//Copyright (c) 2015-2017 Emil Dotchevski and Reverge Studios, Inc.
 
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -6,6 +6,7 @@
 #include <boost/synapse/connect.hpp>
 #include <boost/synapse/connection.hpp>
 #include <vector>
+#include <algorithm>
 
 namespace
     {
@@ -27,33 +28,34 @@ boost
             interthread_interface * get_interthread_api();
             namespace
                 {
-                template <class T>
-                bool
-                is_empty( weak_ptr<T> const & a )
-                    {
-                    weak_ptr<T> b;
-                    return !a.owner_before(b) && !b.owner_before(a);
-                    }
                 class
                 conn_rec
                     {
                     void const * ep_;
                     weak_store e_;
-                    weak_ptr<void const> connection_lifetime_;
+                    weak_store r_;
                     shared_ptr<void const> fn_;
+                    shared_ptr<connection> c_;
                     int next_;
                     bool translated_;
                     public:
-                    conn_rec( weak_store const & e, weak_ptr<void const> const & connection_lifetime, shared_ptr<void const> const & fn, bool translated ):
+                    conn_rec( weak_store && e, weak_store && r, shared_ptr<void const> const & fn, shared_ptr<connection> const & c, bool translated ):
                         ep_(e.maybe_lock<void const>().get()),
-                        e_(e),
-                        connection_lifetime_(connection_lifetime),
+                        e_(std::move(e)),
+                        r_(std::move(r)),
                         fn_(fn),
+                        c_(c),
                         next_(-1),
                         translated_(translated)
                         {
                         BOOST_SYNAPSE_ASSERT(ep_!=0);
                         BOOST_SYNAPSE_ASSERT(fn);
+                        }
+                    shared_ptr<connection>
+                    release()
+                        {
+                        shared_ptr<connection> c; c.swap(c_);
+                        return c;
                         }
                     weak_store const &
                     emitter() const
@@ -65,30 +67,36 @@ boost
                         {
                         return e==ep_;
                         }
+                    weak_store const &
+                    receiver() const
+                        {
+                        return r_;
+                        }
                     bool
                     is_free() const
                         {
                         bool fr=(ep_==0);
                         BOOST_SYNAPSE_ASSERT(e_.empty()==fr);
                         BOOST_SYNAPSE_ASSERT(!fn_==fr);
-                        BOOST_SYNAPSE_ASSERT(connection_lifetime_.expired() || !fr);
+                        BOOST_SYNAPSE_ASSERT(r_.expired() || !fr);
                         return fr;
                         }
                     bool
-                    has_expired() const
+                    expired() const
                         {
                         BOOST_SYNAPSE_ASSERT(!is_free());
-                        return connection_lifetime_.expired();
+                        return e_.expired() || r_.expired();
                         }
                     void
                     clear( int first_free )
                         {
                         BOOST_SYNAPSE_ASSERT(first_free==-1 || first_free>=0);
                         BOOST_SYNAPSE_ASSERT(!is_free());
-                        e_.clear();
                         ep_=0;
-                        connection_lifetime_.reset();
+                        e_.clear();
+                        r_.clear();
                         fn_.reset();
+                        c_.reset();
                         next_=first_free;
                         BOOST_SYNAPSE_ASSERT(is_free());
                         }
@@ -112,7 +120,7 @@ boost
                         if( ep_==e && !e_.expired() )
                             {
                             BOOST_SYNAPSE_ASSERT(ep_==e_.maybe_lock<void const>().get());
-                            if( shared_ptr<void const> lk=connection_lifetime_.lock() )
+                            if( shared_ptr<void const> lk=r_.maybe_lock<void const>() )
                                 {
                                 if( translated_ )
                                     if( args )
@@ -127,7 +135,7 @@ boost
                                 return 1;
                                 }
                             }
-                        return false;
+                        return 0;
                         };
                     };
                 }
@@ -138,7 +146,7 @@ boost
                 private:
                 connection_list( connection_list const & );
                 connection_list & operator=( connection_list const & );
-                shared_ptr<thread_local_signal_data> const tlsd_;
+                weak_ptr<thread_local_signal_data> const tlsd_;
                 std::vector<conn_rec> conn_;
                 std::vector<conn_rec> * emit_conn_ptr_;
                 int first_free_;
@@ -202,6 +210,28 @@ boost
                             BOOST_SYNAPSE_ASSERT(0);
                     return n1;
                     }
+                static
+                void
+                cleanup_impl( thread_local_signal_data const & tlsd )
+                    {
+                    shared_ptr<connection_list> cl=tlsd.cl_.lock();
+                    BOOST_SYNAPSE_ASSERT(cl);
+                    cl->cleanup();
+                    cl->destroy();
+                    }
+                void
+                destroy()
+                    {
+                    if( shared_ptr<thread_local_signal_data> tlsd=tlsd_.lock() )
+                        {
+                        BOOST_SYNAPSE_ASSERT(tlsd);
+                        int const n=--tlsd->cl_count_;
+                        BOOST_SYNAPSE_ASSERT(n>=0);
+                        tlsd->cl_.reset();
+                        tlsd->emit_=&emit_stub;
+                        tlsd->cleanup_=&cleanup_stub;
+                        }
+                    }
                 public:
                 int (* const emit_meta_connected_)( connection &, unsigned );
                 connection_list( shared_ptr<thread_local_signal_data> const & tlsd, int (*emit_meta_connected)( connection &, unsigned ) ):
@@ -213,29 +243,36 @@ boost
                     emit_meta_connected_(emit_meta_connected)
                     {
                     BOOST_SYNAPSE_ASSERT(emit_meta_connected_!=0);
-                    tlsd_->emit_=&emit_impl;
+                    tlsd->emit_=&emit_impl;
+                    tlsd->cleanup_=&cleanup_impl;
                     check_invariants();
-                    int const n=++tlsd_->cl_count_;
+                    int const n=++tlsd->cl_count_;
                     BOOST_SYNAPSE_ASSERT(n>0);
                     }
                 ~connection_list()
                     {
-                    int const n=--tlsd_->cl_count_;
-                    BOOST_SYNAPSE_ASSERT(n>=0);
-                    tlsd_->cl_.reset();
-                    tlsd_->emit_=&emit_stub;
+                    destroy();
                     }
                 weak_store const &
                 emitter( int index ) const
                     {
                     return conn_[index].emitter();
                     }
+                weak_store const &
+                receiver( int index ) const
+                    {
+                    return conn_[index].receiver();
+                    }
+                shared_ptr<connection>
+                release( int index )
+                    {
+                    return conn_[index].release();
+                    }
                 int
                 add( conn_rec const & r )
                     {
                     if( emit_conn_ptr_ && emit_conn_ptr_->empty() )
                         *emit_conn_ptr_=conn_;
-                    (void) purge();
                     int idx;
                     if( first_free_!=-1 )
                         {
@@ -319,34 +356,34 @@ boost
                     BOOST_SYNAPSE_ASSERT(e!=0);
                     return enumerate_recs( [e,args](conn_rec const & r) { return r.emit(e,args); } );
                     }
-                bool
+                void
                 purge()
                     {
                     check_invariants();
-                    int c=0;
-                    int * i;
-                    for( i=&first_rec_; *i!=-1; )
+                    std::deque<shared_ptr<connection> > purged;
+                    for( int const * i=&first_rec_; *i!=-1; )
                         {
                         conn_rec & cr=conn_[*i];
                         BOOST_SYNAPSE_ASSERT(!cr.is_free());
-                        if( cr.has_expired() )
-                            {
-                            int ff=first_free_;
-                            first_free_=*i;
-                            *i=cr.next();
-                            cr.clear(ff);
-                            }
-                        else
-                            {
-                            ++c;
-                            i=&cr.next();
-                            }
+                        if( cr.expired() )
+                            if( shared_ptr<connection> c=cr.release() )
+                                purged.push_back(c);
+                        i=&cr.next();
                         }
-                    BOOST_SYNAPSE_ASSERT(*i==-1);
-                    last_next_=i;
-                    BOOST_SYNAPSE_ASSERT(c<=conn_.size());
+                    }
+                void
+                cleanup()
+                    {
                     check_invariants();
-                    return c==0;
+                    std::deque<shared_ptr<connection> > purged;
+                    for( int const * i=&first_rec_; *i!=-1; )
+                        {
+                        conn_rec & cr=conn_[*i];
+                        BOOST_SYNAPSE_ASSERT(!cr.is_free());
+                        if( shared_ptr<connection> c=cr.release() )
+                            purged.push_back(c);
+                        i=&cr.next();
+                        }
                     }
                 };
             int
@@ -386,6 +423,11 @@ boost
                         {
                         return cl_->emitter(position_);
                         }
+                    weak_store const &
+                    receiver_() const
+                        {
+                        return cl_->receiver(position_);
+                        }
                     public:
                     explicit
                     connection_impl( shared_ptr<thread_local_signal_data::connection_list> const & cl ):
@@ -396,6 +438,7 @@ boost
                     connect( conn_rec const & cr )
                         {
                         BOOST_SYNAPSE_ASSERT(cl_->emit_meta_connected_!=0);
+                        (void) cl_->purge();
                         position_=cl_->add(cr);
                         unsigned flags=meta::connect_flags::connecting;
                         if( cl_->emitter_connection_count(emitter_().maybe_lock<void const>().get())==1 )
@@ -417,25 +460,41 @@ boost
                             }
                         cl_->remove(position_);
                         }
+                    shared_ptr<connection const>
+                    release() const
+                        {
+                        return cl_->release(position_);
+                        }
+                    shared_ptr<connection>
+                    release()
+                        {
+                        return cl_->release(position_);
+                        }
                     };
                 shared_ptr<connection>
-                connect_impl( shared_ptr<thread_local_signal_data> const & tlsd, weak_store const & e, shared_ptr<void const> const & fn, weak_ptr<void const> const & lifetime, int(*emit_meta_connected)(connection &,unsigned), bool translated )
+                connect_impl( shared_ptr<thread_local_signal_data> const & tlsd, weak_store && e, weak_store && r, shared_ptr<void const> const & fn, int(*emit_meta_connected)(connection &,unsigned), bool translated )
                     {
                     BOOST_SYNAPSE_ASSERT(fn);
                     shared_ptr<connection_impl> c=make_shared<connection_impl>(get_connection_list_(tlsd,emit_meta_connected));
-                    c->connect(conn_rec(e,is_empty(lifetime)?c:lifetime,fn,translated));
+                    c->connect(
+                        conn_rec(
+                            std::move(e),
+                            r.empty() ? weak_store(weak_ptr<connection_impl>(c)) : std::move(r),
+                            fn,
+                            e.lockable() || r.lockable() ? c : shared_ptr<connection>(),
+                            translated ) );
                     return c;
                     }
                 }
             shared_ptr<connection>
-            connect_( shared_ptr<thread_local_signal_data> const & tlsd, weak_store const & e, shared_ptr<void const> const & fn, weak_ptr<void const> const & lifetime, int(*emit_meta_connected)(connection &,unsigned) )
+            connect_( shared_ptr<thread_local_signal_data> const & tlsd, weak_store && e, weak_store && r, shared_ptr<void const> const & fn, int(*emit_meta_connected)(connection &,unsigned) )
                 {
-                return connect_impl(tlsd,e,fn,lifetime,emit_meta_connected,false);
+                return connect_impl(tlsd,std::move(e),std::move(r),fn,emit_meta_connected,false);
                 }
             shared_ptr<connection>
-            connect_translated_( shared_ptr<thread_local_signal_data> const & tlsd, weak_store const & e, shared_ptr<void const> const & fn, weak_ptr<void const> const & lifetime, int(*emit_meta_connected)(connection &,unsigned) )
+            connect_translated_( shared_ptr<thread_local_signal_data> const & tlsd, weak_store && e, weak_store && r, shared_ptr<void const> const & fn, int(*emit_meta_connected)(connection &,unsigned) )
                 {
-                return connect_impl(tlsd,e,fn,lifetime,emit_meta_connected,true);
+                return connect_impl(tlsd,std::move(e),std::move(r),fn,emit_meta_connected,true);
                 }
             shared_ptr<void const> &
             meta_emitter()
@@ -447,7 +506,7 @@ boost
         namespace
         meta
             {
-            shared_ptr<void const>
+            weak_ptr<void const>
             emitter()
                 {
                 return synapse_detail::meta_emitter();
@@ -456,6 +515,20 @@ boost
         connection::
         ~connection()
             {
+            }
+        shared_ptr<connection const>
+        release( weak_ptr<connection const> const & c )
+            {
+            shared_ptr<connection const> sp = c.lock();
+            shared_ptr<connection const> released = static_cast<synapse_detail::connection_impl const *>(sp.get())->release();
+            return released ? released : sp;
+            }
+        shared_ptr<connection>
+        release( weak_ptr<connection> const & c )
+            {
+            shared_ptr<connection> sp = c.lock();
+            shared_ptr<connection> released = static_cast<synapse_detail::connection_impl *>(sp.get())->release();
+            return released ? released : sp;
             }
         } 
     }
