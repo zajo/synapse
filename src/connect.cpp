@@ -222,6 +222,7 @@ boost
                 void
                 destroy()
                     {
+                    BOOST_SYNAPSE_ASSERT(first_rec_==-1);
                     if( shared_ptr<thread_local_signal_data> tlsd=tlsd_.lock() )
                         {
                         BOOST_SYNAPSE_ASSERT(tlsd);
@@ -375,14 +376,20 @@ boost
                 cleanup()
                     {
                     check_invariants();
-                    std::deque<shared_ptr<connection> > purged;
-                    for( int const * i=&first_rec_; *i!=-1; )
+                    try
                         {
-                        conn_rec & cr=conn_[*i];
-                        BOOST_SYNAPSE_ASSERT(!cr.is_free());
-                        if( shared_ptr<connection> c=cr.release() )
-                            purged.push_back(c);
-                        i=&cr.next();
+                        std::deque<shared_ptr<connection> > purged;
+                        for( int const * i=&first_rec_; *i!=-1; )
+                            {
+                            conn_rec & cr=conn_[*i];
+                            BOOST_SYNAPSE_ASSERT(!cr.is_free());
+                            if( shared_ptr<connection> c=cr.release() )
+                                purged.push_back(c);
+                            i=&cr.next();
+                            }
+                        }
+                    catch(...)
+                        {
                         }
                     }
                 };
