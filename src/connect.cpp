@@ -6,6 +6,7 @@
 #include <boost/synapse/connect.hpp>
 #include <boost/synapse/connection.hpp>
 #include <vector>
+#include <deque>
 #include <algorithm>
 
 namespace
