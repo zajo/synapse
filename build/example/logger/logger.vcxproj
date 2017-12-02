@@ -52,10 +52,10 @@
     <NMakePreprocessorDefinitions>BOOST_ALL_NO_LIB=1;</NMakePreprocessorDefinitions>
     <!-- reverge_end defines(debug) -->
     <!-- reverge_begin includes(debug) -->
-    <NMakeIncludeSearchPath>C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\INCLUDE;C:\Program Files (x86)\Windows Kits\10\include\10.0.10240.0\ucrt;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\include\um;C:\Program Files (x86)\Windows Kits\8.1\include\\shared;C:\Program Files (x86)\Windows Kits\8.1\include\\um;C:\Program Files (x86)\Windows Kits\8.1\include\\winrt;$(ProjectDir)..\..\..\..\..</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\INCLUDE;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\ATLMFC\INCLUDE;C:\Program Files (x86)\Windows Kits\10\include\10.0.10586.0\ucrt;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\include\um;C:\Program Files (x86)\Windows Kits\10\include\10.0.10586.0\shared;C:\Program Files (x86)\Windows Kits\10\include\10.0.10586.0\um;C:\Program Files (x86)\Windows Kits\10\include\10.0.10586.0\winrt;$(ProjectDir)..\..\..\..\..</NMakeIncludeSearchPath>
     <!-- reverge_end includes(debug) -->
     <!-- reverge_begin options(debug) -->
-    <AdditionalOptions>-TP -c /EHs /GR /MTd /Ob0 /Od /W3 /Z7 /Zc:forScope /Zc:wchar_t /favor:blend /wd4675 </AdditionalOptions>
+    <AdditionalOptions>-TP -c /EHs /GR /MDd /Ob0 /Od /W3 /Z7 /Zc:forScope /Zc:wchar_t /favor:blend /wd4675 </AdditionalOptions>
     <!-- reverge_end options(debug) -->
     <OutDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\example\logger\msvc-14.0\$(Configuration)\address-model-64\link-static\runtime-link-static</OutDir>
     <IntDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\example\logger\msvc-14.0\$(Configuration)\address-model-64\link-static\runtime-link-static</IntDir>
@@ -75,10 +75,10 @@
     <NMakePreprocessorDefinitions>BOOST_ALL_NO_LIB=1;NDEBUG;</NMakePreprocessorDefinitions>
     <!-- reverge_end defines(release) -->
     <!-- reverge_begin includes(release) -->
-    <NMakeIncludeSearchPath>C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\INCLUDE;C:\Program Files (x86)\Windows Kits\10\include\10.0.10240.0\ucrt;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\include\um;C:\Program Files (x86)\Windows Kits\8.1\include\\shared;C:\Program Files (x86)\Windows Kits\8.1\include\\um;C:\Program Files (x86)\Windows Kits\8.1\include\\winrt;$(ProjectDir)..\..\..\..\..</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\INCLUDE;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\ATLMFC\INCLUDE;C:\Program Files (x86)\Windows Kits\10\include\10.0.10586.0\ucrt;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\include\um;C:\Program Files (x86)\Windows Kits\10\include\10.0.10586.0\shared;C:\Program Files (x86)\Windows Kits\10\include\10.0.10586.0\um;C:\Program Files (x86)\Windows Kits\10\include\10.0.10586.0\winrt;$(ProjectDir)..\..\..\..\..</NMakeIncludeSearchPath>
     <!-- reverge_end includes(release) -->
     <!-- reverge_begin options(release) -->
-    <AdditionalOptions>-TP -c /EHs /GR /MT /O2 /Ob2 /W3 /Zc:forScope /Zc:wchar_t /favor:blend /wd4675 </AdditionalOptions>
+    <AdditionalOptions>-TP -c /EHs /GR /MD /O2 /Ob2 /W3 /Zc:forScope /Zc:wchar_t /favor:blend /wd4675 </AdditionalOptions>
     <!-- reverge_end options(release) -->
     <OutDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\example\logger\msvc-14.0\$(Configuration)\address-model-64\link-static\runtime-link-static</OutDir>
     <IntDir>$(SolutionDir)..\..\..\bin.v2\libs\$(SolutionName)\build\example\logger\msvc-14.0\$(Configuration)\address-model-64\link-static\runtime-link-static</IntDir>
