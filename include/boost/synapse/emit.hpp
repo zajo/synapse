@@ -18,8 +18,7 @@ boost
     synapse
         {
         template <class Signal,class... A>
-        typename synapse_detail::enable_if<is_signal<Signal>::value,int>::type
-        emit( void const *, A... );
+        int emit( void const *, A... );
         }
     }
 
@@ -93,7 +92,7 @@ boost
                 }
             }
         template <class Signal,class... A>
-        typename synapse_detail::enable_if<is_signal<Signal>::value,int>::type
+        int
         emit( void const * e, A... a )
             {
             return synapse_detail::emit_fwd<Signal>(e,synapse_detail::args_binder<typename signal_traits<Signal>::signal_type,void(*)(A...)>(a...));

@@ -42,18 +42,6 @@ boost
             signal_traits<typename meta::blocked<Signal>::type>
             {
             };
-        template <class T>
-        struct
-        is_signal
-            {
-            static bool const value = signal_traits<T>::arity>=0;
-            };
-        namespace
-        synapse_detail
-            {
-            template <bool,class> struct enable_if;
-            template <class T> struct enable_if<true,T> { typedef T type; };
-            }
         } 
     }
 

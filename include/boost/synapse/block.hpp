@@ -18,16 +18,13 @@ boost
         class blocker;
 
         template <class Signal,class Emitter>
-        typename synapse_detail::enable_if<is_signal<Signal>::value,shared_ptr<blocker> >::type
-        block( Emitter * );
+        shared_ptr<blocker> block( Emitter * );
 
         template <class Signal,class Emitter>
-        typename synapse_detail::enable_if<is_signal<Signal>::value,shared_ptr<blocker> >::type
-        block( weak_ptr<Emitter> const & );
+        shared_ptr<blocker> block( weak_ptr<Emitter> const & );
 
         template <class Signal,class Emitter>
-        typename synapse_detail::enable_if<is_signal<Signal>::value,shared_ptr<blocker> >::type
-        block( shared_ptr<Emitter> const & );
+        shared_ptr<blocker> block( shared_ptr<Emitter> const & );
 
         namespace
         meta
@@ -64,19 +61,19 @@ boost
                 }
             }
         template <class Signal,class Emitter>
-        typename synapse_detail::enable_if<is_signal<Signal>::value,shared_ptr<blocker> >::type
+        shared_ptr<blocker>
         block( Emitter * e )
             {
             return synapse_detail::block_fwd<Signal,Emitter>(e);
             }
         template <class Signal,class Emitter>
-        typename synapse_detail::enable_if<is_signal<Signal>::value,shared_ptr<blocker> >::type
+        shared_ptr<blocker>
         block( weak_ptr<Emitter> const & e )
             {
             return synapse_detail::block_fwd<Signal,Emitter>(e);
             }
         template <class Signal,class Emitter>
-        typename synapse_detail::enable_if<is_signal<Signal>::value,shared_ptr<blocker> >::type
+        shared_ptr<blocker>
         block( shared_ptr<Emitter> const & e )
             {
             return synapse_detail::block_fwd<Signal,Emitter>(e);
