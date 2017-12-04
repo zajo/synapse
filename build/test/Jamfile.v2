@@ -21,7 +21,6 @@ compile compile_connect_hpp.cpp ;
 compile compile_connection_hpp.cpp ;
 compile compile_thread_local_queue_hpp.cpp : <threading>multi ;
 compile compile_emit_hpp.cpp ;
-compile compile_signal_traits_hpp.cpp ;
 compile compile_translate_hpp.cpp ;
 
 run release_test.cpp ..//synapse ;

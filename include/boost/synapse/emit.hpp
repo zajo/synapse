@@ -95,7 +95,7 @@ boost
         int
         emit( void const * e, A... a )
             {
-            return synapse_detail::emit_fwd<Signal>(e,synapse_detail::args_binder<typename signal_traits<Signal>::signal_type,void(*)(A...)>(a...));
+            return synapse_detail::emit_fwd<Signal>(e,synapse_detail::args_binder<typename synapse_detail::signal_traits<Signal>::signal_type,void(*)(A...)>(a...));
             }
         } 
     }

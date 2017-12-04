@@ -6,7 +6,7 @@
 #ifndef UUID_A098543F9C6D4BEC8CE41B576AA69BA6
 #define UUID_A098543F9C6D4BEC8CE41B576AA69BA6
 
-#include <boost/synapse/signal_traits.hpp>
+#include <boost/synapse/synapse_detail/signal_traits.hpp>
 #include <boost/synapse/dep/thread_local.hpp>
 #include <boost/synapse/dep/smart_ptr.hpp>
 #include <atomic>
