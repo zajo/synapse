@@ -26,22 +26,19 @@
 namespace synapse=boost::synapse;
 
 namespace
+{
+    void handler1( api_handle * h, int event )
     {
-    void
-    handler1( api_handle * h, int event )
-        {
         std::cout << "handler1 called on api_handle object at 0x" << h << ", event=" << event << std::endl;
-        }
-    void
-    handler2( api_handle * h, int event )
-        {
-        std::cout << "handler2 called on api_handle object at 0x" << h << ", event=" << event << std::endl;
-        }
     }
-
-int
-main()
+    void handler2( api_handle * h, int event )
     {
+        std::cout << "handler2 called on api_handle object at 0x" << h << ", event=" << event << std::endl;
+    }
+}
+
+int main()
+{
     //Connect the meta signal handlers to deal with  api_set_callback and api_clear_callback
     //automatically -- see callback_api.h and synapsify.cpp.
     synapsify();
@@ -49,7 +46,7 @@ main()
     //Use shared_ptr with a custom deleter to hold an api_handle object.
     boost::shared_ptr<api_handle> h(api_create_object(),&api_destroy_object);
 
-        {
+    {
         //The meta signal handlers deal with api_set_callback and api_clear_callback as needed,
         //so now we can use Synapse to connect to the C-style API callbacks. Note that we can
         //create many connections even though the C-style API supports only a single callback
@@ -62,7 +59,7 @@ main()
 
         //This invokes handler1 and handler2, in that order, passing API_EVENT_THAT.
         api_do_that(h.get());
-        }
+    }
 
     //At this point all synapse_callback connections have expired and the meta handlers have
     //cleared the callback on the api_handle object, so the calls below do not invoke any handlers.
@@ -70,4 +67,4 @@ main()
     api_do_that(h.get());
 
     return 0;
-    }
+}

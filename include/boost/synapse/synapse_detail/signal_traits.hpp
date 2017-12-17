@@ -15,36 +15,36 @@ boost
     namespace
     synapse
         {
-		namespace
-		synapse_detail
-			{
-			template <class Signal> struct signal_traits;
-			template <class R,class... A>
-			struct
-			signal_traits<R(*)(A...)>
-				{
-				typedef R(*signal_type)(A...);
-				typedef void signature(A...);
-				template <class Receiver>
-				struct
-				inject_receiver
-					{
-					typedef void signature(Receiver &,A...);
-					};
-				};
-			template <class Signal>
-			struct
-			signal_traits<meta::connected<Signal> >:
-				signal_traits<typename meta::connected<Signal>::type>
-				{
-				};
-			template <class Signal>
-			struct
-			signal_traits<meta::blocked<Signal> >:
-				signal_traits<typename meta::blocked<Signal>::type>
-				{
-				};
-			}
+        namespace
+        synapse_detail
+            {
+            template <class Signal> struct signal_traits;
+            template <class R,class... A>
+            struct
+            signal_traits<R(*)(A...)>
+                {
+                typedef R(*signal_type)(A...);
+                typedef void signature(A...);
+                template <class Receiver>
+                struct
+                inject_receiver
+                    {
+                    typedef void signature(Receiver &,A...);
+                    };
+                };
+            template <class Signal>
+            struct
+            signal_traits<meta::connected<Signal> >:
+                signal_traits<typename meta::connected<Signal>::type>
+                {
+                };
+            template <class Signal>
+            struct
+            signal_traits<meta::blocked<Signal> >:
+                signal_traits<typename meta::blocked<Signal>::type>
+                {
+                };
+            }
         } 
     }
 

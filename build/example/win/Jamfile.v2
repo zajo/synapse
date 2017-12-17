@@ -8,12 +8,8 @@ project
         ../../../example/win
     : requirements
         <link>static
-        <runtime-link>static
     ;
 
-if $(os) == NT
-    {
-    lib user32 : : <name>user32 ;
-    lib gdi32 : : <name>gdi32 ;
-    exe win_WindowProc : win_WindowProc.cpp ../..//synapse user32 gdi32 : <user-interface>gui ;
-    }
+lib user32 : : <target-os>windows:<name>user32 ;
+lib gdi32 : : <target-os>windows:<name>gdi32 ;
+exe win_WindowProc : win_WindowProc.cpp ../..//synapse user32 gdi32 : <target-os>windows:<user-interface>gui ;

@@ -15,7 +15,7 @@
 namespace synapse=boost::synapse;
 
 namespace
-    {
+{
     //Define a mouse_move signal that takes the mouse cursor coordinates.
     typedef struct mouse_move_(*mouse_move)( int x, int y );
 
@@ -28,42 +28,39 @@ namespace
 
     //This is our WindowProc registered with Windows. Its translates Windows messages
     //into calls to synapse::emit<>, passing the hWnd as the emitter object.
-    LRESULT CALLBACK
-    WindowProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
-        {
+    LRESULT CALLBACK WindowProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
+    {
         switch( uMsg )
-            {
-            default:
-                return DefWindowProc(hWnd,uMsg,wParam,lParam);
-            case WM_MOUSEMOVE:
-                synapse::emit<mouse_move>(hWnd,lParam&0xFFFF,(lParam>>16)&0xFFFF);
-                break;
-            case WM_CLOSE:
-                PostQuitMessage(0);
-                break;
-            }
-        return 0;
+        {
+        default:
+            return DefWindowProc(hWnd,uMsg,wParam,lParam);
+        case WM_MOUSEMOVE:
+            synapse::emit<mouse_move>(hWnd,lParam&0xFFFF,(lParam>>16)&0xFFFF);
+            break;
+        case WM_CLOSE:
+            PostQuitMessage(0);
+            break;
         }
+        return 0;
+    }
 
     //This function is connected to the mouse_move signal emitted by WindowProc.
-    void
-    print_mouse_position( HWND hWnd, int x, int y )
-        {
+    void print_mouse_position( HWND hWnd, int x, int y )
+    {
         if( HDC dc=GetDC(hWnd) )
-            {
+        {
             std::ostringstream str; str << "Mouse position: " << x << ", " << y;
             std::string s=str.str();
             RECT rect; GetClientRect(hWnd,&rect);
             FillRect(dc,&rect,(HBRUSH) GetStockObject(WHITE_BRUSH));
             TextOutA(dc,10,10,s.c_str(),s.size());
             ReleaseDC(hWnd,dc);
-            }
         }
     }
+}
 
-int CALLBACK
-WinMain( HINSTANCE hInstance, HINSTANCE, LPSTR, int )
-    {
+int CALLBACK WinMain( HINSTANCE hInstance, HINSTANCE, LPSTR, int )
+{
     //Register the Windows class.
     char const name[ ]="win_WindowProc";
     WNDCLASSEXA wcx; 
@@ -89,11 +86,11 @@ WinMain( HINSTANCE hInstance, HINSTANCE, LPSTR, int )
         return 1; //Error
 
     //Connect the mouse_move signal from the hWnd emitter to the print_mouse_position function.
-    boost::shared_ptr<synapse::connection> conn=synapse::connect<mouse_move>(hWnd,
+    synapse::connect<mouse_move>(hWnd,
         [&hWnd]( int x, int y )
-            {
+        {
             print_mouse_position(hWnd.get(),x,y);
-            } );
+        } );
 
     //Show the window and call print_mouse_position once so it's not empty to begin with.
     ShowWindow(hWnd.get(),SW_SHOW);
@@ -101,9 +98,9 @@ WinMain( HINSTANCE hInstance, HINSTANCE, LPSTR, int )
 
     //Process messages -- this continues until the user closes the window.
     for( MSG msg; GetMessageA(&msg,0,0,0); )
-        {
+    {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
-        }
-    return 0;
     }
+    return 0;
+}

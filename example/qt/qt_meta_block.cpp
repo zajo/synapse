@@ -23,40 +23,35 @@
 
 namespace synapse=boost::synapse;
 
-namespace
-    {
-    //Define a Boost Synapse signal
-    typedef struct button_clicked_(*button_clicked)();
+//Define a Boost Synapse signal
+typedef struct button_clicked_(*button_clicked)();
 
+int main( int argc, char const * argv[ ] )
+{
     //When the button_clicked is being connected, connect the QPushButton::clicked Qt signal to
     //synapse::emit<button_clicked> and store the resulting QMetaObject::Connection object
     //into the synapse::connection object. When disconnecting, disconnect the stored
     //QMetaObject::Connection object.
-    boost::shared_ptr<synapse::connection> meta_conn=synapse::connect<synapse::meta::connected<button_clicked> >(
+    synapse::connect<synapse::meta::connected<button_clicked> >(
         synapse::meta::emitter(),
-        [ ]( synapse::connection & c, unsigned flags )
-            {
+        [ ]( synapse::connection & c,unsigned flags )
+        {
             if( flags&synapse::meta::connect_flags::connecting )
-                {
+            {
                 QPushButton * pb=c.emitter<QPushButton>().get();
-                c.set_user_data( QObject::connect( pb, &QPushButton::clicked, [pb]() { synapse::emit<button_clicked>(pb); } ) );
-                }
+                c.set_user_data(QObject::connect(pb,&QPushButton::clicked,[pb]() { synapse::emit<button_clicked>(pb); }));
+            }
             else
                 QObject::disconnect(*c.get_user_data<QMetaObject::Connection>());
-            } );
+        } );
 
     //Whenever the button_clicked signal is blocked, disable the button. Enable when unblocked.
-    boost::shared_ptr<synapse::connection> meta_block=synapse::connect<synapse::meta::blocked<button_clicked> >(
+    synapse::connect<synapse::meta::blocked<button_clicked> >(
         synapse::meta::emitter(),
-        [ ]( synapse::blocker & b, bool blocked )
-            {
+        [ ](synapse::blocker & b,bool blocked)
+        {
             b.emitter<QPushButton>()->setDisabled(blocked);
-            } );
-    }
-
-int
-main( int argc, char const * argv[ ] )
-    {
+        } );
     QApplication app(argc,(char * *)argv);
 
     //Create a QDialog with a QPushButton and a check QCheckBox.
@@ -73,7 +68,7 @@ main( int argc, char const * argv[ ] )
     boost::weak_ptr<QPushButton> pbw=boost::shared_ptr<QPushButton>(qd,pb);
 
     //accept() the QDialog when pb is clicked.
-    boost::shared_ptr<synapse::connection> c=synapse::connect<button_clicked>(pbw,[qd]() { qd->accept(); } );
+    synapse::connect<button_clicked>(pbw,[qd]() { qd->accept(); } );
 
     //Block/unblock the button_clicked Boost Synapse signal when either checkbox is toggled.
     //This simulates two conditions which independently block the button_clicked signal.
@@ -85,21 +80,21 @@ main( int argc, char const * argv[ ] )
     boost::shared_ptr<synapse::blocker> blk2;
     (void) QObject::connect(cb1,&QCheckBox::stateChanged,
         [&blk1,pbw]( bool block )
-            {
+        {
             if( block )
                 blk1=synapse::block<button_clicked>(pbw);
             else
                 blk1.reset();
-            } );
+        } );
     (void) QObject::connect(cb2,&QCheckBox::stateChanged,
         [&blk2,pbw]( bool block )
-            {
+        {
             if( block )
                 blk2=synapse::block<button_clicked>(pbw);
             else
                 blk2.reset();
-            } );
+        } );
 
     qd->exec();
     return 0;
-    }
+}

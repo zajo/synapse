@@ -12,25 +12,21 @@
 
 namespace synapse=boost::synapse;
 
-namespace { struct null_deleter { void operator()( void const * ) { } }; }
-
-void
-do_some_logging()
-    {
+void do_some_logging()
+{
     synapse::emit<log_message>(severity(0),"Message 1, Severity 0\n");
     synapse::emit<log_message>(severity(100),"Message 2, Severity 100\n");
     synapse::emit<log_message>(severity(2),"Message 3, Severity 2\n");
-    }
+}
 
-int
-main()
-    {
+int main()
+{
     //Create a logger that can distinguish between up to 3 severity levels: 0, 1 and 2.
     boost::shared_ptr<logger> const l=init_logger(3);
 
     //Severity 0 and 1 go to stdout, severity 2 and above go to stdout and stderr.
-    add_log_target(*l,boost::shared_ptr<FILE>(stdout,null_deleter()),0);
-    add_log_target(*l,boost::shared_ptr<FILE>(stderr,null_deleter()),2);
+    add_log_target(*l,boost::shared_ptr<FILE>(stdout,[ ]( FILE * ) { }),0);
+    add_log_target(*l,boost::shared_ptr<FILE>(stderr,[ ]( FILE * ) { }),2);
 
     do_some_logging();
-    }
+}
