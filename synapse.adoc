@@ -1,0 +1,115 @@
+:sourcedir: .
+:last-update-label!:
+:source-highlighter: coderay
+:icons: font
+= Synapse
+Non-intrusive signal programming library for C++11
+:toclevels: 3
+:toc: left
+:toc-title:
+
+[abstract]
+== Abstract
+(Note: Synapse is not part of Boost. Please post questions and suggestions on the Boost Developers Mailing List).
+
+Synapse is a C++ signal programming library. It can be used to define communication channels between arbitrary objects in a dynamic object environment.
+
+The advantage of Synapse over other similar libraries is that it is non-intrusive: it allows any object of any type whatsoever to be used as a signal emitter.
+
+== Tutorial
+
+This is a short introduction to Synapse. There are also several complete example programs that may be of interest to the beginner.
+
+=== Signals, emitters, receivers
+
+In Synapse, signals are defined by function pointer typedefs. The return type is used to tell apart different signals that have otherwise identical signature.
+
+To emit a signal, we instantiate the `emit` function template with a signal type, passing the emitter object as the first argument. The rest of the arguments follow, as defined by the signal signature.
+
+Below we define a UI type `button` that emits a Synapse signal `clicked` (which takes no arguments) when the member function `click` is called:
+
+[source,c++]
+----
+class button {
+
+	public:
+
+	typedef struct clicked_(*clicked)();
+
+	void click() {
+		synapse::emit<clicked>(this);
+	}
+};
+----
+
+To receive a signal from an emitter, we need to connect it to a function. Below, we connect the signal `button::clicked` to the `accept` member function of a dialog box object:
+
+[source,c++]
+----
+class dialog {
+
+	public:
+
+	void accept();
+
+};
+
+....
+shared_ptr<button> emitter=make_shared<button>();
+shared_ptr<dialog> receiver=make_shared<dialog>();
+synapse::connect<button::clicked>(emitter, receiver, &dialog::accept);
+----
+
+Or we could use a lambda instead:
+
+[source,c++]
+----
+synapse::connect<button::clicked>(emitter, receiver,
+	[ ](dialog & d) {
+		d.accept();
+	} );
+----
+
+NOTE: Emitting a signal calls all conected functions, in the order in which the connections were created.
+
+=== Managing connections lifetime
+
+The `connect` function template is overloaded: first, the `receiver` argument is optional, and secondly both the `emitter` and the `receiver` may be passed as raw pointers, `weak_ptr` or `shared_ptr` (the latter is equivalent to passing `weak_ptr`.)
+
+If we use an overload that takes only raw pointer(s), `connect` returns `shared_ptr<connection>`. Once that object expires, the connection is considered disconnected. It is the responsibility of the user to ensure that both the `emitter` and the `receiver` are valid until then.
+
+Otherwise, as in the example above, `connect` retains `weak_ptr` references to both `emitter` and `receiver` (if used.) In this case the connection will expire automatically when either one of them expires, while the returned `weak_ptr<connection>` can be locked to access the connection object, or passed to `release` to force a disconnect.
+
+
+== Synopsis
+
+=== boost/synapse/emit.hpp
+
+include::{sourcedir}/adoc/synopses/emit.hpp.adoc[]
+
+=== boost/synapse/connect.hpp
+
+include::{sourcedir}/adoc/synopses/connect.hpp.adoc[]
+
+=== boost/synapse/connection.hpp
+
+include::{sourcedir}/adoc/synopses/connection.hpp.adoc[]
+
+=== boost/synapse/translate.hpp
+
+include::{sourcedir}/adoc/synopses/translate.hpp.adoc[]
+
+=== boost/synapse/block.hpp
+
+include::{sourcedir}/adoc/synopses/block.hpp.adoc[]
+
+=== boost/synapse/blocker.hpp
+
+include::{sourcedir}/adoc/synopses/blocker.hpp.adoc[]
+
+=== boost/synapse/thread_local_queue.hpp
+
+include::{sourcedir}/adoc/synopses/thread_local_queue.hpp.adoc[]
+
+== Reference
+

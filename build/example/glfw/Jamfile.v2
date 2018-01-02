@@ -3,8 +3,11 @@
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-build-project callback_api ;
-build-project logger ;
-# build-project qt ;
-build-project win ;
-build-project glfw ;
+project
+    : source-location
+        ../../../example/glfw
+    ;
+
+lib glfw ;
+
+exe glfw_example : glfw_example.cpp synapsify_glfw.cpp glfw ../..//synapse/<link>static : <framework>OpenGL ;

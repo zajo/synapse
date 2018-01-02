@@ -208,5 +208,7 @@ main( int argc, char const * argv[] )
     test_reset_connection();
     test_reset_lifetime();
     test_emitter_expiring_before_connection();
+	(void) synapse::connect<synapse::meta::connected<my_signal> >(synapse::meta::emitter(), [ ]( synapse::connection &, unsigned ) { } ); 
+	//Program exits as the above connection persists. This is to test the tricky shutdown sequence.
     return boost::report_errors();
     }
