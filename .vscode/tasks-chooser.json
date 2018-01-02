@@ -133,6 +133,27 @@
 			"isBuildCommand": "true",
 			"command": "sh",
 			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test3" ]
+		},
+		{
+			"displayName": "shutdown_test4",
+			"description": "shutdown_test4",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test4" ]
+		},
+		{
+			"displayName": "shutdown_test5",
+			"description": "shutdown_test5",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test5" ]
+		},
+		{
+			"displayName": "shutdown_test6",
+			"description": "shutdown_test6",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test6" ]
 		}
 	],
 	"baseItem": {
