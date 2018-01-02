@@ -112,6 +112,27 @@
 			"isBuildCommand": "true",
 			"command": "sh",
 			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 weak_store_test" ]
+		},
+		{
+			"displayName": "shutdown_test1",
+			"description": "shutdown_test1",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test1" ]
+		},
+		{
+			"displayName": "shutdown_test2",
+			"description": "shutdown_test2",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test2" ]
+		},
+		{
+			"displayName": "shutdown_test3",
+			"description": "shutdown_test3",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test3" ]
 		}
 	],
 	"baseItem": {
