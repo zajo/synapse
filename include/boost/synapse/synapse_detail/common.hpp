@@ -18,6 +18,12 @@ boost
     synapse
         {
         namespace
+        meta
+            {
+            template <class Signal> struct connected;
+            template <class Signal> struct blocked;
+            }
+        namespace
         synapse_detail
             {
             class connection_list_list;
@@ -49,6 +55,8 @@ boost
                 struct connection_list; weak_ptr<connection_list> cl_;
                 struct blocked_emitters_list; weak_ptr<blocked_emitters_list> bl_;
                 struct posted_signals; shared_ptr<posted_signals> ps_;
+                shared_ptr<thread_local_signal_data const> keep_meta_connected_tlsd_afloat_;
+                shared_ptr<thread_local_signal_data const> keep_meta_blocked_tlsd_afloat_;
                 shared_ptr<connection_list_list> const & (* const get_cll_)( shared_ptr<connection_list_list> (*)() );
                 std::atomic<int> & cl_count_;
                 std::atomic<interthread_interface *> & interthread_;
@@ -88,6 +96,44 @@ boost
                 return obj;
                 }
             template <class Signal>
+            shared_ptr<thread_local_signal_data> const & get_thread_local_signal_data( bool allocate );
+            template <class Signal>
+            struct
+            register_with_non_meta
+                {
+                static
+                void
+                keep_afloat( shared_ptr<thread_local_signal_data const> const & )
+                    {
+                    }
+                };
+            template <class Signal>
+            struct
+            register_with_non_meta<meta::connected<Signal> >
+                {
+                static
+                void
+                keep_afloat( shared_ptr<thread_local_signal_data const> const & meta )
+                    {
+                    auto main_tlsd = get_thread_local_signal_data<Signal>(true);
+                    assert(!main_tlsd->keep_meta_connected_tlsd_afloat_);
+                    main_tlsd->keep_meta_connected_tlsd_afloat_ = meta;
+                    }
+                };
+            template <class Signal>
+            struct
+            register_with_non_meta<meta::blocked<Signal> >
+                {
+                static
+                void
+                keep_afloat( shared_ptr<thread_local_signal_data const> const & meta )
+                    {
+                    auto main_tlsd = get_thread_local_signal_data<Signal>(true);
+                    assert(!main_tlsd->keep_meta_blocked_tlsd_afloat_);
+                    main_tlsd->keep_meta_blocked_tlsd_afloat_ = meta;
+                    }
+                };
+            template <class Signal>
             shared_ptr<thread_local_signal_data> const &
             get_thread_local_signal_data( bool allocate )
                 {
@@ -95,7 +141,10 @@ boost
                 BOOST_SYNAPSE_STATIC(std::atomic<interthread_interface *>,interthread);
                 BOOST_SYNAPSE_THREAD_LOCAL(shared_ptr<thread_local_signal_data>,obj);
                 if( !obj && (allocate || interthread.load()) )
+                    {
                     obj=synapse::make_shared<thread_local_signal_data>(&get_connection_list_list<Signal>,count,interthread);
+                    register_with_non_meta<Signal>::keep_afloat(obj);
+                    }
                 return obj;
                 }
             }
