@@ -85,7 +85,7 @@ static void error_callback(int error, const char* description)
 
 int main(void)
 {
-	synapsify_glfw();
+    synapsify_glfw();
     GLFWwindow* window;
     GLuint vertex_buffer, vertex_shader, fragment_shader, program;
     GLint mvp_location, vpos_location, vcol_location;
@@ -105,12 +105,12 @@ int main(void)
         exit(EXIT_FAILURE);
     }
 
-	auto connected = synapse::connect<glfw_signals::key>(window,
-		[ ]( GLFWwindow * window, int key, int /*scancode*/, int action, int /*mods*/ )
-		{
-			if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-				glfwSetWindowShouldClose(window, GLFW_TRUE);
-		} );
+    auto connected = synapse::connect<glfw_signals::key>(window,
+        [ ]( GLFWwindow * window, int key, int /*scancode*/, int action, int /*mods*/ )
+        {
+            if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+                glfwSetWindowShouldClose(window, GLFW_TRUE);
+        } );
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
@@ -153,10 +153,10 @@ int main(void)
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT);
 
-		float mvp[4][4]; mref(mvp) =
-			perspective_rh(1.0472f, width/(float) height, .001f, 100.0f) *
-			translation_mat(_00X(-2)) *
-			rotz_mat<4>((float) glfwGetTime());
+        float mvp[4][4]; mref(mvp) =
+            perspective_rh(1.0472f, width/(float) height, .001f, 100.0f) *
+            translation_mat(_00X(-2)) *
+            rotz_mat<4>((float) glfwGetTime());
 
         glUseProgram(program);
         glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*) mvp);
