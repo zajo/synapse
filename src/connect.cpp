@@ -223,7 +223,6 @@ boost
                 void
                 destroy()
                     {
-                    BOOST_SYNAPSE_ASSERT(first_rec_==-1);
                     if( shared_ptr<thread_local_signal_data> tlsd=tlsd_.lock() )
                         {
                         BOOST_SYNAPSE_ASSERT(tlsd);
@@ -233,6 +232,11 @@ boost
                         tlsd->emit_=&emit_stub;
                         tlsd->cleanup_=&cleanup_stub;
                         }
+                    }
+                bool
+                empty() const
+                    {
+                    return first_rec_==-1;
                     }
                 public:
                 int (* const emit_meta_connected_)( connection &, unsigned );
@@ -253,6 +257,7 @@ boost
                     }
                 ~connection_list()
                     {
+                    BOOST_SYNAPSE_ASSERT(empty());
                     destroy();
                     }
                 weak_store const &

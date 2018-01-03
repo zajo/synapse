@@ -5,11 +5,11 @@
 			"name": "C++ Launch",
 			"type": "cppdbg",
 			"request": "launch",
-			"program": "/Users/Zajo/Desktop/boost/bin.v2/libs/synapse/build/test/connection_lifetime_test.test/darwin-darwin-4.2.1/debug/link-static/threadapi-pthread/connection_lifetime_test",
-//			"program": "/Users/Zajo/Desktop/boost/bin.v2/libs/synapse/build/example/glfw/darwin-darwin-4.2.1/debug/threadapi-pthread/glfw_example",
+//			"program": "/Users/emildotchevski/Desktop/boost/bin.v2/libs/synapse/build/test/connection_lifetime_test.test/darwin-darwin-4.2.1/debug/link-static/threadapi-pthread/connection_lifetime_test",
+			"program": "/Users/emildotchevski/Desktop/boost/bin.v2/libs/synapse/build/example/glfw/darwin-darwin-4.2.1/debug/threadapi-pthread/glfw_example",
 			"cwd": "${workspaceRoot}",
 			"stopAtEntry": false,
-			"externalConsole": false,
+			"externalConsole": true,
 			"linux": {
 				"MIMode": "gdb",
 				"setupCommands": [

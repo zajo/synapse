@@ -4,7 +4,6 @@
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/synapse/connect.hpp>
-#include <boost/detail/lightweight_test.hpp>
 
 namespace synapse=boost::synapse;
 using synapse::shared_ptr;
@@ -22,5 +21,5 @@ main( int argc, char const * argv[] )
     shared_ptr<my_emitter_type> e=make_shared<my_emitter_type>();
     synapse::connect<my_signal>( e, [ ] ( ) { } );
     synapse::connect<synapse::meta::connected<my_signal> >( synapse::meta::emitter(), [ ]( synapse::connection &, unsigned ) { } );
-    return boost::report_errors();
+    return 0;
     }

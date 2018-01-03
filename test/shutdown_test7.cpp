@@ -19,7 +19,7 @@ int
 main( int argc, char const * argv[] )
     {
     shared_ptr<my_emitter_type> e=make_shared<my_emitter_type>();
-    synapse::connect<synapse::meta::connected<my_signal> >( synapse::meta::emitter(), [ ]( synapse::connection &, unsigned ) { } );
     synapse::connect<my_signal>( e, [ ] ( ) { } );
-    return 0;
+    auto connected = release(synapse::connect<synapse::meta::connected<my_signal> >( synapse::meta::emitter(), [ ]( synapse::connection &, unsigned ) { } ));
+    exit(0);
     }
