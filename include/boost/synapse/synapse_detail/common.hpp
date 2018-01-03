@@ -48,24 +48,24 @@ boost
                 private:
                 thread_local_signal_data( thread_local_signal_data const & );
                 thread_local_signal_data & operator=( thread_local_signal_data const & );
+                cleanup_fn * cleanup_;
+                std::atomic<int> & cl_count_;
                 public:
                 emit_fn * emit_;
-                cleanup_fn * cleanup_;
                 emitter_blocked_fn * emitter_blocked_;
-                struct connection_list; weak_ptr<connection_list> cl_;
+                struct connection_list; weak_ptr<connection_list> cl_; friend struct connection_list;
                 struct blocked_emitters_list; weak_ptr<blocked_emitters_list> bl_;
                 struct posted_signals; shared_ptr<posted_signals> ps_;
                 shared_ptr<thread_local_signal_data const> keep_meta_connected_tlsd_afloat_;
                 shared_ptr<thread_local_signal_data const> keep_meta_blocked_tlsd_afloat_;
                 shared_ptr<connection_list_list> const & (* const get_cll_)( shared_ptr<connection_list_list> (*)() );
-                std::atomic<int> & cl_count_;
                 std::atomic<interthread_interface *> & interthread_;
                 thread_local_signal_data( shared_ptr<connection_list_list> const & (*get_cll)( shared_ptr<connection_list_list> (*)() ), std::atomic<int> & cl_count, std::atomic<interthread_interface *> & interthread ):
-                    emit_(&emit_stub),
                     cleanup_(&cleanup_stub),
+                    cl_count_(cl_count),
+                    emit_(&emit_stub),
                     emitter_blocked_(&emitter_blocked_stub),
                     get_cll_(get_cll),
-                    cl_count_(cl_count),
                     interthread_(interthread)
                     {
                     }
@@ -73,21 +73,23 @@ boost
                     {
                     cleanup_(*this);
                     }
+                static
+                inline
+                int
+                emit_stub( thread_local_signal_data const & tlsd, void const * e, args_binder_base const * args )
+                    {
+                    if( tlsd.cl_count_ )
+                        if( interthread_interface * interthread=tlsd.interthread_.load() )
+                            return interthread->emit(tlsd,e,args);
+                    return 0;
+                    }
+                static
+                inline
+                void
+                cleanup_stub( thread_local_signal_data const & )
+                    {
+                    }
                 };
-            inline
-            int
-            emit_stub( thread_local_signal_data const & tlsd, void const * e, args_binder_base const * args )
-                {
-                if( tlsd.cl_count_ )
-                    if( interthread_interface * interthread=tlsd.interthread_.load() )
-                        return interthread->emit(tlsd,e,args);
-                return 0;
-                }
-            inline
-            void
-            cleanup_stub( thread_local_signal_data const & )
-                {
-                }
             template <class Signal>
             shared_ptr<connection_list_list> const &
             get_connection_list_list( shared_ptr<connection_list_list> (*create_connection_list_list)() )

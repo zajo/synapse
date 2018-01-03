@@ -229,8 +229,8 @@ boost
                         int const n=--tlsd->cl_count_;
                         BOOST_SYNAPSE_ASSERT(n>=0);
                         tlsd->cl_.reset();
-                        tlsd->emit_=&emit_stub;
-                        tlsd->cleanup_=&cleanup_stub;
+                        tlsd->emit_=&thread_local_signal_data::emit_stub;
+                        tlsd->cleanup_=&thread_local_signal_data::cleanup_stub;
                         }
                     }
                 bool
