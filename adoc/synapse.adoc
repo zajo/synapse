@@ -85,31 +85,34 @@ Otherwise, as in the example above, `connect` retains `weak_ptr` references to b
 
 === boost/synapse/emit.hpp
 
-include::{sourcedir}/adoc/synopses/emit.hpp.adoc[]
+include::{sourcedir}/synopses/emit.hpp.adoc[]
 
 === boost/synapse/connect.hpp
 
-include::{sourcedir}/adoc/synopses/connect.hpp.adoc[]
+include::{sourcedir}/synopses/connect.hpp.adoc[]
 
 === boost/synapse/connection.hpp
 
-include::{sourcedir}/adoc/synopses/connection.hpp.adoc[]
+include::{sourcedir}/synopses/connection.hpp.adoc[]
 
 === boost/synapse/translate.hpp
 
-include::{sourcedir}/adoc/synopses/translate.hpp.adoc[]
+include::{sourcedir}/synopses/translate.hpp.adoc[]
 
 === boost/synapse/block.hpp
 
-include::{sourcedir}/adoc/synopses/block.hpp.adoc[]
+include::{sourcedir}/synopses/block.hpp.adoc[]
 
 === boost/synapse/blocker.hpp
 
-include::{sourcedir}/adoc/synopses/blocker.hpp.adoc[]
+include::{sourcedir}/synopses/blocker.hpp.adoc[]
 
 === boost/synapse/thread_local_queue.hpp
 
-include::{sourcedir}/adoc/synopses/thread_local_queue.hpp.adoc[]
+include::{sourcedir}/synopses/thread_local_queue.hpp.adoc[]
 
 == Reference
 
+== Examples
+
+include::{sourcedir}/examples/glfw.adoc[]

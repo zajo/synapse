@@ -24,6 +24,9 @@
 //========================================================================
 //! [code]
 
+#include <boost/synapse/API/GLFW/synapsify.hpp>
+namespace synapse = boost::synapse;
+
 #if defined(__APPLE__)
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
@@ -36,10 +39,6 @@
 #endif
 #include <GLFW/glfw3.h>
 
-#include <boost/synapse/connect.hpp>
-namespace synapse = boost::synapse;
-
-#include "synapsify_glfw.hpp"
 
 #include <boost/qvm/all.hpp>
 using namespace boost::qvm;
@@ -85,7 +84,6 @@ static void error_callback(int error, const char* description)
 
 int main(void)
 {
-    synapsify_glfw();
     GLFWwindow* window;
     GLuint vertex_buffer, vertex_shader, fragment_shader, program;
     GLint mvp_location, vpos_location, vcol_location;
@@ -105,7 +103,7 @@ int main(void)
         exit(EXIT_FAILURE);
     }
 
-    auto connected = synapse::connect<glfw_signals::key>(window,
+    auto connected = synapse::connect<glfw_signals::Key>(window,
         [ ]( GLFWwindow * window, int key, int /*scancode*/, int action, int /*mods*/ )
         {
             if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
