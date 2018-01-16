@@ -9,6 +9,7 @@
 
 namespace synapse=boost::synapse;
 using synapse::shared_ptr;
+using synapse::make_shared;
 
 namespace
     {
@@ -23,10 +24,19 @@ namespace
 int
 main( int argc, char const * argv[] )
     {
-    my_emitter_type e;
-    shared_ptr<synapse::connection> c=synapse::connect<my_signal>(&e,&noop);
-    BOOST_TEST(!c->get_user_data<int>());
-    c->set_user_data(42);
-    BOOST_TEST(*c->get_user_data<int>()==42);
+        {
+        my_emitter_type e;
+        shared_ptr<synapse::connection> c=synapse::connect<my_signal>(&e,&noop);
+        BOOST_TEST(!c->get_user_data<int>());
+        c->set_user_data(42);
+        BOOST_TEST(*c->get_user_data<int>()==42);
+        }
+        {
+        auto e = make_shared<my_emitter_type>();
+        shared_ptr<synapse::pconnection> c=synapse::pconnect<my_signal>(e,&noop).lock();
+        BOOST_TEST(!c->get_user_data<int>());
+        c->set_user_data(42);
+        BOOST_TEST(*c->get_user_data<int>()==42);
+        }
     return boost::report_errors();
     }
