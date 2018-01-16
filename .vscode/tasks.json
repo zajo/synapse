@@ -1,11 +1,11 @@
 {
-    "displayName": "shutdown_test1",
-    "description": "shutdown_test1",
+    "displayName": "All unit tests",
+    "description": "All unit tests",
     "isBuildCommand": "true",
     "command": "sh",
     "args": [
         "-c",
-        "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test1"
+        "cd ${workspaceRoot}/build/test && ../../../../b2"
     ],
     "version": "0.1.0",
     "problemMatcher": {
@@ -23,5 +23,5 @@
             "message": 5
         }
     },
-    "chooserIndex": 16
+    "chooserIndex": 0
 }

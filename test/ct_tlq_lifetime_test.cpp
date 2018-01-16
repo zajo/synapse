@@ -53,7 +53,7 @@ namespace
         {
         shared_ptr<synapse::thread_local_queue> tlq=synapse::create_thread_local_queue();
         bool keep_going=true;
-        (void) synapse::connect<terminate_thread>(terminate,[&keep_going]() { keep_going=false; }).lock()->
+        (void) synapse::pconnect<terminate_thread>(terminate,[&keep_going]() { keep_going=false; }).lock()->
             set_user_data(make_shared<thread_connection_counter>());
         b.wait();
         while( keep_going )

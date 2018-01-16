@@ -22,12 +22,26 @@ boost
             virtual synapse_detail::weak_store const & receiver_() const=0;
             shared_ptr<void> user_data_;
             protected:
+            connection();
             ~connection();
             public:
             template <class T> void set_user_data( T const & );
             template <class T> T * get_user_data() const;
             template <class T> shared_ptr<T> emitter() const;
             template <class T> shared_ptr<T> receiver() const;
+            };
+        class
+        pconnection:
+            protected connection
+            {
+            protected:
+            pconnection();
+            ~pconnection();
+            public:
+            using connection::set_user_data;
+            using connection::get_user_data;
+            using connection::emitter;
+            using connection::receiver;
             };
         }
     }

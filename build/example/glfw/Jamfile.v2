@@ -10,4 +10,4 @@ project
 
 lib glfw ;
 
-exe glfw_example : glfw_example.cpp glfw ../..//synapse/<link>static : <framework>OpenGL ;
+exe glfw_example : simple_example.cpp glfw ../..//synapse/<link>static : <framework>OpenGL ;

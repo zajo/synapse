@@ -18,7 +18,7 @@ int
 main( int argc, char const * argv[] )
     {
     int meta_counter=0;
-    shared_ptr<synapse::connection> mc=release(synapse::connect<synapse::meta::connected<my_signal> >(synapse::meta::emitter(),
+    shared_ptr<synapse::connection> mc=release(synapse::pconnect<synapse::meta::connected<my_signal> >(synapse::meta::emitter(),
         [&meta_counter]( synapse::connection & c, unsigned flags )
         {
         if( flags&synapse::meta::connect_flags::connecting )
@@ -30,7 +30,7 @@ main( int argc, char const * argv[] )
     shared_ptr<my_emitter> e1 = make_shared<my_emitter>();
     int emit_counter1=0;
     BOOST_TEST(meta_counter==0);
-    weak_ptr<synapse::connection> c1 = synapse::connect<my_signal>(e1,
+    weak_ptr<synapse::pconnection> c1 = synapse::pconnect<my_signal>(e1,
         [&emit_counter1]()
         {
         ++emit_counter1;
@@ -40,7 +40,7 @@ main( int argc, char const * argv[] )
     shared_ptr<my_emitter> e2 = make_shared<my_emitter>();
     int emit_counter2=0;
     BOOST_TEST(meta_counter==1);
-    weak_ptr<synapse::connection> c2 = synapse::connect<my_signal>(e2,
+    weak_ptr<synapse::pconnection> c2 = synapse::pconnect<my_signal>(e2,
         [&emit_counter2]()
         {
         ++emit_counter2;

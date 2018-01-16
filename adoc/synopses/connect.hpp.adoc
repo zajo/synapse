@@ -3,64 +3,64 @@
 ----
 namespace boost { namespace synapse {
 
-	class connection;
+    class connection;
 
-	template <class Signal,class Emitter,class F>
-	shared_ptr<connection> connect( Emitter * e, F f );
+    template <class Signal,class Emitter,class F>
+    shared_ptr<connection> connect( Emitter * e, F f );
 
-	template <class Signal,class Emitter,class F>
-	weak_ptr<connection> connect( weak_ptr<Emitter> const & e, F f );
+    template <class Signal,class Emitter,class F>
+    weak_ptr<connection> connect( weak_ptr<Emitter> const & e, F f );
 
-	template <class Signal,class Emitter,class F>
-	weak_ptr<connection> connect( shared_ptr<Emitter> const & e, F f );
+    template <class Signal,class Emitter,class F>
+    weak_ptr<connection> connect( shared_ptr<Emitter> const & e, F f );
 
-	template <class Signal,class Emitter,class Receiver,class F>
-	shared_ptr<connection> connect( Emitter * e, Receiver * r, F f );
+    template <class Signal,class Emitter,class Receiver,class F>
+    shared_ptr<connection> connect( Emitter * e, Receiver * r, F f );
 
-	template <class Signal,class Emitter,class Receiver,class F>
-	weak_ptr<connection> connect( Emitter * e, weak_ptr<Receiver> const & r, F f );
+    template <class Signal,class Emitter,class Receiver,class F>
+    weak_ptr<connection> connect( Emitter * e, weak_ptr<Receiver> const & r, F f );
 
-	template <class Signal,class Emitter,class Receiver,class F>
-	weak_ptr<connection> connect( Emitter * e, shared_ptr<Receiver> const & r, F f );
+    template <class Signal,class Emitter,class Receiver,class F>
+    weak_ptr<connection> connect( Emitter * e, shared_ptr<Receiver> const & r, F f );
 
-	template <class Signal,class Emitter,class Receiver,class F>
-	weak_ptr<connection> connect( weak_ptr<Emitter> const & e, Receiver * r, F f );
+    template <class Signal,class Emitter,class Receiver,class F>
+    weak_ptr<connection> connect( weak_ptr<Emitter> const & e, Receiver * r, F f );
 
-	template <class Signal,class Emitter,class Receiver,class F>
-	weak_ptr<connection> connect( weak_ptr<Emitter> const & e, weak_ptr<Receiver> const & r, F f );
+    template <class Signal,class Emitter,class Receiver,class F>
+    weak_ptr<connection> connect( weak_ptr<Emitter> const & e, weak_ptr<Receiver> const & r, F f );
 
-	template <class Signal,class Emitter,class Receiver,class F>
-	weak_ptr<connection> connect( weak_ptr<Emitter> const & e, shared_ptr<Receiver> const & r, F f );
+    template <class Signal,class Emitter,class Receiver,class F>
+    weak_ptr<connection> connect( weak_ptr<Emitter> const & e, shared_ptr<Receiver> const & r, F f );
 
-	template <class Signal,class Emitter,class Receiver,class F>
-	weak_ptr<connection> connect( shared_ptr<Emitter> const & e, Receiver * r, F f );
+    template <class Signal,class Emitter,class Receiver,class F>
+    weak_ptr<connection> connect( shared_ptr<Emitter> const & e, Receiver * r, F f );
 
-	template <class Signal,class Emitter,class Receiver,class F>
-	weak_ptr<connection> connect( shared_ptr<Emitter> const & e, weak_ptr<Receiver> const & r, F f );
+    template <class Signal,class Emitter,class Receiver,class F>
+    weak_ptr<connection> connect( shared_ptr<Emitter> const & e, weak_ptr<Receiver> const & r, F f );
 
-	template <class Signal,class Emitter,class Receiver,class F>
-	weak_ptr<connection> connect( shared_ptr<Emitter> const & e, shared_ptr<Receiver> const & r, F f );
+    template <class Signal,class Emitter,class Receiver,class F>
+    weak_ptr<connection> connect( shared_ptr<Emitter> const & e, shared_ptr<Receiver> const & r, F f );
 
-	shared_ptr<connection const> release( weak_ptr<connection const> const & c );
-	shared_ptr<connection> release( weak_ptr<connection> const & c );
+    shared_ptr<connection const> release( weak_ptr<connection const> const & c );
+    shared_ptr<connection> release( weak_ptr<connection> const & c );
 
-	namespace meta {
+    namespace meta {
 
-		weak_ptr<void const> emitter();
+        weak_ptr<void const> emitter();
 
-		namespace connect_flags {
+        namespace connect_flags {
 
-			unsigned const connecting=1;
-			unsigned const first_for_this_emitter=2;
-			unsigned const last_for_this_emitter=4;
-			
-		}
+            unsigned const connecting=1;
+            unsigned const first_for_this_emitter=2;
+            unsigned const last_for_this_emitter=4;
+            
+        }
 
-		template <class Signal>
-		struct connected {
-			typedef connected<Signal>(*type)( connection & c, unsigned connect_flags cf );
-		};
-	}
+        template <class Signal>
+        struct connected {
+            typedef connected<Signal>(*type)( connection & c, unsigned connect_flags cf );
+        };
+    }
 
 } }
 ----

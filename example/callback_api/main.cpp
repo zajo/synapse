@@ -51,8 +51,8 @@ int main()
         //so now we can use Synapse to connect to the C-style API callbacks. Note that we can
         //create many connections even though the C-style API supports only a single callback
         //per api_handle object.
-        boost::shared_ptr<synapse::connection> c1 = release(synapse::connect<synapse_callback>(h,&handler1));
-        boost::shared_ptr<synapse::connection> c2 = release(synapse::connect<synapse_callback>(h,&handler2));
+        boost::shared_ptr<synapse::connection> c1 = synapse::connect<synapse_callback>(h,&handler1);
+        boost::shared_ptr<synapse::connection> c2 = synapse::connect<synapse_callback>(h,&handler2);
 
         //This invokes handler1 and handler2, in that order, passing API_EVENT_THIS.
         api_do_this(h.get());
