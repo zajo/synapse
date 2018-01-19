@@ -9,6 +9,13 @@
 			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2" ]
 		},
 		{
+			"displayName": "property_test",
+			"description": "property_test_test",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 property_test" ]
+		},
+		{
 			"displayName": "args_connect_test",
 			"description": "args_connect_test",
 			"isBuildCommand": "true",
