@@ -16,7 +16,7 @@ main( int argc, char const * argv[] )
     {
     int obj;
     BOOST_TEST(synapse::get<prop1>(&obj)==0);
-    shared_ptr<synapse::connection> c=synapse::set<prop1>(&obj,"Hello World");
+    auto c=synapse::set<prop1>(&obj,"Hello World");
     BOOST_TEST(*synapse::get<prop1>(&obj)=="Hello World");
     c.reset();
     BOOST_TEST(synapse::get<prop1>(&obj)==0);
