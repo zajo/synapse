@@ -6,13 +6,7 @@ namespace boost { namespace synapse {
     class blocker;
 
     template <class Signal,class Emitter>
-    shared_ptr<blocker> block( Emitter * );
-
-    template <class Signal,class Emitter>
-    shared_ptr<blocker> block( weak_ptr<Emitter> const & );
-
-    template <class Signal,class Emitter>
-    shared_ptr<blocker> block( shared_ptr<Emitter> const & );
+    shared_ptr<blocker> block( <<Emitter>> e ); <1>
 
     namespace meta {
 
@@ -25,3 +19,4 @@ namespace boost { namespace synapse {
 
 } }
 ----
+<1> `\<<Emitter>>`  is `Emitter *`, `weak_ptr<Emitter> const &` or, equivalently, `shared_ptr<Emitter> const &`.

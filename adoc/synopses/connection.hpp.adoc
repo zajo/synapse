@@ -7,6 +7,7 @@ namespace boost { namespace synapse {
 
     protected:
 
+        connection();
         ~connection();
 
     public:
@@ -22,6 +23,22 @@ namespace boost { namespace synapse {
 
         template <class T>
         shared_ptr<T> receiver() const;
+    };
+
+    class pconnection: protected connection { //abstract base
+
+    protected:
+
+        pconnection();
+        ~pconnection();
+
+    public:
+        
+        using connection::set_user_data;
+        using connection::get_user_data;
+        using connection::emitter;
+        using connection::receiver;
+
     };
 
 } }

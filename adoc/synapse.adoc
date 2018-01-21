@@ -78,7 +78,7 @@ NOTE: The `receiver` argument to `connect` is optional. If it is specified, it i
 
 === Emitting signals from objects of 3rd-party types
 
-In Synapse, any object whatsoever can be used as an emitter. This makes it possible to `emit` non-intrusively even if the emitter object is not built to support signals. For example, a function that processes a file can use the standard `FILE` pointer as a Synapse emitter to report on its progress:
+In Synapse, any object whatsoever can be used as an emitter. This makes it possible to `emit` non-intrusively even if the emitter object was not designed to support signals. For example, a function that processes a file can use the standard `FILE` pointer as a Synapse emitter to report on its progress:
 
 [source,c++]
 ----
@@ -110,91 +110,14 @@ if( FILE * f=fopen("file.dat","rb") ) {
 
 Notice that `process_file` is not coupled with `QProgressBar`: the `report_progress` signal could be connected to a different function or not connected at all, in which case the call to `emit` would be a no-op.
 
-
-
-
 === Managing connection lifetime
 
-The `connect` function template has multiple overloads:
+In Synapse there are two types of connection objects: <<connection,`connection`>> and <<pconnection,`pconnection`>>:
 
-- the `receiver` argument is optional;
-- both the `emitter` and the `receiver` may each be passed as raw pointer, `weak_ptr` or `shared_ptr` (the latter is equivalent to passing a `weak_ptr`.)
+- `shared_ptr<<<connection,connection>>>` objects are returned by <<connect,`connect`>>. The user is required to keep this object afloat; the signal is disconnected when it expires.
+- `weak_ptr<<<pconnection,pconnection>>>` objects are returned by <<pconnect,`pconnect`>>. The user is not required to keep this object afloat; the connection is disconnected when Synapse detects that the emitter or the receiver have expired.
 
-If we call an overload that takes the emitter _and_ the receiver (if used) as raw pointer(s), the connection expires with the returned `shared_ptr<connection>`. It is the responsibility of the user to ensure that both the `emitter` and the `receiver` are valid until then.
-
-====
-[source,c++]
-.Example 1
-----
-#include <boost/synapse/connect.hpp>
-#include <string>
-#include <iostream>
-
-namespace synapse = boost::synapse;
-
-typedef struct print_(*print)(std::string const & s);
-
-int main() {
-
-    int emitter; <1>
-
-    shared_ptr<synapse::connection> c = synapse::connect<my_signal>(
-        &emitter, <2>
-        [ ](std::string const & s) {
-            std::cout << s;
-        } );
-
-    synapse::emit<print>(&emitter,"Hello World"); <3>
-
-    c.reset();
-    synapse::emit<print>(&emitter,"NOOP"); <4>
-}
-----
-<1> In Synapse, any object -- including this `int` -- can be used as a signal emitter.
-
-<2> The emitter is passed to `connect` as a raw pointer, so the return value is of type `shared_ptr<connection>`.
-
-<3> `emit` calls the connected lambda, printing `Hello World`.
-
-<4> At this point calling `emit` is a noop because the connection `c` has expired.
-====
-
-If we call an overload that takes at least one of the emitter or the receiver (if used) as a `weak_ptr` (or, equivalently, `shared_ptr`), the return value is of type `weak_ptr<connection>`. The connection itself will expire automatically when either the receiver or the emitter (if applicable) expire, while the returned `weak_ptr<connection>` can be locked to access the connection object, or passed to `release` to force a disconnect.
-
-====
-[source,c++]
-.Example 2
-----
-#include <boost/synapse/connect.hpp>
-#include <string>
-#include <iostream>
-
-namespace synapse = boost::synapse;
-
-typedef struct print_(*print)(std::string const & s);
-
-int main() {
-
-    shared_ptr<int> emitter = make_shared<int>();
-
-    weak_ptr<synapse::connection> c = synapse::connect<my_signal>(
-        emitter, # <1>
-        [ ](std::string const & s) {
-            std::cout << s;
-        } );
-
-    synapse::emit<print>(emitter.get(),"Hello World"); # <2>
-
-    emitter.reset();
-    synapse::emit<print>(emitter.get(),"NOOP"); # <3>
-}
-----
-<1> The emitter is passed to `connect` as a `shared_ptr`, so the return value is of type `weak_ptr<connection>`.
-
-<2> `emit` calls the connected lambda, printing `Hello World`.
-
-<3> Resetting the `emitter` causes the connection to expire, so the following `emit` is a noop.
-====
+NOTE: The <<release,`release`>> function can be used to convert a <<pconnection,`pconnection`>> object to a <<connection,`connection`>> object.
 
 === Blocking of signals
 
@@ -202,9 +125,8 @@ It is possible to temporarily block a specific signal for a specific emitter. Th
 
 NOTE: Blocking affects pre-existing as well as future connections.
 
-====
 [source,c++]
-.Example 3
+.Example
 ----
 #include <boost/synapse/connect.hpp>
 #include <boost/synapse/block.hpp>
@@ -239,7 +161,6 @@ int main() {
 <2> The `print` signal will be blocked until `b` expires, therefore the call to `emit` on the next line is a noop, even though the `c` has not expired (meaning, the signal is still connected.)
 
 <3> At this point `b` has expired, so the call to `emit` will call the connected lambda, printing `Hello World`, again.
-====
 
 === Meta signals
 
@@ -253,9 +174,42 @@ NOTE: To further facilitate the integration of Synapse with 3rd-partty callback 
 
 === Interthread communication
 
-Most of the internal state used by Synapse to manage connections uses thread-local storage: emitting a signal only calls connections created by the calling thread. This allows `emit` to block, calling all connected functions in the order they've been connected.
 
-It is also possible to use Synapse signals across thread boundaries. If this is desired, create a `thread_local_queue` object in any thread needs to _receive_ Synapse signals. In this case calling `emit` from that same thread works as usual, but emitting from other threads results in the signal call being queued into `thread_local_queue` objects associated with all threads which _connect_ that specific signal. These queued emits are executed synchronously when the user polls a `thread_local_queue` object.
+==== Emitting signals across thread boundaries
+
+Synapse can be used to implement interthread communication using signals. The data structures created by <<connect,`connect`>> (or <<translate,`translate`>>) use thread-local storage, so by default calling <<emit,`emit`>> will call only functions connected by the calling thread (and will not return until all such functions have been called in order, or one of them throws.)
+
+The following diagram shows the connections created (by calls to `<<connect,connect>><S>`) in a single thread for a given signal type `S`, each connecting an emitter to a function. When `<<emit,emit>><S>(e1,arg,...)` is called, all functions connected (for `S`) to the given emitter `e1` are called (in the order in which the connections were created):
+
+image::fig1.png[]
+
+However, it is also possible for any thread to request to receive all signals emitted by other threads, by creating its own <<thread_local_queue,`thread_local_queue`>> object using <<create_thread_local_queue,`create_thread_local_queue`>>.
+
+In this case, _in addition_ to the behavior described above, `<<emit,emit>><S>(e1,arg,...)` will capture its arguments (depending on the signature of `S`) and queue them into the <<thread_local_queue,`thread_local_queue`>> object created by any thread _other_ than the calling thread. Each such thread must poll its own <<thread_local_queue,`thread_local_queue`>> regularly; this "emits" the queued objects locally and removes them from the queue (note that <<poll,`poll`>> is not given an emitter or a signal type, it emits locally all queued objects, regardless of signal type or emitter).
+
+This is illustrated by the following diagram:
+
+image::fig2.png[]
+
+A typical use case for this system is to update user interface objects with data generated by one or multiple worker threads: the user interface objects themselves need not be thread-safe, because they will be updated only synchronously, at the time <<poll,`poll`>> is called.
+
+IMPORTANT:  Special care must be taken to ensure that any objects referred to by arguments passed to <<emit,`emit`>> will remain valid until the time any other threads poll their <<thread_local_queue,`thread_local_queue`>> objects.
+
+For example, the following code is incorrect in the presence of thread_local_queues:
+[source,c++]
+----
+typedef struct my_signal_(*my_signal)( int * );
+
+void emit_my_signal( void * emitter, int x ) {
+    emit<my_signal>(emitter,&x); //Undefined behavior in the presence of thread_local_queues!
+}
+----
+
+The problem is that the address of `x` may be queued into other threads' queues, and since `x` is local to `emit_my_signal`, it may be destroyed by the time these threads call <<poll,`poll`>>.
+
+==== Scheduling function calls across thread boundaries
+
+The <<post,`post`>> function can be used to queue into a <<thread_local_queue,`thread_local_queue`>> arbitrary functions for execution at the time <<poll,`poll`>> is called to emit queued signals. This feature allows critical worker threads to minimize the amount of time they consume by offloading expensive non-critical computations to another, non-critical thread. This also removes the need for synchronization, since the queued functions are executed synchronously in the thread that owns the <<thread_local_queue,`thread_local_queue`>> object.
 
 == Building
 
@@ -281,17 +235,15 @@ include::{sourcedir}/synopses/emit.hpp.adoc[]
 
 include::{sourcedir}/synopses/connect.hpp.adoc[]
 
-include::{sourcedir}/synopses/connection.hpp.adoc[]
-
 include::{sourcedir}/synopses/translate.hpp.adoc[]
+
+include::{sourcedir}/synopses/connection.hpp.adoc[]
 
 include::{sourcedir}/synopses/block.hpp.adoc[]
 
 include::{sourcedir}/synopses/blocker.hpp.adoc[]
 
 include::{sourcedir}/synopses/thread_local_queue.hpp.adoc[]
-
-{empty} +
 
 == Reference
 
@@ -395,51 +347,13 @@ namespace boost { namespace synapse {
 } }
 ----
 +
-The `meta::connected<Signal>` signal is also emitted when the returned `connection` object expires. Handlers of the meta signal take a mutable reference to the `connection` object being created or destroyed, and a second `unsigned` argument, `flags`, which indicates the circumstances under which the meta signal is emitted:
+The `meta::connected<Signal>` signal is also emitted when the returned <<connection,`connection`>> object expires. Handlers of the meta signal take a mutable reference to the <<connection,`connection`>> object being created or destroyed, and a second `unsigned` argument, `flags`, which indicates the circumstances under which the meta signal is emitted:
 
-* If the `connection` object is being created, the `connecting` bit is set, otherwise it is clear;
+* If the <<connection,`connection`>> object is being created, the `connecting` bit is set, otherwise it is clear;
 * If this is the first `Signal` connection being created for the emitter `e`, the `first_for_this_emitter` bit is set, otherwise it is clear;
 * If this is the last `Signal` connection being destroyed for the emitter `e`, the `last_for_this_emitter` bit is set, otherwise it is clear.
 +
-NOTE: The passed `connection` object can be used to access the emitter and receiver objects passed to `connect`.
-
-Thread safety: ::
-Please see <<emit,`emit`>> and <<thread_local_queue,`thread_local_queue`>>.
-
-'''
-
-[[pconnect]]
-=== `pconnect`
-
-====
-[source,c++]
-.#include <boost/synapse/connect.hpp>
-----
-namespace boost { namespace synapse {
-
-    class pconnection;
-
-    template <class Signal,class Emitter,class F>
-    weak_ptr<pconnection> pconnect( <<Emitter>> e, F f ); <1>
-
-    template <class Signal,class Emitter,class Receiver,class F>
-    weak_ptr<pconnection> pconnect( <<Emitter>> e, <<Receiver>> r, F f ); <2>
-
-} }
-----
-<1> `\<<Emitter>>` is `weak_ptr<Emitter>` or, equivalently, `shared_ptr<Emitter>`.
-<2> `\<<Receiver>>` by analogy.
-====
-
-The `pconnect` function template is used to create _persistent_ connections. Unlike connections with explicitly managed lifetime (see <<connect,`connect`>>), the caller of `pconnect` is not required to keep the returned object afloat; instead, the <<pconnection,`pconnection`>> is automatically persisted until `e` (or `r`, if used) expire. The `pconnect` function has the limitation that `e` and `r` are required to be `weak`/`shared_ptr`, while <<connect,`connect`>> can be used with raw pointers as well.
-
-NOTE: A <<pconnection,`pconnection`>> can be converted to <<connection,`connection`>> by calling <<release,`release`>>.
-
-Effects: ::
-
-. Connects the specified `Signal` from the emitter `e` to the function object `f`. The arguments of `F` must match the arguments of `Signal`, except that if `r` is specified, it is prepended as the first argument to `F`, followed by the rest of the arguments as specified by the `Signal` signature. The signal is considered disconnected when either `e` or `r` (if used) expire.
-+
-. The <<meta::connected,`meta::connected<Signal>`>> effects are identical to <<connect,`connect`>>.
+NOTE: The passed <<connection,`connection`>> object can be used to access the emitter and receiver objects passed to `connect`.
 
 Thread safety: ::
 Please see <<emit,`emit`>> and <<thread_local_queue,`thread_local_queue`>>.
@@ -480,112 +394,39 @@ WARNING: If either `e1` or `e2`, passed as raw pointers, expire before the retur
 
 '''
 
-[[ptranslate]]
-=== `ptranslate`
-
-====
-[source,c++]
-.#include <boost/synapse/translate.hpp>
-----
-namespace boost { namespace synapse {
-
-    class pconnection;
-
-    template <
-        class OriginalSignal, class TranslatedSignal,
-        class OriginalEmitter,class TranslatedEmitter>
-    weak_ptr<pconnection> ptranslate( <<OriginalEmitter>> e1, <<TranslatedEmitter>> e2 ); <1>
-
-} }
-----
-<1> `\<<OriginalEmitter>>` is either `weak_ptr<OriginalEmitter>` or, equivalently, `shared_ptr<OrignialEmitter>`; `\<<TranslatedEmitter>>` by analogy.
-====
-
-Effects: ::
-The `ptranslate` function template creates a _persistent_ connection which causes the emitter `e2` to emit `TranslatedSignal` each time the emitter `e1` emits `OriginalSignal` (the two signals must have campatible signatures). Unlike connections with explicitly managed lifetime (see <<translate,`translate`>>, the caller of `ptranslate` is not required to keep the returned object afloat; instead, the <<pconnection,`pconnection`>> is automatically persisted until either `e1` or `e2` expire. The `ptranslate` function has the limitation that `e1` and `e2` are erquired to be `weak'/`shared_ptr`, while <<translate,`translate`>> can be used with raw pointers as well.
-
-NOTE: A <<pconnection,`pconnection`>> can be converted to <<connection,`connection`>> by calling <<release,`release`>>.
-
-'''
-
-[[block]]
-=== `block`
-
-====
-[source,c++]
-.#include <boost/synapse/block.hpp>
-----
-namespace boost { namespace synapse {
-
-    class blocker;
-
-    template <class Signal,class Emitter>
-    shared_ptr<blocker> block( <<Emitter>> e ); <1>
-
-} }
-----
-<1> `\<<Emitter>>` is either `Emitter *`, `weak_ptr<Emitter>` or, equivalently, `shared_ptr<Emitter>`.
-====
-
-Effects: ::
-. Blocks the specified `Signal` from the emitter `e` until the returned `blocker` object expires. While the `Signal` is blocked, calls to `emit<Signal>` for `e` are ignored and return `0`. The returned `blocker` object does not own `e` even if the `shared_ptr` `block` overload is used.
-. [[meta::blocked]] The `meta::emitter` emits the `meta::blocked<Signal>`:
-+
-[source,c++]
-----
-namespace boost { namespace synapse { namespace meta {
-
-    template <class Signal>
-    struct blocked {
-        //unspecified
-    };
-        
-} } }
-----
-The `meta::blocked<Signal>` signal is also emitted when the returned <<blocker,`blocker`>> object expires. Handlers of the meta signal take a reference to the <<blocker,`blocker`>> object being created or destroyed, and a second `bool` argument, `is_blocked`, which is true if the signal is becoming blocked, false if it is becoming unblocked.
-
-NOTE: Blocking affects existing as well as future connections.
-
-WARNING: If `block` is passed a raw pointer, deleting the emitter before the returned `blocker` object has expired results in undefined behavior.
-
-'''
-
-[[blocker]]
-=== Class `blocker`
-
-====
-include::{sourcedir}/synopses/blocker.hpp.adoc[]
-====
-
-The <<block,`block`>> function returns `shared_ptr<blocker const>` that is used to control the time the signal remains blocked. As well, `blocker` objects are passed to handlers of the <<meta::blocked,`meta::blocked`>> signal, which can use the `emitter` member function template to access the emitter object passed to <<block,`block`>>.
-
-'''
-
-[[blocker::emitter]]
-==== `emitter`
-
-[source,c++]
-----
-template <class T>
-shared_ptr<T> emitter() const;
-----
-
-Returns: ::
-A `shared_ptr` that points the emitter that was passed to an overload of the <<block,`block`>> function template to get the `blocker` object.
-
-Notes: ::
-* An empty shared_ptr is returned if:
-** `T` does not match the static type of the emitter passed to <<block,`block`>>, or
-** the emitter was passed to <<block,`block`>> as a `shared`/`weak_ptr` and it has expired.
-* If the emitter was passed to <<block,`block`>> as a raw pointer, the returned `shared_ptr` points that emitter but does not (can not) keep it afloat.
-
-'''
-
 [[connection]]
-=== Class `connection`
+=== `connection`
 
 ====
-include::{sourcedir}/synopses/connection.hpp.adoc[]
+[source,c++]
+.#include <boost/synapse/connection.hpp>
+----
+namespace boost { namespace synapse {
+
+    class connection { //abstract base
+
+    protected:
+
+        connection();
+        ~connection();
+
+    public:
+        
+        template <class T>
+        void set_user_data( T const & );
+
+        template <class T>
+        T * get_user_data() const;
+
+        template <class T>
+        shared_ptr<T> emitter() const;
+
+        template <class T>
+        shared_ptr<T> receiver() const;
+    };
+
+} }
+----
 ====
 
 The <<connect,`connect`>> and <<translate,`translate`>> functions return `shared_ptr<connection>` that is used to control the lifetime of the connection. As well, `connection` objects are passed to handlers of the <<meta::connected,`meta::connected`>> signal, which can use the <<connection::emitter,`emitter`>> member function template to access the emitter object passed to <<connect,`connect`>>/<<translate,`translate`>>, and the <<connection::set_user_data,`set_user_data`>>/<<connection::get_user_data,`get_user_data`>> member function templates to store auxiliary information in the <<connection,`connection`>> object.
@@ -662,32 +503,273 @@ Notes: ::
 ** the emitter was passed to `connect` (or `translate`) as a `shared_ptr`/`weak_ptr` and it has expired.
 * If the emitter was passed to `connect` (or `translate`) as a raw pointer, the returned `shared_ptr` points that emitter but does not (can not) keep it afloat.
 
-=== Signal types
+'''
 
-In synapse, the signal types used to instantiate the <<emit,`emit`>>  and <<connect,`connect`>> function templates must be function pointer types. The signal signature is used to deduce the arguments of <<emit,`emit`>>, and must be compatible with the function argument of <<connect,`connect`>>.
-
-The return type of a signal `typedef` is used to tell apart different signals that happen to have identical arguments. When calling connected functions, return values are discarded.
-
-In addition to function pointer types, the <<emit,`emit`>> and <<connect,`connect`>> templates may be instantiated with instances of the <<meta::connected,`meta::connected`>> and <<meta::blocked,`meta::blocked`>> class templates. These meta signal templates must be instantiated with another signal type (that is, a function pointer type or an instance of <<meta::connected,`meta::connected`>> or <<meta::blocked,`meta::blocked`>>).
-
-Example signal typedefs:
+[[pconnect]]
+=== `pconnect`
 
 ====
 [source,c++]
+.#include <boost/synapse/connect.hpp>
 ----
-typedef struct window_closed_(*window_closed)( Window * ); //<1>
+namespace boost { namespace synapse {
 
-typedef struct button_clicked_(*button_clicked)( int x, int y ); //<2>
+    class pconnection;
 
-typedef struct mouse_moved_(*mouse_moved)( int x, int y ); //<3>
+    template <class Signal,class Emitter,class F>
+    weak_ptr<pconnection> pconnect( <<Emitter>> e, F f ); <1>
 
-meta::connected<mouse_moved> //<4>
+    template <class Signal,class Emitter,class Receiver,class F>
+    weak_ptr<pconnection> pconnect( <<Emitter>> e, <<Receiver>> r, F f ); <2>
+
+} }
 ----
-<1> This signal may be used to indicate that a `Window` object is being closed.
-<2> This signal `typedef` could be used to communicate a mouse button click at the given screen coordinates.
-<3> A similar signal used to communicated mouse movement. We know this is a different signal from `button_clicked` because it uses a different return type (`struct mouse_moved_` vs. `struct button_clicked_`).
-<4> This signal type can be used to get notifications when the user connects or disconnects the `mouse_moved` signal.
+<1> `\<<Emitter>>` is `weak_ptr<Emitter>` or, equivalently, `shared_ptr<Emitter>`.
+<2> `\<<Receiver>>` by analogy.
 ====
+
+The `pconnect` function template is used to create _persistent_ connections. Unlike connections with explicitly managed lifetime (see <<connect,`connect`>>), the caller of `pconnect` is not required to keep the returned object afloat; instead, the <<pconnection,`pconnection`>> is automatically persisted until `e` (or `r`, if used) expire. The `pconnect` function has the limitation that `e` and `r` are required to be `weak`/`shared_ptr`, while <<connect,`connect`>> can be used with raw pointers as well.
+
+NOTE: A <<pconnection,`pconnection`>> can be converted to <<connection,`connection`>> by calling <<release,`release`>>.
+
+Effects: ::
+
+. Connects the specified `Signal` from the emitter `e` to the function object `f`. The arguments of `F` must match the arguments of `Signal`, except that if `r` is specified, it is prepended as the first argument to `F`, followed by the rest of the arguments as specified by the `Signal` signature. The signal is considered disconnected when either `e` or `r` (if used) expire.
++
+. The <<meta::connected,`meta::connected<Signal>`>> effects are identical to <<connect,`connect`>>.
+
+Thread safety: ::
+Please see <<emit,`emit`>> and <<thread_local_queue,`thread_local_queue`>>.
+
+'''
+
+[[ptranslate]]
+=== `ptranslate`
+
+====
+[source,c++]
+.#include <boost/synapse/translate.hpp>
+----
+namespace boost { namespace synapse {
+
+    class pconnection;
+
+    template <
+        class OriginalSignal, class TranslatedSignal,
+        class OriginalEmitter,class TranslatedEmitter>
+    weak_ptr<pconnection> ptranslate( <<OriginalEmitter>> e1, <<TranslatedEmitter>> e2 ); <1>
+
+} }
+----
+<1> `\<<OriginalEmitter>>` is either `weak_ptr<OriginalEmitter>` or, equivalently, `shared_ptr<OrignialEmitter>`; `\<<TranslatedEmitter>>` by analogy.
+====
+
+Effects: ::
+The `ptranslate` function template creates a _persistent_ connection which causes the emitter `e2` to emit `TranslatedSignal` each time the emitter `e1` emits `OriginalSignal` (the two signals must have campatible signatures). Unlike connections with explicitly managed lifetime (see <<translate,`translate`>>, the caller of `ptranslate` is not required to keep the returned object afloat; instead, the <<pconnection,`pconnection`>> is automatically persisted until either `e1` or `e2` expire. The `ptranslate` function has the limitation that `e1` and `e2` are erquired to be `weak'/`shared_ptr`, while <<translate,`translate`>> can be used with raw pointers as well.
+
+NOTE: A <<pconnection,`pconnection`>> can be converted to <<connection,`connection`>> by calling <<release,`release`>>.
+
+'''
+
+[[pconnection]]
+=== `pconnection`
+
+====
+[source,c++]
+.#include <boost/synapse/connection.hpp>
+----
+namespace boost { namespace synapse {
+
+    class pconnection: protected connection { //abstract base
+
+    protected:
+
+        pconnection();
+        ~pconnection();
+
+    public:
+        
+        using connection::set_user_data;
+        using connection::get_user_data;
+        using connection::emitter;
+        using connection::receiver;
+
+    };
+
+} }
+----
+====
+
+The <<pconnect,`pconnect`>> and <<ptranslate,`ptranslate`>> functions return `weak_ptr<pconnection>` that is used as a non-owning reference to the created connection object. Objects of type `pconnection` are passed to handlers of the <<meta::connected,`meta::connected`>> signal as a <<connection,`connection`>> reference.
+
+NOTE: Use <<release,`release`>> to convert a non-owning `weak_ptr<pconnection>` reference to an owning `shared_ptr<<<connection,connection>>>` reference.
+
+'''
+
+[[block]]
+=== `block`
+
+====
+[source,c++]
+.#include <boost/synapse/block.hpp>
+----
+namespace boost { namespace synapse {
+
+    class blocker;
+
+    template <class Signal,class Emitter>
+    shared_ptr<blocker> block( <<Emitter>> e ); <1>
+
+} }
+----
+<1> `\<<Emitter>>` is either `Emitter *`, `weak_ptr<Emitter>` or, equivalently, `shared_ptr<Emitter>`.
+====
+
+Effects: ::
+. Blocks the specified `Signal` from the emitter `e` until the returned `blocker` object expires. While the `Signal` is blocked, calls to `emit<Signal>` for `e` are ignored and return `0`. The returned `blocker` object does not own `e` even if the `shared_ptr` `block` overload is used.
+. [[meta::blocked]] The `meta::emitter` emits the `meta::blocked<Signal>`:
++
+[source,c++]
+----
+namespace boost { namespace synapse { namespace meta {
+
+    template <class Signal>
+    struct blocked {
+        //unspecified
+    };
+        
+} } }
+----
+The `meta::blocked<Signal>` signal is also emitted when the returned <<blocker,`blocker`>> object expires. Handlers of the meta signal take a reference to the <<blocker,`blocker`>> object being created or destroyed, and a second `bool` argument, `is_blocked`, which is true if the signal is becoming blocked, false if it is becoming unblocked.
+
+NOTE: Blocking affects existing as well as future connections.
+
+WARNING: If `block` is passed a raw pointer, deleting the emitter before the returned `blocker` object has expired results in undefined behavior.
+
+'''
+
+[[blocker]]
+=== `blocker`
+
+====
+include::{sourcedir}/synopses/blocker.hpp.adoc[]
+====
+
+The <<block,`block`>> function returns `shared_ptr<blocker const>` that is used to control the time the signal remains blocked. As well, `blocker` objects are passed to handlers of the <<meta::blocked,`meta::blocked`>> signal, which can use the `emitter` member function template to access the emitter object passed to <<block,`block`>>.
+
+'''
+
+[[blocker::emitter]]
+==== `emitter`
+
+[source,c++]
+----
+template <class T>
+shared_ptr<T> emitter() const;
+----
+
+Returns: ::
+A `shared_ptr` that points the emitter that was passed to an overload of the <<block,`block`>> function template to get the `blocker` object.
+
+Notes: ::
+* An empty shared_ptr is returned if:
+** `T` does not match the static type of the emitter passed to <<block,`block`>>, or
+** the emitter was passed to <<block,`block`>> as a `shared`/`weak_ptr` and it has expired.
+* If the emitter was passed to <<block,`block`>> as a raw pointer, the returned `shared_ptr` points that emitter but does not (can not) keep it afloat.
+
+'''
+
+[[thread_local_queue]]
+=== `thread_local_queue`
+
+[[create_thread_local_queue]]
+==== `create_thread_local_queue`
+
+====
+[source,c++]
+.#include <boost/synapse/thread_local_queue.hpp>
+----
+namespace boost { namespace synapse {
+
+    struct thread_local_queue;
+    shared_ptr<thread_local_queue> create_thread_local_queue();
+
+} }
+----
+====
+
+Returns: ::
+A thread-local object that can be used to queue signals emitted asynchronously from other threads. Use <<poll,`poll`>> to emit the queued signals synchronously into the calling thread. See <<Interthread communication>>.
+
+NOTE: While any number of threads can use this function to create their own <<thread_local_queue,`thread_local_queue`>>, it is invalid to create more than one `thread_local_queue` object per thread.
+
+'''
+
+[[poll]]
+==== `poll`
+
+====
+[source,c++]
+.#include <boost/synapse/thread_local_queue.hpp>
+----
+namespace boost { namespace synapse {
+
+    int poll( thread_local_queue & );
+
+} }
+----
+====
+
+Effects: ::
+Synchronously emits all signals queued asynchronously into `q` by calls to <<emit,`emit`>> from other threads. See <<Interthread communication>>.
+
+Returns: ::
+The total number of signals emitted.
+
+'''
+
+[[wait]]
+==== `wait`
+
+====
+[source,c++]
+.#include <boost/synapse/thread_local_queue.hpp>
+----
+namespace boost { namespace synapse {
+
+    int wait( thread_local_queue & );
+
+} }
+----
+====
+
+Effects: ::
+The same as `<<poll,poll>>(q)`, except that it blocks and does not return until at least one signal was delivered.
+
+Returns: ::
+The total number of signals emitted (always greater than 1).
+
+'''
+
+[[post]]
+==== `post`
+
+====
+[source,c++]
+.#include <boost/synapse/thread_local_queue.hpp>
+----
+namespace boost { namespace synapse {
+
+    void post( thread_local_queue &, function<void()> const & );
+
+} }
+----
+====
+
+Effects: ::
+Queues `f` to be called next time `q` is polled; that is, `f` will be executed synchronously in the thread that has created `q`.
+
+NOTE: While <<poll,`poll`>> (or <<wait,`wait`>>) must be called from the thread that created the <<thread_local_queue,`thread_local_queue`>> object, <<post,`post`>> may be called from any thread. 
 
 == Programming techniques
 
@@ -700,8 +782,8 @@ include::{sourcedir}/examples/glfw.adoc[]
 [qanda]
 How does Synapse differ from Boost Signals 2, which is also "non-intrusive"?::
     The main design difference is that in Boost Signals 2 emitting a signal requires a signal object. This is significant because in general it is not trivial to associate a Boost Signals 2 signal object with 3rd-party objects. When using Synapse such association is not necessary because the 3rd-party object itself can be passed to `emit`.
-What is the design rationale for ignoring the value returned by the connected functions?::
-    A typical use case for Synapse is when the caller of `emit` doesn't care if there are 0, 1 or many connected functions. Allowing return values makes the zero/many case quite tricky to deal with. On the other hand, passing a reference or a (shared) pointer to `emit` to return/accumulate values from any number of connected functions (if needed) is simpler and fits that case nicely.
+What is the design rationale for ignoring the value returned by connected functions?::
+    A typical use case for Synapse is when the caller of `emit` doesn't care if there are 0, 1 or many connected functions. Allowing return values makes the zero/many case quite tricky to deal with. On the other hand, passing a reference or a pointer to `emit` to return/accumulate values from any number of connected functions (if needed) is simpler and fits that case nicely.
 Is there a way to stop the emit loop before all connected functions have been called?::
     No, except by throwing an exception.
 I am concerned about code size, does Synapse use a lot of templates?::

@@ -6,47 +6,14 @@ namespace boost { namespace synapse {
     template <
         class OriginalSignal,  class TranslatedSignal,
         class OriginalEmitter, class TranslatedEmitter>
-    shared_ptr<connection> translate( OriginalEmitter * e1, TranslatedEmitter * e2 );
+    shared_ptr<connection> translate( <<OriginalEmitter>> e1, <<TranslatedEmitter>> e2 ); <1>
 
     template <
         class OriginalSignal,  class TranslatedSignal,
         class OriginalEmitter, class TranslatedEmitter>
-    weak_ptr<connection> translate( OriginalEmitter * e1, weak_ptr<TranslatedEmitter> const & e2 );
-
-    template <
-        class OriginalSignal,  class TranslatedSignal,
-        class OriginalEmitter, class TranslatedEmitter>
-    weak_ptr<connection> translate( OriginalEmitter * e1, shared_ptr<TranslatedEmitter> const & e2 );
-
-    template <
-        class OriginalSignal,  class TranslatedSignal,
-        class OriginalEmitter, class TranslatedEmitter>
-    weak_ptr<connection> translate( weak_ptr<OriginalEmitter> const & e1, TranslatedEmitter * e2 );
-
-    template <
-        class OriginalSignal,  class TranslatedSignal,
-        class OriginalEmitter, class TranslatedEmitter>
-    weak_ptr<connection> translate( weak_ptr<OriginalEmitter> const & e1, weak_ptr<TranslatedEmitter> const & e2 );
-
-    template <
-        class OriginalSignal,  class TranslatedSignal,
-        class OriginalEmitter, class TranslatedEmitter>
-    weak_ptr<connection> translate( weak_ptr<OriginalEmitter> const & e1, shared_ptr<TranslatedEmitter> const & e2 );
-
-    template <
-        class OriginalSignal,  class TranslatedSignal,
-        class OriginalEmitter, class TranslatedEmitter>
-    weak_ptr<connection> translate( shared_ptr<OriginalEmitter> const & e1, TranslatedEmitter * e2 );
-
-    template <
-        class OriginalSignal,  class TranslatedSignal,
-        class OriginalEmitter, class TranslatedEmitter>
-    weak_ptr<connection> translate( shared_ptr<OriginalEmitter> const & e1, weak_ptr<TranslatedEmitter> const & e2 );
-
-    template <
-        class OriginalSignal,  class TranslatedSignal,
-        class OriginalEmitter, class TranslatedEmitter>
-    weak_ptr<connection> translate( shared_ptr<OriginalEmitter> const & e1, shared_ptr<TranslatedEmitter> const & e2 );
+    weak_ptr<pconnection> ptranslate( <<OriginalEmitter>> e1, <<TranslatedEmitter>> e2 ); <2>
 
 } }
 ----
+<1> `\<<OriginalEmitter>>` is either `OriginalEmitter *`, `weak_ptr<OriginalEmitter> const &` or, equivalently, `shared_ptr<OriginalEmitter> const &`; `\<<TranslatedEmitter>>` by analogy.
+<2> `\<<OriginalEmitter>>` is `weak_ptr<OriginalEmitter> const &` or, equivalently, `shared_ptr<OriginalEmitter> const &`; `\<<TranslatedEmitter>>` by analogy.
