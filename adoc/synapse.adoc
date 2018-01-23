@@ -114,8 +114,8 @@ Notice that `process_file` is not coupled with `QProgressBar`: the `report_progr
 
 In Synapse there are two types of connection objects: <<connection,`connection`>> and <<pconnection,`pconnection`>>:
 
-- `shared_ptr<<<connection,connection>>>` objects are returned by <<connect,`connect`>>. The user is required to keep this object afloat; the signal is disconnected when it expires.
-- `weak_ptr<<<pconnection,pconnection>>>` objects are returned by <<pconnect,`pconnect`>>. The user is not required to keep this object afloat; the connection is disconnected when Synapse detects that the emitter or the receiver have expired.
+- `shared_ptr<<<connection,connection>>>` objects are returned by overloads of <<connect,`connect`>> which take the emitter (and, if used, the receiver) as a raw pointer. The user is required to keep this object afloat; the signal is disconnected when it expires.
+- `weak_ptr<<<pconnection,pconnection>>>` objects are returned by overloads of <<connect,`connect`>> which take at least one of the emitter or the receiver as a `weak_ptr` or `shared_ptr`. The user is not required to keep this object afloat; the connection is disconnected when Synapse detects that the emitter or the receiver have expired.
 
 NOTE: The <<release,`release`>> function can be used to convert a <<pconnection,`pconnection`>> object to a <<connection,`connection`>> object.
 
@@ -264,12 +264,12 @@ namespace boost { namespace synapse {
 ====
 
 Effects: ::
-Calls all function objects that are connected to the specified `Signal` from the emitter `e`, in the order in which they were connected by <<connect,`connect`>>, <<pconnect,`pconnect`>> or <<translate,`translate`>>, passing the specified arguments depending on the `Signal` signature, subject to the connection lifetime/blocking restrictions.
+Calls all function objects that are connected to the specified `Signal` from the emitter `e`, in the order in which they were connected by <<connect,`connect`>> or <<translate,`translate`>>, passing the specified arguments depending on the `Signal` signature, subject to the connection lifetime/blocking restrictions.
 
 Returns: ::
 The count of the connected function objects that were called. Signals that are currently blocked are not included in the count returned by `emit`.
 
-WARNING: It is the responsibility of the caller to ensure that the emitter object e does not expire before `emit` returns, otherwise the behavior is undefined.
+IMPORTANT: It is the responsibility of the caller to ensure that the emitter object e does not expire before `emit` returns, otherwise the behavior is undefined.
 
 Throws: ::
 Any exception emitted by one of the connected function objects, in which case the remaining function objects are not called.
@@ -298,30 +298,40 @@ namespace boost { namespace synapse {
     class connection;
 
     template <class Signal,class Emitter,class F>
-    shared_ptr<connection> connect( <<Emitter>> e, F f ); <1>
+    shared_ptr<connection> connect( Emitter * e, F f );
 
     template <class Signal,class Emitter,class Receiver,class F>
-    shared_ptr<connection> connect( <<Emitter>> e, <<Receiver>> r, F f ); <2>
+    shared_ptr<connection> connect( Emitter * e, Receiver * r, F f );
+
+    class pconnection;
+
+    template <class Signal,class Emitter,class F>
+    weak_ptr<pconnection> connect( <<Emitter>> e, F f ); <1>
+
+    template <class Signal,class Emitter,class Receiver,class F>
+    weak_ptr<pconnection> connect( <<Emitter>> e, <<Receiver>> r, F f ); <2>
 
 } }
 ----
-<1> `\<<Emitter>>` is either `Emitter *`, `weak_ptr<Emitter>` or, equivalently, `shared_ptr<Emitter>`.
-<2> `\<<Receiver>>` by analogy.
+<1> `\<<Emitter>>`  is `weak_ptr<Emitter> const &` or, equivalently, `shared_ptr<Emitter> const &`;
+<2> `\<<Emitter>>`  is `Emitter *`, `weak_ptr<Emitter> const &` or, equivalently, `shared_ptr<Emitter> const &`; at least one of `e` and `r` is _not_ a raw pointer.
 ====
 
-The `connect` function template is used to make connections whose lifetime is explicitly managed by the user. Such connections require that the caller keeps the returned <<connection,`connection`>> object afloat for as long as the connection should persist.
+Overloads of `connect` that return `shared_ptr<<<connection,connection>>>` create connections whose lifetime is explicitly managed by the user. Such connections require that the caller keeps the returned <<connection,`connection`>> object afloat for as long as the connection should persist.
+
+Overloads of `connect` that return `weak_ptr<<<pconnection,pconnection>>>` take at least one of `e` and `r` as a `weak_ptr` or `shared_ptr`. They create _persistent_ connections which expire when either `e` or `r` expire.
 
 Effects: ::
 
-. Connects the specified `Signal` from the emitter `e` to the function object `f`. The arguments of `F` must match the arguments of `Signal`, except that if `r` is specified, it is prepended as the first argument to `F`, followed by the rest of the arguments as specified by the `Signal` signature. The signal is considered disconnected when either of the following occurs:
+. Connects the specified `Signal` from the emitter `e` to the function object `f`. The arguments of `F` must match the arguments of `Signal`, except that if `r` is specified, it is dereferenced and prepended as the first argument to `F`, followed by the rest of the arguments as specified by the `Signal` signature. The signal is considered disconnected when either of the following occurs:
 +
-* The returned `shared_ptr<connection>` object expires;
+* The returned `shared_ptr<<<connection,connection>>>` object expires (this applies only to overloads that return `shared_ptr<<<connection,connection>>>`);
 * `e` (passed as either `weak_ptr<Emitter>` or `shared_ptr<Emitter>`) expires;
 * `r` (passed as either `weak_ptr<Emitter>` or `shared_ptr<Emitter>`) expires.
 +
-NOTE: The returned `connection` object does not assume ownership of `e` or `r`: passing `shared_ptr` is equivalent to passing `weak_ptr`.
+NOTE: The returned object does not assume ownership of `e` or `r`: passing `shared_ptr` is equivalent to passing `weak_ptr`.
 +
-WARNING: If either the emitter or the receiver, passed as raw pointers, expire before the returned `connection` object has expired, the behavior is undefined.
+IMPORTANT: If either the emitter or the receiver, passed as raw pointers, expire before the returned <<connection,`connection`>> object has expired, the behavior is undefined.
 +
 .  [[meta::connected]] The `meta::emitter` emits the `meta::connected<Signal>` signal:
 +
@@ -330,7 +340,9 @@ WARNING: If either the emitter or the receiver, passed as raw pointers, expire b
 namespace boost { namespace synapse {
 
     namespace meta {
-            
+    
+        weak_ptr<void const> emitter();
+
         template <class Signal>
         struct connected {
             //unspecified
@@ -347,13 +359,15 @@ namespace boost { namespace synapse {
 } }
 ----
 +
-The `meta::connected<Signal>` signal is also emitted when the returned <<connection,`connection`>> object expires. Handlers of the meta signal take a mutable reference to the <<connection,`connection`>> object being created or destroyed, and a second `unsigned` argument, `flags`, which indicates the circumstances under which the meta signal is emitted:
+The `meta::connected<Signal>` signal is also emitted when the returned object expires. Handlers of the meta signal take a mutable reference to the <<connection,`connection`>> object being created or destroyed, and a second `unsigned` argument, `flags`, which indicates the circumstances under which the meta signal is emitted:
 
 * If the <<connection,`connection`>> object is being created, the `connecting` bit is set, otherwise it is clear;
 * If this is the first `Signal` connection being created for the emitter `e`, the `first_for_this_emitter` bit is set, otherwise it is clear;
 * If this is the last `Signal` connection being destroyed for the emitter `e`, the `last_for_this_emitter` bit is set, otherwise it is clear.
 +
-NOTE: The passed <<connection,`connection`>> object can be used to access the emitter and receiver objects passed to `connect`.
+NOTE: Because class <<connection,`connection`>> is the protected base of class <<pconnection,`pconnection`>>, handlers of `meta::connected<Signal>` take `connection &` regardless of which `connect` overload was used.
++
+TIP: The passed <<connection,`connection`>> object can be used to access the emitter and receiver objects passed to `connect`.
 
 Thread safety: ::
 Please see <<emit,`emit`>> and <<thread_local_queue,`thread_local_queue`>>.
@@ -369,28 +383,31 @@ Please see <<emit,`emit`>> and <<thread_local_queue,`thread_local_queue`>>.
 ----
 namespace boost { namespace synapse {
 
-    class connection;
+    template <
+        class OriginalSignal,  class TranslatedSignal,
+        class OriginalEmitter, class TranslatedEmitter>
+    shared_ptr<connection> translate( OriginalEmitter * e1, TranslatedEmitter * e2 );
 
     template <
-        class OriginalSignal, class TranslatedSignal,
-        class OriginalEmitter,class TranslatedEmitter>
-    shared_ptr<connection> translate( <<OriginalEmitter>> e1, <<TranslatedEmitter>> e2 ); <1>
+        class OriginalSignal,  class TranslatedSignal,
+        class OriginalEmitter, class TranslatedEmitter>
+    weak_ptr<pconnection> translate( <<OriginalEmitter>> e1, <<TranslatedEmitter>> e2 ); <1>
 
 } }
 ----
-<1> `\<<OriginalEmitter>>` is `OriginalEmitter *`, `weak_ptr<OriginalEmitter>` or, equivalently, `shared_ptr<OrignialEmitter>`; `\<<TranslatedEmitter>>` by analogy.
+<1> `\<<OriginalEmitter>>` is either `OriginalEmitter *`, `weak_ptr<OriginalEmitter> const &` or, equivalently, `shared_ptr<OriginalEmitter> const &`; `\<<TranslatedEmitter>>` by analogy. At least one of `e1` and `e2` is _not_ a raw pointer.
 ====
 
 Effects: ::
 The `translate` function template creates a connection which causes the emitter `e2` to emit `TranslatedSignal` each time the emitter `e1` emits `OriginalSignal` (the two signals must have campatible signatures). This behavior persists until:
 
-- the returned <<connection,`connection`>> object expires;
+- the returned <<connection,`connection`>> object expires (this applies only to the `translate` overload that takes `e1` and `e2` as raw pointers);
 - `e1` (passed as either `weak_ptr` or `shared_ptr` expires;
 - `e2` (passed as either `weak_ptr` or `shared_ptr` expires.
 
 NOTE: The returned <<connection,`connection`>> object does not assume ownership of `e1` or `e2`: passing `shared_ptr` is equivalent to passing `weak_ptr`.
 
-WARNING: If either `e1` or `e2`, passed as raw pointers, expire before the returned <<connection,`connection`>> object has expired, the behavior is undefined.
+IMPORTANT: If either `e1` or `e2`, passed as raw pointers, expire before the returned <<connection,`connection`>> object has expired, the behavior is undefined.
 
 '''
 
@@ -429,7 +446,7 @@ namespace boost { namespace synapse {
 ----
 ====
 
-The <<connect,`connect`>> and <<translate,`translate`>> functions return `shared_ptr<connection>` that is used to control the lifetime of the connection. As well, `connection` objects are passed to handlers of the <<meta::connected,`meta::connected`>> signal, which can use the <<connection::emitter,`emitter`>> member function template to access the emitter object passed to <<connect,`connect`>>/<<translate,`translate`>>, and the <<connection::set_user_data,`set_user_data`>>/<<connection::get_user_data,`get_user_data`>> member function templates to store auxiliary information in the <<connection,`connection`>> object.
+The <<connect,`connect`>> and <<translate,`translate`>> functions return `shared_ptr<connection>` that is used to control the lifetime of the connection. As well, `connection` objects are passed to handlers of the <<meta::connected,`meta::connected`>> signal, which can use the <<connection::emitter,`emitter`>> member function template to access the emitter object passed to <<connect,`connect`>>/<<translate,`translate`>>, and the <<connection::set_user_data,`set_user_data`>>/<<connection::get_user_data,`get_user_data`>> member function templates to store auxiliary information in the `connection` object.
 
 '''
 
@@ -505,72 +522,6 @@ Notes: ::
 
 '''
 
-[[pconnect]]
-=== `pconnect`
-
-====
-[source,c++]
-.#include <boost/synapse/connect.hpp>
-----
-namespace boost { namespace synapse {
-
-    class pconnection;
-
-    template <class Signal,class Emitter,class F>
-    weak_ptr<pconnection> pconnect( <<Emitter>> e, F f ); <1>
-
-    template <class Signal,class Emitter,class Receiver,class F>
-    weak_ptr<pconnection> pconnect( <<Emitter>> e, <<Receiver>> r, F f ); <2>
-
-} }
-----
-<1> `\<<Emitter>>` is `weak_ptr<Emitter>` or, equivalently, `shared_ptr<Emitter>`.
-<2> `\<<Receiver>>` by analogy.
-====
-
-The `pconnect` function template is used to create _persistent_ connections. Unlike connections with explicitly managed lifetime (see <<connect,`connect`>>), the caller of `pconnect` is not required to keep the returned object afloat; instead, the <<pconnection,`pconnection`>> is automatically persisted until `e` (or `r`, if used) expire. The `pconnect` function has the limitation that `e` and `r` are required to be `weak`/`shared_ptr`, while <<connect,`connect`>> can be used with raw pointers as well.
-
-NOTE: A <<pconnection,`pconnection`>> can be converted to <<connection,`connection`>> by calling <<release,`release`>>.
-
-Effects: ::
-
-. Connects the specified `Signal` from the emitter `e` to the function object `f`. The arguments of `F` must match the arguments of `Signal`, except that if `r` is specified, it is prepended as the first argument to `F`, followed by the rest of the arguments as specified by the `Signal` signature. The signal is considered disconnected when either `e` or `r` (if used) expire.
-+
-. The <<meta::connected,`meta::connected<Signal>`>> effects are identical to <<connect,`connect`>>.
-
-Thread safety: ::
-Please see <<emit,`emit`>> and <<thread_local_queue,`thread_local_queue`>>.
-
-'''
-
-[[ptranslate]]
-=== `ptranslate`
-
-====
-[source,c++]
-.#include <boost/synapse/translate.hpp>
-----
-namespace boost { namespace synapse {
-
-    class pconnection;
-
-    template <
-        class OriginalSignal, class TranslatedSignal,
-        class OriginalEmitter,class TranslatedEmitter>
-    weak_ptr<pconnection> ptranslate( <<OriginalEmitter>> e1, <<TranslatedEmitter>> e2 ); <1>
-
-} }
-----
-<1> `\<<OriginalEmitter>>` is either `weak_ptr<OriginalEmitter>` or, equivalently, `shared_ptr<OrignialEmitter>`; `\<<TranslatedEmitter>>` by analogy.
-====
-
-Effects: ::
-The `ptranslate` function template creates a _persistent_ connection which causes the emitter `e2` to emit `TranslatedSignal` each time the emitter `e1` emits `OriginalSignal` (the two signals must have campatible signatures). Unlike connections with explicitly managed lifetime (see <<translate,`translate`>>, the caller of `ptranslate` is not required to keep the returned object afloat; instead, the <<pconnection,`pconnection`>> is automatically persisted until either `e1` or `e2` expire. The `ptranslate` function has the limitation that `e1` and `e2` are erquired to be `weak'/`shared_ptr`, while <<translate,`translate`>> can be used with raw pointers as well.
-
-NOTE: A <<pconnection,`pconnection`>> can be converted to <<connection,`connection`>> by calling <<release,`release`>>.
-
-'''
-
 [[pconnection]]
 === `pconnection`
 
@@ -600,9 +551,9 @@ namespace boost { namespace synapse {
 ----
 ====
 
-The <<pconnect,`pconnect`>> and <<ptranslate,`ptranslate`>> functions return `weak_ptr<pconnection>` that is used as a non-owning reference to the created connection object. Objects of type `pconnection` are passed to handlers of the <<meta::connected,`meta::connected`>> signal as a <<connection,`connection`>> reference.
+The `pconnection` class represents _persistent_ connections, returned by overloads of <<connect,`connect`>> and <<translate,`translate`>> which take at least one `weak_ptr` or `shared_ptr` argument. The user is not required to keep the returned `weak_ptr<pconnection>` afloat: the connection will be destroyed automatically when Synapse detects that either the emitter or the receiver argument to <<connect,`connect`>> have expired.
 
-NOTE: Use <<release,`release`>> to convert a non-owning `weak_ptr<pconnection>` reference to an owning `shared_ptr<<<connection,connection>>>` reference.
+TIP: Use <<release,`release`>> to convert a non-owning `weak_ptr<pconnection>` reference to an owning `shared_ptr<<<connection,connection>>>` reference.
 
 '''
 
@@ -644,7 +595,7 @@ The `meta::blocked<Signal>` signal is also emitted when the returned <<blocker,`
 
 NOTE: Blocking affects existing as well as future connections.
 
-WARNING: If `block` is passed a raw pointer, deleting the emitter before the returned `blocker` object has expired results in undefined behavior.
+IMPORTANT: If `block` is passed a raw pointer, deleting the emitter before the returned `blocker` object has expired results in undefined behavior.
 
 '''
 
@@ -772,6 +723,185 @@ Queues `f` to be called next time `q` is polled; that is, `f` will be executed s
 NOTE: While <<poll,`poll`>> (or <<wait,`wait`>>) must be called from the thread that created the <<thread_local_queue,`thread_local_queue`>> object, <<post,`post`>> may be called from any thread. 
 
 == Programming techniques
+
+=== Synapsifying C callbacks
+
+Synapse can be used with any C-style callback API to install C++ functions, including lambdas, as callbacks. For example, consider the `SSL_set_info_callback` from https://www.openssl.org/[OpenSSL]:
+
+[source,c]
+----
+void SSL_set_info_callback(SSL *ssl,
+        void (*cb) (const SSL *ssl, int type, int val));
+----
+
+We can define the following Synapse signal to represent this callback:
+
+[source,c++]
+----
+typedef struct SSL_info_callback_(*SSL_info_callback)( const SSL *ssl, int type, int val );
+----
+
+Next, at a global scope or during initialization, we install a handler for the `meta::connected<SSL_info_callback>` signal, which the <<meta::connected,`meta::emitter`>> emits every time the user connects or disconnects the `SSL_info_callback` signal:
+
+[source,c++]
+----
+void emit_fwd( SSL const * ssl, int type, int val );
+
+int main( int argc, char const * argv[ ] ) {
+
+    connect<meta::connected<SSL_info_callback> >( meta::emitter(),
+        [ ]( connection & c, unsigned flags ) { <1>
+
+            if( flags&meta::connect_flags::connecting ) { <2>
+
+                if( flags&meta::connect_flags::first_for_this_emitter ) <3>
+                    SSL_set_info_callback(c.emitter<SSL>().get(),&emit_fwd); <4>
+
+            } else { <5>
+
+                if( flags&meta::connect_flags::last_for_this_emitter ) <6>
+                    if( auto ssl = c.emitter<SSL>() ) <7>
+                        SSL_set_info_callback(ssl.get(),0); <8>
+
+            }
+
+        } );
+
+}
+
+void emit_fwd( SSL const * ssl, int type, int val ) {
+    emit<SSL_info_callback>(ssl,ssl,type,val);
+}
+----
+<1> This lambda function is called every time the user connects or disconnects the `SSL_info_callback` Synapse signal.
+<2> The user is _connecting_ the `SSL_info_callback` signal.
+<3> This is the _first_ time the `SSL_info_callback` signal is being connected for a particular `SSL` object (emitter).
+<4> Use <<connection::emitter,`connection::emitter`>> to get the emitter as a `shared_ptr<SSL>` (we know the emitter is of type `SSL *`), and use the OpenSSL API to install a C callback `emit_fwd`, which uses `<<emit,emit>><SSL_info_callback>` to call all connected Synapse functions.
+<5> The user is _disconnecting_ the `SSL_info_callback` signal.
+<6> This is the _last_ `SSL_info_callback` connection being destroyed for a particular `SSL` object (emitter).
+<7> Check if the SSL object is still accessible (it may have been destroyed already).
+<8> Uninstall the `emit_fwd` callback.
+
+Once this handler for the `meta::connected<SSL_info_callback>` signal is installed, we can simply use <<connect,`connect`>> to install a C++ lamda handler for the `SSL_info_callback` signal we defined:
+
+[source,c++]
+----
+shared_ptr<SSL> ssl(SSL_new(ctx),&SSL_free);
+
+connect<SSL_info_callback>( ssl,
+    [ ]( const SSL *ssl, int type, int val ) noexcept {
+
+    } );
+----
+
+=== Reporting exceptions from `noexcept` signal handlers
+
+Sometimes connected functions are not permitted to throw exceptions -- this is usually the case when the callback originates in C code. With synapse, such exceptions can be reported safely to a C++ context that can store them for later processing.
+
+First, we define a Synapse signal we will use to report exceptions:
+
+[source,c++]
+----
+typedef struct exception_caught_(*exception_caught)();
+----
+
+If we take a handler of the `SSL_info_callback` (see above) as an example, we could modify it like this:
+
+
+[source,c++]
+----
+shared_ptr<SSL> ssl(SSL_new(ctx),&SSL_free);
+
+connect<SSL_info_callback>( ssl,
+    [ ]( const SSL *ssl, int type, int val ) noexcept {
+        try {
+
+            //code which may throw
+
+        } catch(...) {
+
+            int n=synapse::emit<exception_caught>(ssl); <1>
+            assert(n>0); <2>
+
+        }
+    } );
+----
+<1> <<emit,`emit`>> the `exception_caught` Synapse signal from the `ssl` object. Handlers of this signal must be able to deal with any exception, for example they can use `std::current_exception` to capture the exception and rethrow it once control has exited the critical `noexcept` path.
+<2> <<emit,`emit`>> returns the number of connected functions it called, so this `assert` ensures that the exception won't get ignored.
+
+=== Using Synapse with Qt to avoid MOCing
+
+The signal programming API that is used in https://www.qt.io/[Qt] is intrusive: signals must be specified in the definition of each type. For this reason, it is not possible to add signals to existing Qt types. When this is needed, users are directed to define the new signals in their own class which derives from the Qt type they wanted to add signal(s) to.
+
+https://wiki.qt.io/Qt_for_Beginners#Creating_custom_signals_and_slots[There is a special example that illustrates this approach]. Unfortunately, this requires the use of the proprietary Qt Meta Object Compiler which the author finds cumbersome. Below is the same example modified to use Synapse signals, which requires no MOCing (the changes made to the original program are marked with numbers):
+
+[source,c++]
+----
+#include <boost/synapse/connect.hpp>
+#define QT_NO_EMIT //Suppress the #define emit from Qt since it clashes with synapse::emit.
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QPushButton>
+
+namespace synapse=boost::synapse;
+
+class Window : public QWidget
+{
+public:
+    explicit Window(QWidget *parent = 0);
+    signals: //Not needed with Synapse but okay
+    typedef struct counterReached_(*counterReached)(); <1>
+private slots: //<-- Not needed with Synapse but okay
+    void slotButtonClicked(bool checked);
+private:
+    int m_counter;
+    QPushButton *m_button;
+    shared_ptr<synapse::connection> c_; <2>
+};
+
+Window::Window(QWidget *parent) :
+    QWidget(parent)
+{
+     // Set size of the window
+     setFixedSize(100, 50);
+
+    // Create and position the button
+    m_button = new QPushButton("Hello World", this);
+    m_button->setGeometry(10, 10, 80, 30);
+    m_button->setCheckable(true);
+
+    // Set the counter to 0
+    m_counter = 0;
+
+    connect(m_button, SIGNAL (clicked(bool)), this, SLOT (slotButtonClicked(bool)));
+
+    c_=synapse::connect<counterReached>(this,&QApplication::quit); <3>
+}
+
+void Window::slotButtonClicked(bool checked)
+{
+    if (checked)
+        m_button->setText("Checked");
+    else
+        m_button->setText("Hello World");
+    m_counter ++;
+    if (m_counter == 10)
+        synapse::emit<counterReached>(this); <4>
+}
+
+int main(int argc, char **argv)
+{
+    QApplication app (argc, argv);
+
+    Window window;
+    window.show();
+
+    return app.exec();
+}
+----
+<1> Was: `void counterReached();`
+<2> Needed to keep the Synapse connection afloat.
+<3> Was: `connect(this, SIGNAL (counterReached()), QApplication::instance(), SLOT (quit()));`
+<4> Was: `emit counterReached();`
 
 == Examples
 

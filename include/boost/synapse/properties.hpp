@@ -52,7 +52,7 @@ boost
                     return weak_ptr<pconnection>();
                     }
                 else
-                    return pconnect<access_property<Property> >(o,
+                    return connect<access_property<Property> >(o,
                         [x]( typename Property::type * y, bool update_value ) mutable
                             {
                             if( update_value )
@@ -75,32 +75,17 @@ boost
             return synapse_detail::set_<Property>(o,o,x);
             }
         template <class Property,class Object>
-        shared_ptr<connection>
-        set( shared_ptr<Object> const & o, typename Property::type const & x )
-            {
-            return synapse_detail::set_<Property>(o,o.get(),x);
-            }
-        template <class Property,class Object>
-        shared_ptr<connection>
-        set( weak_ptr<Object> const & o, typename Property::type const & x )
-            {
-            if( shared_ptr<Object> so=o.lock() )
-                return set<Property>(o,x);
-            else
-                return shared_ptr<connection>();
-            }
-        template <class Property,class Object>
         weak_ptr<pconnection>
-        pset( shared_ptr<Object> const & o, typename Property::type x )
+        set( shared_ptr<Object> const & o, typename Property::type x )
             {
             return synapse_detail::pset_<Property>(o,o,x);
             }
         template <class Property,class Object>
         weak_ptr<pconnection>
-        pset( weak_ptr<Object> const & o, typename Property::type x )
+        set( weak_ptr<Object> const & o, typename Property::type x )
             {
             if( shared_ptr<Object> so=o.lock() )
-                return pset<Property>(o,x);
+                return set<Property>(o,x);
             else
                 return weak_ptr<pconnection>();
             }

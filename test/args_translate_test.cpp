@@ -36,16 +36,16 @@ namespace
         int count=0;
         my_emitter_type e1;
         my_emitter_type e2;
-        shared_ptr<synapse::connection> mc_c0 = synapse::connect<synapse::meta::connected<signal0_a0> >(synapse::meta::emitter(),
-            [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } );
+        shared_ptr<synapse::connection> mc_c0 = release( synapse::connect<synapse::meta::connected<signal0_a0> >(synapse::meta::emitter(),
+            [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
         BOOST_TEST(mc_c0.unique());
         BOOST_TEST(connect_count==0);
-        shared_ptr<synapse::connection> mc_c1 = synapse::connect<synapse::meta::connected<signal1_a0> >(synapse::meta::emitter(),
-            [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } );
+        shared_ptr<synapse::connection> mc_c1 = release( synapse::connect<synapse::meta::connected<signal1_a0> >(synapse::meta::emitter(),
+            [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
         BOOST_TEST(mc_c1.unique());
         BOOST_TEST(connect_count==0);
-        shared_ptr<synapse::connection> mc_c2 = synapse::connect<synapse::meta::connected<signal2_a0> >(synapse::meta::emitter(),
-            [&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } );
+        shared_ptr<synapse::connection> mc_c2 = release( synapse::connect<synapse::meta::connected<signal2_a0> >(synapse::meta::emitter(),
+            [&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } ) );
         BOOST_TEST(mc_c2.unique());
         BOOST_TEST(connect_count==0);
         shared_ptr<synapse::connection> c0=synapse::translate<signal0_a0,signal1_a0>(&e1,&e1);
@@ -102,16 +102,16 @@ namespace
         int count=0;
         my_emitter_type e1;
         my_emitter_type e2;
-        shared_ptr<synapse::connection> mc_c0 = synapse::connect<synapse::meta::connected<signal0_a1> >(synapse::meta::emitter(),
-            [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } );
+        shared_ptr<synapse::connection> mc_c0 = release( synapse::connect<synapse::meta::connected<signal0_a1> >(synapse::meta::emitter(),
+            [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
         BOOST_TEST(mc_c0.unique());
         BOOST_TEST(connect_count==0);
-        shared_ptr<synapse::connection> mc_c1 = synapse::connect<synapse::meta::connected<signal1_a1> >(synapse::meta::emitter(),
-            [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } );
+        shared_ptr<synapse::connection> mc_c1 = release( synapse::connect<synapse::meta::connected<signal1_a1> >(synapse::meta::emitter(),
+            [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
         BOOST_TEST(mc_c1.unique());
         BOOST_TEST(connect_count==0);
-        shared_ptr<synapse::connection> mc_c2 = synapse::connect<synapse::meta::connected<signal2_a1> >(synapse::meta::emitter(),
-            [&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } );
+        shared_ptr<synapse::connection> mc_c2 = release( synapse::connect<synapse::meta::connected<signal2_a1> >(synapse::meta::emitter(),
+            [&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } ) );
         BOOST_TEST(mc_c2.unique());
         BOOST_TEST(connect_count==0);
         shared_ptr<synapse::connection> c0=synapse::translate<signal0_a1,signal1_a1>(&e1,&e1);
@@ -169,16 +169,16 @@ namespace
         int count=0;
         my_emitter_type e1;
         my_emitter_type e2;
-        shared_ptr<synapse::connection> mc_c0 = synapse::connect<synapse::meta::connected<signal0_a2> >(synapse::meta::emitter(),
-            [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } );
+        shared_ptr<synapse::connection> mc_c0 = release( synapse::connect<synapse::meta::connected<signal0_a2> >(synapse::meta::emitter(),
+            [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
         BOOST_TEST(mc_c0.unique());
         BOOST_TEST(connect_count==0);
-        shared_ptr<synapse::connection> mc_c1 = synapse::connect<synapse::meta::connected<signal1_a2> >(synapse::meta::emitter(),
-            [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } );
+        shared_ptr<synapse::connection> mc_c1 = release( synapse::connect<synapse::meta::connected<signal1_a2> >(synapse::meta::emitter(),
+            [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
         BOOST_TEST(mc_c1.unique());
         BOOST_TEST(connect_count==0);
-        shared_ptr<synapse::connection> mc_c2 = synapse::connect<synapse::meta::connected<signal2_a2> >(synapse::meta::emitter(),
-            [&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } );
+        shared_ptr<synapse::connection> mc_c2 = release( synapse::connect<synapse::meta::connected<signal2_a2> >(synapse::meta::emitter(),
+            [&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } ) );
         BOOST_TEST(mc_c2.unique());
         BOOST_TEST(connect_count==0);
         shared_ptr<synapse::connection> c0=synapse::translate<signal0_a2,signal1_a2>(&e1,&e1);
@@ -237,16 +237,16 @@ namespace
         int count=0;
         my_emitter_type e1;
         my_emitter_type e2;
-        shared_ptr<synapse::connection> mc_c0 = synapse::connect<synapse::meta::connected<signal0_a3> >(synapse::meta::emitter(),
-            [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } );
+        shared_ptr<synapse::connection> mc_c0 = release( synapse::connect<synapse::meta::connected<signal0_a3> >(synapse::meta::emitter(),
+            [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
         BOOST_TEST(mc_c0.unique());
         BOOST_TEST(connect_count==0);
-        shared_ptr<synapse::connection> mc_c1 = synapse::connect<synapse::meta::connected<signal1_a3> >(synapse::meta::emitter(),
-            [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } );
+        shared_ptr<synapse::connection> mc_c1 = release( synapse::connect<synapse::meta::connected<signal1_a3> >(synapse::meta::emitter(),
+            [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
         BOOST_TEST(mc_c1.unique());
         BOOST_TEST(connect_count==0);
-        shared_ptr<synapse::connection> mc_c2 = synapse::connect<synapse::meta::connected<signal2_a3> >(synapse::meta::emitter(),
-            [&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } );
+        shared_ptr<synapse::connection> mc_c2 = release( synapse::connect<synapse::meta::connected<signal2_a3> >(synapse::meta::emitter(),
+            [&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } ) );
         BOOST_TEST(mc_c2.unique());
         BOOST_TEST(connect_count==0);
         shared_ptr<synapse::connection> c0=synapse::translate<signal0_a3,signal1_a3>(&e1,&e1);
@@ -306,16 +306,16 @@ namespace
         int count=0;
         my_emitter_type e1;
         my_emitter_type e2;
-        shared_ptr<synapse::connection> mc_c0 = synapse::connect<synapse::meta::connected<signal0_a4> >(synapse::meta::emitter(),
-            [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } );
+        shared_ptr<synapse::connection> mc_c0 = release( synapse::connect<synapse::meta::connected<signal0_a4> >(synapse::meta::emitter(),
+            [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
         BOOST_TEST(mc_c0.unique());
         BOOST_TEST(connect_count==0);
-        shared_ptr<synapse::connection> mc_c1 = synapse::connect<synapse::meta::connected<signal1_a4> >(synapse::meta::emitter(),
-            [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } );
+        shared_ptr<synapse::connection> mc_c1 = release( synapse::connect<synapse::meta::connected<signal1_a4> >(synapse::meta::emitter(),
+            [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
         BOOST_TEST(mc_c1.unique());
         BOOST_TEST(connect_count==0);
-        shared_ptr<synapse::connection> mc_c2 = synapse::connect<synapse::meta::connected<signal2_a4> >(synapse::meta::emitter(),
-            [&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } );
+        shared_ptr<synapse::connection> mc_c2 = release( synapse::connect<synapse::meta::connected<signal2_a4> >(synapse::meta::emitter(),
+            [&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } ) );
         BOOST_TEST(mc_c2.unique());
         BOOST_TEST(connect_count==0);
         short a4=42;

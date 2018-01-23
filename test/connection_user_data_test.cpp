@@ -33,7 +33,7 @@ main( int argc, char const * argv[] )
         }
         {
         auto e = make_shared<my_emitter_type>();
-        shared_ptr<synapse::pconnection> c=synapse::pconnect<my_signal>(e,&noop).lock();
+        shared_ptr<synapse::pconnection> c=synapse::connect<my_signal>(e,&noop).lock();
         BOOST_TEST(!c->get_user_data<int>());
         c->set_user_data(42);
         BOOST_TEST(*c->get_user_data<int>()==42);

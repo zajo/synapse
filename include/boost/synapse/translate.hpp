@@ -18,52 +18,28 @@ boost
         shared_ptr<connection> translate( OriginalEmitter *, TranslatedEmitter * );
 
         template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        shared_ptr<connection> translate( OriginalEmitter *, weak_ptr<TranslatedEmitter> const & );
+        weak_ptr<pconnection> translate( OriginalEmitter *, weak_ptr<TranslatedEmitter> const & );
 
         template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        shared_ptr<connection> translate( OriginalEmitter *, shared_ptr<TranslatedEmitter> const & );
+        weak_ptr<pconnection> translate( OriginalEmitter *, shared_ptr<TranslatedEmitter> const & );
 
         template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        shared_ptr<connection> translate( weak_ptr<OriginalEmitter> const &, TranslatedEmitter * );
+        weak_ptr<pconnection> translate( weak_ptr<OriginalEmitter> const &, TranslatedEmitter * );
 
         template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        shared_ptr<connection> translate( weak_ptr<OriginalEmitter> const &, weak_ptr<TranslatedEmitter> const & );
+        weak_ptr<pconnection> translate( weak_ptr<OriginalEmitter> const &, weak_ptr<TranslatedEmitter> const & );
 
         template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        shared_ptr<connection> translate( weak_ptr<OriginalEmitter> const &, shared_ptr<TranslatedEmitter> const & );
+        weak_ptr<pconnection> translate( weak_ptr<OriginalEmitter> const &, shared_ptr<TranslatedEmitter> const & );
 
         template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        shared_ptr<connection> translate( shared_ptr<OriginalEmitter> const &, TranslatedEmitter * );
+        weak_ptr<pconnection> translate( shared_ptr<OriginalEmitter> const &, TranslatedEmitter * );
 
         template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        shared_ptr<connection> translate( shared_ptr<OriginalEmitter> const &, weak_ptr<TranslatedEmitter> const & );
+        weak_ptr<pconnection> translate( shared_ptr<OriginalEmitter> const &, weak_ptr<TranslatedEmitter> const & );
 
         template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        shared_ptr<connection> translate( shared_ptr<OriginalEmitter> const &, shared_ptr<TranslatedEmitter> const & );
-
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        weak_ptr<pconnection> ptranslate( OriginalEmitter *, weak_ptr<TranslatedEmitter> const & );
-
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        weak_ptr<pconnection> ptranslate( OriginalEmitter *, shared_ptr<TranslatedEmitter> const & );
-
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        weak_ptr<pconnection> ptranslate( weak_ptr<OriginalEmitter> const &, TranslatedEmitter * );
-
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        weak_ptr<pconnection> ptranslate( weak_ptr<OriginalEmitter> const &, weak_ptr<TranslatedEmitter> const & );
-
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        weak_ptr<pconnection> ptranslate( weak_ptr<OriginalEmitter> const &, shared_ptr<TranslatedEmitter> const & );
-
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        weak_ptr<pconnection> ptranslate( shared_ptr<OriginalEmitter> const &, TranslatedEmitter * );
-
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        weak_ptr<pconnection> ptranslate( shared_ptr<OriginalEmitter> const &, weak_ptr<TranslatedEmitter> const & );
-
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        weak_ptr<pconnection> ptranslate( shared_ptr<OriginalEmitter> const &, shared_ptr<TranslatedEmitter> const & );
+        weak_ptr<pconnection> translate( shared_ptr<OriginalEmitter> const &, shared_ptr<TranslatedEmitter> const & );
         }
     }
 
@@ -127,98 +103,50 @@ boost
             return synapse_detail::translate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
             }
         template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        shared_ptr<connection>
+        weak_ptr<pconnection>
         translate( OriginalEmitter * oe, weak_ptr<TranslatedEmitter> const & te )
             {
-            return synapse_detail::translate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
+            return synapse_detail::ptranslate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
             }
         template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        shared_ptr<connection>
+        weak_ptr<pconnection>
         translate( OriginalEmitter * oe, shared_ptr<TranslatedEmitter> const & te )
             {
-            return synapse_detail::translate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
+            return synapse_detail::ptranslate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
             }
         template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        shared_ptr<connection>
+        weak_ptr<pconnection>
         translate( weak_ptr<OriginalEmitter> const & oe, TranslatedEmitter * te )
             {
-            return synapse_detail::translate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
+            return synapse_detail::ptranslate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
             }
         template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        shared_ptr<connection>
+        weak_ptr<pconnection>
         translate( weak_ptr<OriginalEmitter> const & oe, weak_ptr<TranslatedEmitter> const & te )
             {
-            return synapse_detail::translate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
+            return synapse_detail::ptranslate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
             }
         template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        shared_ptr<connection>
+        weak_ptr<pconnection>
         translate( weak_ptr<OriginalEmitter> const & oe, shared_ptr<TranslatedEmitter> const & te )
             {
-            return synapse_detail::translate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
+            return synapse_detail::ptranslate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
             }
         template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        shared_ptr<connection>
+        weak_ptr<pconnection>
         translate( shared_ptr<OriginalEmitter> const & oe, TranslatedEmitter * te )
             {
-            return synapse_detail::translate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
+            return synapse_detail::ptranslate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
             }
         template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        shared_ptr<connection>
+        weak_ptr<pconnection>
         translate( shared_ptr<OriginalEmitter> const & oe, weak_ptr<TranslatedEmitter> const & te )
             {
-            return synapse_detail::translate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
+            return synapse_detail::ptranslate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
             }
         template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        shared_ptr<connection>
+        weak_ptr<pconnection>
         translate( shared_ptr<OriginalEmitter> const & oe, shared_ptr<TranslatedEmitter> const & te )
-            {
-            return synapse_detail::translate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
-            }
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        weak_ptr<pconnection>
-        ptranslate( OriginalEmitter * oe, weak_ptr<TranslatedEmitter> const & te )
-            {
-            return synapse_detail::ptranslate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
-            }
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        weak_ptr<pconnection>
-        ptranslate( OriginalEmitter * oe, shared_ptr<TranslatedEmitter> const & te )
-            {
-            return synapse_detail::ptranslate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
-            }
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        weak_ptr<pconnection>
-        ptranslate( weak_ptr<OriginalEmitter> const & oe, TranslatedEmitter * te )
-            {
-            return synapse_detail::ptranslate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
-            }
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        weak_ptr<pconnection>
-        ptranslate( weak_ptr<OriginalEmitter> const & oe, weak_ptr<TranslatedEmitter> const & te )
-            {
-            return synapse_detail::ptranslate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
-            }
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        weak_ptr<pconnection>
-        ptranslate( weak_ptr<OriginalEmitter> const & oe, shared_ptr<TranslatedEmitter> const & te )
-            {
-            return synapse_detail::ptranslate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
-            }
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        weak_ptr<pconnection>
-        ptranslate( shared_ptr<OriginalEmitter> const & oe, TranslatedEmitter * te )
-            {
-            return synapse_detail::ptranslate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
-            }
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        weak_ptr<pconnection>
-        ptranslate( shared_ptr<OriginalEmitter> const & oe, weak_ptr<TranslatedEmitter> const & te )
-            {
-            return synapse_detail::ptranslate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
-            }
-        template <class OriginalSignal,class TranslatedSignal,class OriginalEmitter,class TranslatedEmitter>
-        weak_ptr<pconnection>
-        ptranslate( shared_ptr<OriginalEmitter> const & oe, shared_ptr<TranslatedEmitter> const & te )
             {
             return synapse_detail::ptranslate_fwd<OriginalSignal,TranslatedSignal>(oe,te);
             }

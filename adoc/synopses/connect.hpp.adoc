@@ -6,18 +6,18 @@ namespace boost { namespace synapse {
     class connection;
 
     template <class Signal,class Emitter,class F>
-    shared_ptr<connection> connect( <<Emitter>> e, F f ); <1>
+    shared_ptr<connection> connect( Emitter * e, F f );
 
     template <class Signal,class Emitter,class Receiver,class F>
-    shared_ptr<connection> connect( <<Emitter>> e, <<Receiver>> r, F f ); <2>
+    shared_ptr<connection> connect( Emitter * e, Receiver * r, F f );
 
     class pconnection;
 
     template <class Signal,class Emitter,class F>
-    weak_ptr<pconnection> pconnect( <<Emitter>> e, F f ); <3>
+    weak_ptr<pconnection> connect( <<Emitter>> e, F f ); <1>
 
     template <class Signal,class Emitter,class Receiver,class F>
-    weak_ptr<pconnection> pconnect( <<Emitter>> e, <<Receiver>> r, F f ); <4>
+    weak_ptr<pconnection> connect( <<Emitter>> e, <<Receiver>> r, F f ); <2>
 
     shared_ptr<connection const> release( weak_ptr<pconnection const> const & c );
     shared_ptr<connection> release( weak_ptr<pconnection> const & c );
@@ -42,7 +42,5 @@ namespace boost { namespace synapse {
 
 } }
 ----
-<1> `\<<Emitter>>`  is `Emitter *`, `weak_ptr<Emitter> const &` or, equivalently, `shared_ptr<Emitter> const &`;
-<2> `\<<Receiver>>` by analogy;
-<3> `\<<Emitter>>`  is `weak_ptr<Emitter> const &` or, equivalently, `shared_ptr<Emitter> const &`;
-<4> `\<<Receiver>>` by analogy.
+<1> `\<<Emitter>>`  is `weak_ptr<Emitter> const &` or, equivalently, `shared_ptr<Emitter> const &`;
+<2> `\<<Emitter>>`  is `Emitter *`, `weak_ptr<Emitter> const &` or, equivalently, `shared_ptr<Emitter> const &`; at least one of `e` and `r` is _not_ a raw pointer.

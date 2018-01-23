@@ -20,70 +20,40 @@ boost
         template <class Signal,class Emitter,class F>
         shared_ptr<connection> connect( Emitter *, F );
 
-        template <class Signal,class Emitter,class F>
-        shared_ptr<connection> connect( weak_ptr<Emitter> const &, F );
-
-        template <class Signal,class Emitter,class F>
-        shared_ptr<connection> connect( shared_ptr<Emitter> const &, F );
-
         template <class Signal,class Emitter,class Receiver,class F>
         shared_ptr<connection> connect( Emitter *, Receiver *, F );
-
-        template <class Signal,class Emitter,class Receiver,class F>
-        shared_ptr<connection> connect( Emitter *, weak_ptr<Receiver> const &, F );
-
-        template <class Signal,class Emitter,class Receiver,class F>
-        shared_ptr<connection> connect( Emitter *, shared_ptr<Receiver> const &, F );
-
-        template <class Signal,class Emitter,class Receiver,class F>
-        shared_ptr<connection> connect( weak_ptr<Emitter> const &, Receiver *, F );
-
-        template <class Signal,class Emitter,class Receiver,class F>
-        shared_ptr<connection> connect( weak_ptr<Emitter> const &, weak_ptr<Receiver> const &, F );
-
-        template <class Signal,class Emitter,class Receiver,class F>
-        shared_ptr<connection> connect( weak_ptr<Emitter> const &, shared_ptr<Receiver> const &, F );
-
-        template <class Signal,class Emitter,class Receiver,class F>
-        shared_ptr<connection> connect( shared_ptr<Emitter> const &, Receiver *, F );
-
-        template <class Signal,class Emitter,class Receiver,class F>
-        shared_ptr<connection> connect( shared_ptr<Emitter> const &, weak_ptr<Receiver> const &, F );
-
-        template <class Signal,class Emitter,class Receiver,class F>
-        shared_ptr<connection> connect( shared_ptr<Emitter> const &, shared_ptr<Receiver> const &, F );
 
         class pconnection;
 
         template <class Signal,class Emitter,class F>
-        weak_ptr<pconnection> pconnect( weak_ptr<Emitter> const &, F );
+        weak_ptr<pconnection> connect( weak_ptr<Emitter> const &, F );
 
         template <class Signal,class Emitter,class F>
-        weak_ptr<pconnection> pconnect( shared_ptr<Emitter> const &, F );
+        weak_ptr<pconnection> connect( shared_ptr<Emitter> const &, F );
 
         template <class Signal,class Emitter,class Receiver,class F>
-        weak_ptr<pconnection> pconnect( Emitter *, weak_ptr<Receiver> const &, F );
+        weak_ptr<pconnection> connect( Emitter *, weak_ptr<Receiver> const &, F );
 
         template <class Signal,class Emitter,class Receiver,class F>
-        weak_ptr<pconnection> pconnect( Emitter *, shared_ptr<Receiver> const &, F );
+        weak_ptr<pconnection> connect( Emitter *, shared_ptr<Receiver> const &, F );
 
         template <class Signal,class Emitter,class Receiver,class F>
-        weak_ptr<pconnection> pconnect( weak_ptr<Emitter> const &, Receiver *, F );
+        weak_ptr<pconnection> connect( weak_ptr<Emitter> const &, Receiver *, F );
 
         template <class Signal,class Emitter,class Receiver,class F>
-        weak_ptr<pconnection> pconnect( weak_ptr<Emitter> const &, weak_ptr<Receiver> const &, F );
+        weak_ptr<pconnection> connect( weak_ptr<Emitter> const &, weak_ptr<Receiver> const &, F );
 
         template <class Signal,class Emitter,class Receiver,class F>
-        weak_ptr<pconnection> pconnect( weak_ptr<Emitter> const &, shared_ptr<Receiver> const &, F );
+        weak_ptr<pconnection> connect( weak_ptr<Emitter> const &, shared_ptr<Receiver> const &, F );
 
         template <class Signal,class Emitter,class Receiver,class F>
-        weak_ptr<pconnection> pconnect( shared_ptr<Emitter> const &, Receiver *, F );
+        weak_ptr<pconnection> connect( shared_ptr<Emitter> const &, Receiver *, F );
 
         template <class Signal,class Emitter,class Receiver,class F>
-        weak_ptr<pconnection> pconnect( shared_ptr<Emitter> const &, weak_ptr<Receiver> const &, F );
+        weak_ptr<pconnection> connect( shared_ptr<Emitter> const &, weak_ptr<Receiver> const &, F );
 
         template <class Signal,class Emitter,class Receiver,class F>
-        weak_ptr<pconnection> pconnect( shared_ptr<Emitter> const &, shared_ptr<Receiver> const &, F );
+        weak_ptr<pconnection> connect( shared_ptr<Emitter> const &, shared_ptr<Receiver> const &, F );
 
         shared_ptr<connection const> release( weak_ptr<pconnection const> const & );
         shared_ptr<connection> release( weak_ptr<pconnection> const & );
@@ -208,129 +178,69 @@ boost
             {
             return synapse_detail::connect_fwd<Signal>(e,f);
             }
-        template <class Signal,class Emitter,class F>
-        shared_ptr<connection>
-        connect( weak_ptr<Emitter> const & e, F f )
-            {
-            return synapse_detail::connect_fwd<Signal>(e,f);
-            }
-        template <class Signal,class Emitter,class F>
-        shared_ptr<connection>
-        connect( shared_ptr<Emitter> const & e, F f )
-            {
-            return synapse_detail::connect_fwd<Signal>(e,f);
-            }
         template <class Signal,class Emitter,class Receiver,class F>
         shared_ptr<connection>
         connect( Emitter * e, Receiver * r, F f )
             {
             return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::connect_fwd(e,r,f);
             }
+        template <class Signal,class Emitter,class F>
+        weak_ptr<pconnection>
+        connect( weak_ptr<Emitter> const & e, F f )
+            {
+            return synapse_detail::pconnect_fwd<Signal>(e,f);
+            }
+        template <class Signal,class Emitter,class F>
+        weak_ptr<pconnection>
+        connect( shared_ptr<Emitter> const & e, F f )
+            {
+            return synapse_detail::pconnect_fwd<Signal>(e,f);
+            }
         template <class Signal,class Emitter,class Receiver,class F>
-        shared_ptr<connection>
+        weak_ptr<pconnection>
         connect( Emitter * e, weak_ptr<Receiver> const & r, F f )
             {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::connect_fwd(e,r,f);
+            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
             }
         template <class Signal,class Emitter,class Receiver,class F>
-        shared_ptr<connection>
+        weak_ptr<pconnection>
         connect( Emitter * e, shared_ptr<Receiver> const & r, F f )
             {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::connect_fwd(e,r,f);
+            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
             }
         template <class Signal,class Emitter,class Receiver,class F>
-        shared_ptr<connection>
+        weak_ptr<pconnection>
         connect( weak_ptr<Emitter> const & e, Receiver * r, F f )
             {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::connect_fwd(e,r,f);
+            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
             }
         template <class Signal,class Emitter,class Receiver,class F>
-        shared_ptr<connection>
+        weak_ptr<pconnection>
         connect( weak_ptr<Emitter> const & e, weak_ptr<Receiver> const & r, F f )
             {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::connect_fwd(e,r,f);
+            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
             }
         template <class Signal,class Emitter,class Receiver,class F>
-        shared_ptr<connection>
+        weak_ptr<pconnection>
         connect( weak_ptr<Emitter> const & e, shared_ptr<Receiver> const & r, F f )
             {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::connect_fwd(e,r,f);
+            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
             }
         template <class Signal,class Emitter,class Receiver,class F>
-        shared_ptr<connection>
+        weak_ptr<pconnection>
         connect( shared_ptr<Emitter> const & e, Receiver * r, F f )
             {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::connect_fwd(e,r,f);
+            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
             }
         template <class Signal,class Emitter,class Receiver,class F>
-        shared_ptr<connection>
+        weak_ptr<pconnection>
         connect( shared_ptr<Emitter> const & e, weak_ptr<Receiver> const & r, F f )
             {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::connect_fwd(e,r,f);
+            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
             }
         template <class Signal,class Emitter,class Receiver,class F>
-        shared_ptr<connection>
+        weak_ptr<pconnection>
         connect( shared_ptr<Emitter> const & e, shared_ptr<Receiver> const & r, F f )
-            {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::connect_fwd(e,r,f);
-            }
-        template <class Signal,class Emitter,class F>
-        weak_ptr<pconnection>
-        pconnect( weak_ptr<Emitter> const & e, F f )
-            {
-            return synapse_detail::pconnect_fwd<Signal>(e,f);
-            }
-        template <class Signal,class Emitter,class F>
-        weak_ptr<pconnection>
-        pconnect( shared_ptr<Emitter> const & e, F f )
-            {
-            return synapse_detail::pconnect_fwd<Signal>(e,f);
-            }
-        template <class Signal,class Emitter,class Receiver,class F>
-        weak_ptr<pconnection>
-        pconnect( Emitter * e, weak_ptr<Receiver> const & r, F f )
-            {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
-            }
-        template <class Signal,class Emitter,class Receiver,class F>
-        weak_ptr<pconnection>
-        pconnect( Emitter * e, shared_ptr<Receiver> const & r, F f )
-            {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
-            }
-        template <class Signal,class Emitter,class Receiver,class F>
-        weak_ptr<pconnection>
-        pconnect( weak_ptr<Emitter> const & e, Receiver * r, F f )
-            {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
-            }
-        template <class Signal,class Emitter,class Receiver,class F>
-        weak_ptr<pconnection>
-        pconnect( weak_ptr<Emitter> const & e, weak_ptr<Receiver> const & r, F f )
-            {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
-            }
-        template <class Signal,class Emitter,class Receiver,class F>
-        weak_ptr<pconnection>
-        pconnect( weak_ptr<Emitter> const & e, shared_ptr<Receiver> const & r, F f )
-            {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
-            }
-        template <class Signal,class Emitter,class Receiver,class F>
-        weak_ptr<pconnection>
-        pconnect( shared_ptr<Emitter> const & e, Receiver * r, F f )
-            {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
-            }
-        template <class Signal,class Emitter,class Receiver,class F>
-        weak_ptr<pconnection>
-        pconnect( shared_ptr<Emitter> const & e, weak_ptr<Receiver> const & r, F f )
-            {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
-            }
-        template <class Signal,class Emitter,class Receiver,class F>
-        weak_ptr<pconnection>
-        pconnect( shared_ptr<Emitter> const & e, shared_ptr<Receiver> const & r, F f )
             {
             return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
             }

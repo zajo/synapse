@@ -22,6 +22,4 @@ lib QtCore : : <name>Qt5Cored <search>$(qt_dir_lib) : : $(qt_usage_requirements)
 lib QtWidgets : : <variant>release <name>Qt5Widgets <search>$(qt_dir_lib) : : $(qt_usage_requirements) ;
 lib QtWidgets : : <name>Qt5Widgetsd <search>$(qt_dir_lib) : : $(vqt_usage_requirements) ;
 
-exe qt_button : qt_button.cpp QtWidgets QtCore ../..//synapse/<link>static ;
 exe qt_custom_signals : qt_custom_signals.cpp QtWidgets QtCore ../..//synapse/<link>static ;
-exe qt_meta_block : qt_meta_block.cpp QtWidgets QtCore ../..//synapse/<link>static ../..//block/<link>static ;

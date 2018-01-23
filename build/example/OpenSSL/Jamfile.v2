@@ -5,9 +5,9 @@
 
 project
     : source-location
-        ../../../example/callback_api
-    : requirements
-        <link>static
+        ../../../example/OpenSSL
     ;
 
-exe callback_api : main.cpp callback_api.c synapsify.cpp ../..//synapse ;
+lib OpenSSL : : : : <include>/usr/local/opt/openssl/include ;
+
+exe openssl_example : example.cpp OpenSSL ../..//synapse/<link>static ;

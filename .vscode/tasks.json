@@ -1,11 +1,11 @@
 {
-    "displayName": "property_test",
-    "description": "property_test_test",
+    "displayName": "All unit tests",
+    "description": "All unit tests",
     "isBuildCommand": "true",
     "command": "sh",
     "args": [
         "-c",
-        "cd ${workspaceRoot}/build/test && ../../../../b2 property_test"
+        "cd ${workspaceRoot}/build/test && ../../../../b2"
     ],
     "version": "0.1.0",
     "problemMatcher": {
@@ -23,5 +23,5 @@
             "message": 5
         }
     },
-    "chooserIndex": 1
+    "chooserIndex": 0
 }
