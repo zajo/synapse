@@ -18,8 +18,6 @@ Synapse is non-intrusive: it allows any object of any type whatsoever to be used
 
 == Tutorial
 
-This is a short introduction to Synapse. There are also several complete example programs that may be of interest to the beginner.
-
 === Signals, emitters, receivers
 
 In Synapse, signals are defined by function pointer typedefs. The return type is used to tell apart different signals that have otherwise identical signature.
@@ -72,9 +70,7 @@ synapse::connect<button::clicked>(emitter, receiver,
     } );
 ----
 
-NOTE: The `receiver` argument to `connect` is optional. If it is specified, it is passed as the first argument to the connected function, prepending all other arguments as specified by the signal signature.
-
-
+NOTE: The `receiver` argument to `connect` is optional. If it is specified, it is dereferenced and passed as the first argument to the connected function, prepending all other arguments as specified by the signal signature.
 
 === Emitting signals from objects of 3rd-party types
 
@@ -102,8 +98,8 @@ Outside of `process_file` the `report_progress` signal can be connected to some 
 ----
 if( FILE * f=fopen("file.dat","rb") ) {
     QProgressBar pb(....);
-    auto c=synapse::connect<report_progress>(f,
-        boost::bind(&QProgressBar::setValue,&pb,_1));
+    auto c=synapse::connect<report_progress>(f, &pb,
+		&QProgressBar::setValue);
     process_file(f);
 }
 ----
@@ -114,7 +110,7 @@ Notice that `process_file` is not coupled with `QProgressBar`: the `report_progr
 
 In Synapse there are two types of connection objects: <<connection,`connection`>> and <<pconnection,`pconnection`>>:
 
-- `shared_ptr<<<connection,connection>>>` objects are returned by overloads of <<connect,`connect`>> which take the emitter (and, if used, the receiver) as a raw pointer. The user is required to keep this object afloat; the signal is disconnected when it expires.
+- `shared_ptr<<<connection,connection>>>` objects are returned by overloads of <<connect,`connect`>> which take the emitter (and, if specified, the receiver) as a raw pointer. The user is required to keep this object afloat; the signal is disconnected when it expires.
 - `weak_ptr<<<pconnection,pconnection>>>` objects are returned by overloads of <<connect,`connect`>> which take at least one of the emitter or the receiver as a `weak_ptr` or `shared_ptr`. The user is not required to keep this object afloat; the connection is disconnected when Synapse detects that the emitter or the receiver have expired.
 
 NOTE: The <<release,`release`>> function can be used to convert a <<pconnection,`pconnection`>> object to a <<connection,`connection`>> object.
@@ -141,8 +137,7 @@ int main() {
 
     int emitter;
 
-    weak_ptr<synapse::connection> c = synapse::connect<my_signal>(
-        &emitter,
+    auto c = synapse::connect<my_signal>(&emitter,
         [ ](std::string const & s) {
             std::cout << s;
         } );
@@ -158,7 +153,7 @@ int main() {
 ----
 <1> `emit` calls the connected lambda, printing `Hello World`.
 
-<2> The `print` signal will be blocked until `b` expires, therefore the call to `emit` on the next line is a noop, even though the `c` has not expired (meaning, the signal is still connected.)
+<2> The `print` signal will be blocked until `b` expires, therefore the call to `emit` on the next line is a noop, even though `c` has not expired (meaning, the signal is still connected.)
 
 <3> At this point `b` has expired, so the call to `emit` will call the connected lambda, printing `Hello World`, again.
 
@@ -168,12 +163,11 @@ Synapse features a special global emitter that emits meta signals to notify conn
 
 When a `Signal` is blocked or unblocked, the meta emitter emits the `meta::blocked<Signal>` signal. Connecting this signal allows the blocked state of the signal to be automatically reflected in other systems, for example user interface.
 
-Similarly, when a `Signal` is connected or disconnected, the meta emitter emits the ,,<<meta::connected,`meta::connected<Signal>`>>. This meta signal is useful for integrating Synapse with 3rd-party callback systems; see this example.
+Similarly, when a `Signal` is connected or disconnected, the meta emitter emits the <<meta::connected,`meta::connected<Signal>`>>. This meta signal is useful for integrating Synapse with 3rd-party callback systems; see <<Synapsifying C callbacks>>.
 
 NOTE: To further facilitate the integration of Synapse with 3rd-partty callback systems, `connection`  objects (returned by the `connect` function) can store arbitrary user data.
 
 === Interthread communication
-
 
 ==== Emitting signals across thread boundaries
 
@@ -183,7 +177,7 @@ The following diagram shows the connections created (by calls to `<<connect,conn
 
 image::fig1.png[]
 
-However, it is also possible for any thread to request to receive all signals emitted by other threads, by creating its own <<thread_local_queue,`thread_local_queue`>> object using <<create_thread_local_queue,`create_thread_local_queue`>>.
+It is also possible for any thread to request to receive all signals emitted by other threads, by creating its own <<thread_local_queue,`thread_local_queue`>> object using <<create_thread_local_queue,`create_thread_local_queue`>>.
 
 In this case, _in addition_ to the behavior described above, `<<emit,emit>><S>(e1,arg,...)` will capture its arguments (depending on the signature of `S`) and queue them into the <<thread_local_queue,`thread_local_queue`>> object created by any thread _other_ than the calling thread. Each such thread must poll its own <<thread_local_queue,`thread_local_queue`>> regularly; this "emits" the queued objects locally and removes them from the queue (note that <<poll,`poll`>> is not given an emitter or a signal type, it emits locally all queued objects, regardless of signal type or emitter).
 
@@ -193,9 +187,8 @@ image::fig2.png[]
 
 A typical use case for this system is to update user interface objects with data generated by one or multiple worker threads: the user interface objects themselves need not be thread-safe, because they will be updated only synchronously, at the time <<poll,`poll`>> is called.
 
-IMPORTANT:  Special care must be taken to ensure that any objects referred to by arguments passed to <<emit,`emit`>> will remain valid until the time any other threads poll their <<thread_local_queue,`thread_local_queue`>> objects.
+Special care must be taken to ensure that any objects referred to by arguments passed to <<emit,`emit`>> will remain valid until the time all other threads have polled their <<thread_local_queue,`thread_local_queue`>> objects. For example, the following code is incorrect in the presence of `thread_local_queue` objects:
 
-For example, the following code is incorrect in the presence of thread_local_queues:
 [source,c++]
 ----
 typedef struct my_signal_(*my_signal)( int * );
@@ -209,7 +202,7 @@ The problem is that the address of `x` may be queued into other threads' queues,
 
 ==== Scheduling function calls across thread boundaries
 
-The <<post,`post`>> function can be used to queue into a <<thread_local_queue,`thread_local_queue`>> arbitrary functions for execution at the time <<poll,`poll`>> is called to emit queued signals. This feature allows critical worker threads to minimize the amount of time they consume by offloading expensive non-critical computations to another, non-critical thread. This also removes the need for synchronization, since the queued functions are executed synchronously in the thread that owns the <<thread_local_queue,`thread_local_queue`>> object.
+The <<post,`post`>> function can be used to queue into a <<thread_local_queue,`thread_local_queue`>> arbitrary functions for execution at the time <<poll,`poll`>> is called. This feature allows critical worker threads to minimize the amount of time they consume by offloading expensive non-critical computations to another, non-critical thread. This also removes the need for synchronization, since the queued functions are executed synchronously in the thread that owns the <<thread_local_queue,`thread_local_queue`>> object.
 
 == Building
 
