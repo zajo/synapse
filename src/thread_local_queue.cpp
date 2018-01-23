@@ -32,6 +32,7 @@ boost
 #include <vector>
 #include <deque>
 #include <algorithm>
+#include <condition_variable>
 
 namespace
 boost
