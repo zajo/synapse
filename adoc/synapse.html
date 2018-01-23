@@ -528,7 +528,12 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_managing_connection_lifetime">Managing connection lifetime</a></li>
 <li><a href="#_blocking_of_signals">Blocking of signals</a></li>
 <li><a href="#_meta_signals">Meta signals</a></li>
-<li><a href="#_interthread_communication">Interthread communication</a></li>
+<li><a href="#_interthread_communication">Interthread communication</a>
+<ul class="sectlevel3">
+<li><a href="#_emitting_signals_across_thread_boundaries">Emitting signals across thread boundaries</a></li>
+<li><a href="#_scheduling_function_calls_across_thread_boundaries">Scheduling function calls across thread boundaries</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a href="#_building">Building</a></li>
@@ -536,29 +541,41 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_synopsis">Synopsis</a></li>
 <li><a href="#_reference">Reference</a>
 <ul class="sectlevel2">
-<li><a href="#__code_emit_code"><code>emit()</code></a></li>
-<li><a href="#__code_connect_code"><code>connect()</code></a></li>
-<li><a href="#__code_pconnect_code"><code>pconnect()</code></a></li>
-<li><a href="#__code_block_code"><code>block()</code></a></li>
-<li><a href="#__code_meta_blocked_code"><code>meta::blocked&lt;&gt;</code></a></li>
-<li><a href="#__code_translate_code"><code>translate()</code></a></li>
-<li><a href="#_class_code_blocker_code">Class <code>blocker</code></a>
+<li><a href="#emit"><code>emit</code></a></li>
+<li><a href="#connect"><code>connect</code></a></li>
+<li><a href="#translate"><code>translate</code></a></li>
+<li><a href="#connection"><code>connection</code></a>
 <ul class="sectlevel3">
-<li><a href="#__code_emitter_code"><code>emitter()</code></a></li>
+<li><a href="#connection::set_user_data"><code>set_user_data</code></a></li>
+<li><a href="#connection::get_user_data"><code>get_user_data</code></a></li>
+<li><a href="#connection::emitter"><code>emitter</code></a></li>
+<li><a href="#connection::receiver"><code>receiver</code></a></li>
 </ul>
 </li>
-<li><a href="#_class_code_connection_code">Class <code>connection</code></a>
+<li><a href="#pconnection"><code>pconnection</code></a></li>
+<li><a href="#block"><code>block</code></a></li>
+<li><a href="#blocker"><code>blocker</code></a>
 <ul class="sectlevel3">
-<li><a href="#__code_set_user_data_code"><code>set_user_data()</code></a></li>
-<li><a href="#__code_get_user_data_code"><code>get_user_data()</code></a></li>
-<li><a href="#__code_emitter_code_2"><code>emitter()</code></a></li>
-<li><a href="#__code_receiver_code"><code>receiver()</code></a></li>
+<li><a href="#blocker::emitter"><code>emitter</code></a></li>
 </ul>
 </li>
-<li><a href="#_signal_types">Signal types</a></li>
+<li><a href="#thread_local_queue"><code>thread_local_queue</code></a>
+<ul class="sectlevel3">
+<li><a href="#create_thread_local_queue"><code>create_thread_local_queue</code></a></li>
+<li><a href="#poll"><code>poll</code></a></li>
+<li><a href="#wait"><code>wait</code></a></li>
+<li><a href="#post"><code>post</code></a></li>
 </ul>
 </li>
-<li><a href="#_programming_techniques">Programming techniques</a></li>
+</ul>
+</li>
+<li><a href="#_programming_techniques">Programming techniques</a>
+<ul class="sectlevel2">
+<li><a href="#_synapsifying_c_callbacks">Synapsifying C callbacks</a></li>
+<li><a href="#_reporting_exceptions_from_code_noexcept_code_signal_handlers">Reporting exceptions from <code>noexcept</code> signal handlers</a></li>
+<li><a href="#_using_synapse_with_qt_to_avoid_mocing">Using Synapse with Qt to avoid MOCing</a></li>
+</ul>
+</li>
 <li><a href="#_examples">Examples</a>
 <ul class="sectlevel2">
 <li><a href="#_glfw">GLFW</a></li>
@@ -586,9 +603,6 @@ table.CodeRay td.code>pre{padding:0}
 <div class="sect1">
 <h2 id="_tutorial">Tutorial</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>This is a short introduction to Synapse. There are also several complete example programs that may be of interest to the beginner.</p>
-</div>
 <div class="sect2">
 <h3 id="_signals_emitters_receivers">Signals, emitters, receivers</h3>
 <div class="paragraph">
@@ -654,7 +668,7 @@ synapse::connect&lt;button::clicked&gt;(emitter, receiver, &amp;dialog::accept);
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-The <code>receiver</code> argument to <code>connect</code> is optional. If it is specified, it is passed as the first argument to the connected function, prepending all other arguments as specified by the signal signature.
+The <code>receiver</code> argument to <code>connect</code> is optional. If it is specified, it is dereferenced and passed as the first argument to the connected function, prepending all other arguments as specified by the signal signature.
 </td>
 </tr>
 </table>
@@ -663,7 +677,7 @@ The <code>receiver</code> argument to <code>connect</code> is optional. If it is
 <div class="sect2">
 <h3 id="_emitting_signals_from_objects_of_3rd_party_types">Emitting signals from objects of 3rd-party types</h3>
 <div class="paragraph">
-<p>In Synapse, any object whatsoever can be used as an emitter. This makes it possible to <code>emit</code> non-intrusively even if the emitter object is not built to support signals. For example, a function that processes a file can use the standard <code>FILE</code> pointer as a Synapse emitter to report on its progress:</p>
+<p>In Synapse, any object whatsoever can be used as an emitter. This makes it possible to <code>emit</code> non-intrusively even if the emitter object was not designed to support signals. For example, a function that processes a file can use the standard <code>FILE</code> pointer as a Synapse emitter to report on its progress:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -688,8 +702,8 @@ The <code>receiver</code> argument to <code>connect</code> is optional. If it is
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">if</span>( FILE * f=fopen(<span class="string"><span class="delimiter">&quot;</span><span class="content">file.dat</span><span class="delimiter">&quot;</span></span>,<span class="string"><span class="delimiter">&quot;</span><span class="content">rb</span><span class="delimiter">&quot;</span></span>) ) {
     QProgressBar pb(....);
-    <span class="directive">auto</span> c=synapse::connect&lt;report_progress&gt;(f,
-        boost::bind(&amp;QProgressBar::setValue,&amp;pb,_1));
+    <span class="directive">auto</span> c=synapse::connect&lt;report_progress&gt;(f, &amp;pb,
+                &amp;QProgressBar::setValue);
     process_file(f);
 }</code></pre>
 </div>
@@ -701,123 +715,29 @@ The <code>receiver</code> argument to <code>connect</code> is optional. If it is
 <div class="sect2">
 <h3 id="_managing_connection_lifetime">Managing connection lifetime</h3>
 <div class="paragraph">
-<p>The <code>connect</code> function template has multiple overloads:</p>
+<p>In Synapse there are two types of connection objects: <a href="#connection"><code>connection</code></a> and <a href="#pconnection"><code>pconnection</code></a>:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>the <code>receiver</code> argument is optional;</p>
+<p><code>shared_ptr&lt;<a href="#connection">connection</a>&gt;</code> objects are returned by overloads of <a href="#connect"><code>connect</code></a> which take the emitter (and, if specified, the receiver) as a raw pointer. The user is required to keep this object afloat; the signal is disconnected when it expires.</p>
 </li>
 <li>
-<p>both the <code>emitter</code> and the <code>receiver</code> may each be passed as raw pointer, <code>weak_ptr</code> or <code>shared_ptr</code> (the latter is equivalent to passing a <code>weak_ptr</code>.)</p>
+<p><code>weak_ptr&lt;<a href="#pconnection">pconnection</a>&gt;</code> objects are returned by overloads of <a href="#connect"><code>connect</code></a> which take at least one of the emitter or the receiver as a <code>weak_ptr</code> or <code>shared_ptr</code>. The user is not required to keep this object afloat; the connection is disconnected when Synapse detects that the emitter or the receiver have expired.</p>
 </li>
 </ul>
 </div>
-<div class="paragraph">
-<p>If we call an overload that takes the emitter <em>and</em> the receiver (if used) as raw pointer(s), the connection expires with the returned <code>shared_ptr&lt;connection&gt;</code>. It is the responsibility of the user to ensure that both the <code>emitter</code> and the <code>receiver</code> are valid until then.</p>
-</div>
-<div class="exampleblock">
-<div class="content">
-<div class="listingblock">
-<div class="title">Example 1</div>
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="preprocessor">#include</span> <span class="include">&lt;boost/synapse/connect.hpp&gt;</span>
-<span class="preprocessor">#include</span> <span class="include">&lt;string&gt;</span>
-<span class="preprocessor">#include</span> <span class="include">&lt;iostream&gt;</span>
-
-<span class="keyword">namespace</span> synapse = boost::synapse;
-
-<span class="keyword">typedef</span> <span class="keyword">struct</span> print_(*print)(std::<span class="predefined-type">string</span> <span class="directive">const</span> &amp; s);
-
-<span class="predefined-type">int</span> main() {
-
-    <span class="predefined-type">int</span> emitter; <i class="conum" data-value="1"></i><b>(1)</b>
-
-    shared_ptr&lt;synapse::connection&gt; c = synapse::connect&lt;my_signal&gt;(
-        &amp;emitter, <i class="conum" data-value="2"></i><b>(2)</b>
-        [ ](std::<span class="predefined-type">string</span> <span class="directive">const</span> &amp; s) {
-            std::cout &lt;&lt; s;
-        } );
-
-    synapse::emit&lt;print&gt;(&amp;emitter,<span class="string"><span class="delimiter">&quot;</span><span class="content">Hello World</span><span class="delimiter">&quot;</span></span>); <i class="conum" data-value="3"></i><b>(3)</b>
-
-    c.reset();
-    synapse::emit&lt;print&gt;(&amp;emitter,<span class="string"><span class="delimiter">&quot;</span><span class="content">NOOP</span><span class="delimiter">&quot;</span></span>); <i class="conum" data-value="4"></i><b>(4)</b>
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
+<div class="admonitionblock note">
 <table>
 <tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>In Synapse, any object&#8201;&#8212;&#8201;including this <code>int</code>&#8201;&#8212;&#8201;can be used as a signal emitter.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>The emitter is passed to <code>connect</code> as a raw pointer, so the return value is of type <code>shared_ptr&lt;connection&gt;</code>.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td><code>emit</code> calls the connected lambda, printing <code>Hello World</code>.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>At this point calling <code>emit</code> is a noop because the connection <code>c</code> has expired.</td>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The <a href="#release"><code>release</code></a> function can be used to convert a <a href="#pconnection"><code>pconnection</code></a> object to a <a href="#connection"><code>connection</code></a> object.
+</td>
 </tr>
 </table>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>If we call an overload that takes at least one of the emitter or the receiver (if used) as a <code>weak_ptr</code> (or, equivalently, <code>shared_ptr</code>), the return value is of type <code>weak_ptr&lt;connection&gt;</code>. The connection itself will expire automatically when either the receiver or the emitter (if applicable) expire, while the returned <code>weak_ptr&lt;connection&gt;</code> can be locked to access the connection object, or passed to <code>release</code> to force a disconnect.</p>
-</div>
-<div class="exampleblock">
-<div class="content">
-<div class="listingblock">
-<div class="title">Example 2</div>
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="preprocessor">#include</span> <span class="include">&lt;boost/synapse/connect.hpp&gt;</span>
-<span class="preprocessor">#include</span> <span class="include">&lt;string&gt;</span>
-<span class="preprocessor">#include</span> <span class="include">&lt;iostream&gt;</span>
-
-<span class="keyword">namespace</span> synapse = boost::synapse;
-
-<span class="keyword">typedef</span> <span class="keyword">struct</span> print_(*print)(std::<span class="predefined-type">string</span> <span class="directive">const</span> &amp; s);
-
-<span class="predefined-type">int</span> main() {
-
-    shared_ptr&lt;<span class="predefined-type">int</span>&gt; emitter = make_shared&lt;<span class="predefined-type">int</span>&gt;();
-
-    weak_ptr&lt;synapse::connection&gt; c = synapse::connect&lt;my_signal&gt;(
-        emitter, <i class="conum" data-value="1"></i><b>(1)</b>
-        [ ](std::<span class="predefined-type">string</span> <span class="directive">const</span> &amp; s) {
-            std::cout &lt;&lt; s;
-        } );
-
-    synapse::emit&lt;print&gt;(emitter.get(),<span class="string"><span class="delimiter">&quot;</span><span class="content">Hello World</span><span class="delimiter">&quot;</span></span>); <i class="conum" data-value="2"></i><b>(2)</b>
-
-    emitter.reset();
-    synapse::emit&lt;print&gt;(emitter.get(),<span class="string"><span class="delimiter">&quot;</span><span class="content">NOOP</span><span class="delimiter">&quot;</span></span>); <i class="conum" data-value="3"></i><b>(3)</b>
-}</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The emitter is passed to <code>connect</code> as a <code>shared_ptr</code>, so the return value is of type <code>weak_ptr&lt;connection&gt;</code>.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td><code>emit</code> calls the connected lambda, printing <code>Hello World</code>.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Resetting the <code>emitter</code> causes the connection to expire, so the following <code>emit</code> is a noop.</td>
-</tr>
-</table>
-</div>
-</div>
 </div>
 </div>
 <div class="sect2">
@@ -837,10 +757,8 @@ Blocking affects pre-existing as well as future connections.
 </tr>
 </table>
 </div>
-<div class="exampleblock">
-<div class="content">
 <div class="listingblock">
-<div class="title">Example 3</div>
+<div class="title">Example</div>
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="c++"><span class="preprocessor">#include</span> <span class="include">&lt;boost/synapse/connect.hpp&gt;</span>
 <span class="preprocessor">#include</span> <span class="include">&lt;boost/synapse/block.hpp&gt;</span>
@@ -855,8 +773,7 @@ Blocking affects pre-existing as well as future connections.
 
     <span class="predefined-type">int</span> emitter;
 
-    weak_ptr&lt;synapse::connection&gt; c = synapse::connect&lt;my_signal&gt;(
-        &amp;emitter,
+    <span class="directive">auto</span> c = synapse::connect&lt;my_signal&gt;(&amp;emitter,
         [ ](std::<span class="predefined-type">string</span> <span class="directive">const</span> &amp; s) {
             std::cout &lt;&lt; s;
         } );
@@ -879,7 +796,7 @@ Blocking affects pre-existing as well as future connections.
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>The <code>print</code> signal will be blocked until <code>b</code> expires, therefore the call to <code>emit</code> on the next line is a noop, even though the <code>c</code> has not expired (meaning, the signal is still connected.)</td>
+<td>The <code>print</code> signal will be blocked until <code>b</code> expires, therefore the call to <code>emit</code> on the next line is a noop, even though <code>c</code> has not expired (meaning, the signal is still connected.)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
@@ -888,18 +805,16 @@ Blocking affects pre-existing as well as future connections.
 </table>
 </div>
 </div>
-</div>
-</div>
 <div class="sect2">
 <h3 id="_meta_signals">Meta signals</h3>
 <div class="paragraph">
-<p>Synapse features a special global emitter that emits meta signals to notify connected functions about user interactions with other signals. It can be accessed by the <code>meta::emitter()</code> function.</p>
+<p>Synapse features a special global emitter that emits meta signals to notify connected functions about user interactions with other signals. It can be accessed by the <code>meta::emitter</code> function.</p>
 </div>
 <div class="paragraph">
 <p>When a <code>Signal</code> is blocked or unblocked, the meta emitter emits the <code>meta::blocked&lt;Signal&gt;</code> signal. Connecting this signal allows the blocked state of the signal to be automatically reflected in other systems, for example user interface.</p>
 </div>
 <div class="paragraph">
-<p>Similarly, when a <code>Signal</code> is connected or disconnected, the meta emitter emits the <code>meta::connected&lt;Signal&gt;</code>. This meta signal is useful for integrating Synapse with 3rd-party callback systems; see this example.</p>
+<p>Similarly, when a <code>Signal</code> is connected or disconnected, the meta emitter emits the <a href="#meta::connected"><code>meta::connected&lt;Signal&gt;</code></a>. This meta signal is useful for integrating Synapse with 3rd-party callback systems; see <a href="#_synapsifying_c_callbacks">Synapsifying C callbacks</a>.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -916,11 +831,57 @@ To further facilitate the integration of Synapse with 3rd-partty callback system
 </div>
 <div class="sect2">
 <h3 id="_interthread_communication">Interthread communication</h3>
+<div class="sect3">
+<h4 id="_emitting_signals_across_thread_boundaries">Emitting signals across thread boundaries</h4>
 <div class="paragraph">
-<p>Most of the internal state used by Synapse to manage connections uses thread-local storage: emitting a signal only calls connections created by the calling thread. This allows <code>emit</code> to block, calling all connected functions in the order they&#8217;ve been connected.</p>
+<p>Synapse can be used to implement interthread communication using signals. The data structures created by <a href="#connect"><code>connect</code></a> (or <a href="#translate"><code>translate</code></a>) use thread-local storage, so by default calling <a href="#emit"><code>emit</code></a> will call only functions connected by the calling thread (and will not return until all such functions have been called in order, or one of them throws.)</p>
 </div>
 <div class="paragraph">
-<p>It is also possible to use Synapse signals across thread boundaries. If this is desired, create a <code>thread_local_queue</code> object in any thread needs to <em>receive</em> Synapse signals. In this case calling <code>emit</code> from that same thread works as usual, but emitting from other threads results in the signal call being queued into <code>thread_local_queue</code> objects associated with all threads which <em>connect</em> that specific signal. These queued emits are executed synchronously when the user polls a <code>thread_local_queue</code> object.</p>
+<p>The following diagram shows the connections created (by calls to <code><a href="#connect">connect</a>&lt;S&gt;</code>) in a single thread for a given signal type <code>S</code>, each connecting an emitter to a function. When <code><a href="#emit">emit</a>&lt;S&gt;(e1,arg,&#8230;&#8203;)</code> is called, all functions connected (for <code>S</code>) to the given emitter <code>e1</code> are called (in the order in which the connections were created):</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="fig1.png" alt="fig1">
+</div>
+</div>
+<div class="paragraph">
+<p>It is also possible for any thread to request to receive all signals emitted by other threads, by creating its own <a href="#thread_local_queue"><code>thread_local_queue</code></a> object using <a href="#create_thread_local_queue"><code>create_thread_local_queue</code></a>.</p>
+</div>
+<div class="paragraph">
+<p>In this case, <em>in addition</em> to the behavior described above, <code><a href="#emit">emit</a>&lt;S&gt;(e1,arg,&#8230;&#8203;)</code> will capture its arguments (depending on the signature of <code>S</code>) and queue them into the <a href="#thread_local_queue"><code>thread_local_queue</code></a> object created by any thread <em>other</em> than the calling thread. Each such thread must poll its own <a href="#thread_local_queue"><code>thread_local_queue</code></a> regularly; this "emits" the queued objects locally and removes them from the queue (note that <a href="#poll"><code>poll</code></a> is not given an emitter or a signal type, it emits locally all queued objects, regardless of signal type or emitter).</p>
+</div>
+<div class="paragraph">
+<p>This is illustrated by the following diagram:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="fig2.png" alt="fig2">
+</div>
+</div>
+<div class="paragraph">
+<p>A typical use case for this system is to update user interface objects with data generated by one or multiple worker threads: the user interface objects themselves need not be thread-safe, because they will be updated only synchronously, at the time <a href="#poll"><code>poll</code></a> is called.</p>
+</div>
+<div class="paragraph">
+<p>Special care must be taken to ensure that any objects referred to by arguments passed to <a href="#emit"><code>emit</code></a> will remain valid until the time all other threads have polled their <a href="#thread_local_queue"><code>thread_local_queue</code></a> objects. For example, the following code is incorrect in the presence of <code>thread_local_queue</code> objects:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">typedef</span> <span class="keyword">struct</span> my_signal_(*my_signal)( <span class="predefined-type">int</span> * );
+
+<span class="directive">void</span> emit_my_signal( <span class="directive">void</span> * emitter, <span class="predefined-type">int</span> x ) {
+    emit&lt;my_signal&gt;(emitter,&amp;x); <span class="comment">//Undefined behavior in the presence of thread_local_queues!</span>
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The problem is that the address of <code>x</code> may be queued into other threads' queues, and since <code>x</code> is local to <code>emit_my_signal</code>, it may be destroyed by the time these threads call <a href="#poll"><code>poll</code></a>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_scheduling_function_calls_across_thread_boundaries">Scheduling function calls across thread boundaries</h4>
+<div class="paragraph">
+<p>The <a href="#post"><code>post</code></a> function can be used to queue into a <a href="#thread_local_queue"><code>thread_local_queue</code></a> arbitrary functions for execution at the time <a href="#poll"><code>poll</code></a> is called. This feature allows critical worker threads to minimize the amount of time they consume by offloading expensive non-critical computations to another, non-critical thread. This also removes the need for synchronization, since the queued functions are executed synchronously in the thread that owns the <a href="#thread_local_queue"><code>thread_local_queue</code></a> object.</p>
+</div>
 </div>
 </div>
 </div>
@@ -990,41 +951,19 @@ To further facilitate the integration of Synapse with 3rd-partty callback system
     <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>,<span class="keyword">class</span> <span class="class">F</span>&gt;
     shared_ptr&lt;connection&gt; connect( Emitter * e, F f );
 
-    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>,<span class="keyword">class</span> <span class="class">F</span>&gt;
-    weak_ptr&lt;connection&gt; connect( weak_ptr&lt;Emitter&gt; <span class="directive">const</span> &amp; e, F f );
-
-    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>,<span class="keyword">class</span> <span class="class">F</span>&gt;
-    weak_ptr&lt;connection&gt; connect( shared_ptr&lt;Emitter&gt; <span class="directive">const</span> &amp; e, F f );
-
     <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>,<span class="keyword">class</span> <span class="class">Receiver</span>,<span class="keyword">class</span> <span class="class">F</span>&gt;
     shared_ptr&lt;connection&gt; connect( Emitter * e, Receiver * r, F f );
 
-    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>,<span class="keyword">class</span> <span class="class">Receiver</span>,<span class="keyword">class</span> <span class="class">F</span>&gt;
-    weak_ptr&lt;connection&gt; connect( Emitter * e, weak_ptr&lt;Receiver&gt; <span class="directive">const</span> &amp; r, F f );
+    <span class="keyword">class</span> <span class="class">pconnection</span>;
+
+    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>,<span class="keyword">class</span> <span class="class">F</span>&gt;
+    weak_ptr&lt;pconnection&gt; connect( &lt;&lt;Emitter&gt;&gt; e, F f ); <i class="conum" data-value="1"></i><b>(1)</b>
 
     <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>,<span class="keyword">class</span> <span class="class">Receiver</span>,<span class="keyword">class</span> <span class="class">F</span>&gt;
-    weak_ptr&lt;connection&gt; connect( Emitter * e, shared_ptr&lt;Receiver&gt; <span class="directive">const</span> &amp; r, F f );
+    weak_ptr&lt;pconnection&gt; connect( &lt;&lt;Emitter&gt;&gt; e, &lt;&lt;Receiver&gt;&gt; r, F f ); <i class="conum" data-value="2"></i><b>(2)</b>
 
-    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>,<span class="keyword">class</span> <span class="class">Receiver</span>,<span class="keyword">class</span> <span class="class">F</span>&gt;
-    weak_ptr&lt;connection&gt; connect( weak_ptr&lt;Emitter&gt; <span class="directive">const</span> &amp; e, Receiver * r, F f );
-
-    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>,<span class="keyword">class</span> <span class="class">Receiver</span>,<span class="keyword">class</span> <span class="class">F</span>&gt;
-    weak_ptr&lt;connection&gt; connect( weak_ptr&lt;Emitter&gt; <span class="directive">const</span> &amp; e, weak_ptr&lt;Receiver&gt; <span class="directive">const</span> &amp; r, F f );
-
-    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>,<span class="keyword">class</span> <span class="class">Receiver</span>,<span class="keyword">class</span> <span class="class">F</span>&gt;
-    weak_ptr&lt;connection&gt; connect( weak_ptr&lt;Emitter&gt; <span class="directive">const</span> &amp; e, shared_ptr&lt;Receiver&gt; <span class="directive">const</span> &amp; r, F f );
-
-    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>,<span class="keyword">class</span> <span class="class">Receiver</span>,<span class="keyword">class</span> <span class="class">F</span>&gt;
-    weak_ptr&lt;connection&gt; connect( shared_ptr&lt;Emitter&gt; <span class="directive">const</span> &amp; e, Receiver * r, F f );
-
-    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>,<span class="keyword">class</span> <span class="class">Receiver</span>,<span class="keyword">class</span> <span class="class">F</span>&gt;
-    weak_ptr&lt;connection&gt; connect( shared_ptr&lt;Emitter&gt; <span class="directive">const</span> &amp; e, weak_ptr&lt;Receiver&gt; <span class="directive">const</span> &amp; r, F f );
-
-    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>,<span class="keyword">class</span> <span class="class">Receiver</span>,<span class="keyword">class</span> <span class="class">F</span>&gt;
-    weak_ptr&lt;connection&gt; connect( shared_ptr&lt;Emitter&gt; <span class="directive">const</span> &amp; e, shared_ptr&lt;Receiver&gt; <span class="directive">const</span> &amp; r, F f );
-
-    shared_ptr&lt;connection <span class="directive">const</span>&gt; release( weak_ptr&lt;connection <span class="directive">const</span>&gt; <span class="directive">const</span> &amp; c );
-    shared_ptr&lt;connection&gt; release( weak_ptr&lt;connection&gt; <span class="directive">const</span> &amp; c );
+    shared_ptr&lt;connection <span class="directive">const</span>&gt; release( weak_ptr&lt;pconnection <span class="directive">const</span>&gt; <span class="directive">const</span> &amp; c );
+    shared_ptr&lt;connection&gt; release( weak_ptr&lt;pconnection&gt; <span class="directive">const</span> &amp; c );
 
     <span class="keyword">namespace</span> meta {
 
@@ -1047,6 +986,44 @@ To further facilitate the integration of Synapse with 3rd-partty callback system
 } }</code></pre>
 </div>
 </div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>&lt;&lt;Emitter&gt;&gt;</code>  is <code>weak_ptr&lt;Emitter&gt; const &amp;</code> or, equivalently, <code>shared_ptr&lt;Emitter&gt; const &amp;</code>;</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><code>&lt;&lt;Emitter&gt;&gt;</code>  is <code>Emitter *</code>, <code>weak_ptr&lt;Emitter&gt; const &amp;</code> or, equivalently, <code>shared_ptr&lt;Emitter&gt; const &amp;</code>; at least one of <code>e</code> and <code>r</code> is <em>not</em> a raw pointer.</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/translate.hpp&gt;</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">namespace</span> boost { <span class="keyword">namespace</span> synapse {
+
+    <span class="keyword">template</span> &lt;
+        <span class="keyword">class</span> <span class="class">OriginalSignal</span>,  <span class="keyword">class</span> <span class="class">TranslatedSignal</span>,
+        <span class="keyword">class</span> <span class="class">OriginalEmitter</span>, <span class="keyword">class</span> <span class="class">TranslatedEmitter</span>&gt;
+    shared_ptr&lt;connection&gt; translate( OriginalEmitter * e1, TranslatedEmitter * e2 );
+
+    <span class="keyword">template</span> &lt;
+        <span class="keyword">class</span> <span class="class">OriginalSignal</span>,  <span class="keyword">class</span> <span class="class">TranslatedSignal</span>,
+        <span class="keyword">class</span> <span class="class">OriginalEmitter</span>, <span class="keyword">class</span> <span class="class">TranslatedEmitter</span>&gt;
+    weak_ptr&lt;pconnection&gt; translate( &lt;&lt;OriginalEmitter&gt;&gt; e1, &lt;&lt;TranslatedEmitter&gt;&gt; e2 ); <i class="conum" data-value="1"></i><b>(1)</b>
+
+} }</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>&lt;&lt;OriginalEmitter&gt;&gt;</code> is either <code>OriginalEmitter *</code>, <code>weak_ptr&lt;OriginalEmitter&gt; const &amp;</code> or, equivalently, <code>shared_ptr&lt;OriginalEmitter&gt; const &amp;</code>; <code>&lt;&lt;TranslatedEmitter&gt;&gt;</code> by analogy. At least one of <code>e1</code> and <code>e2</code> is <em>not</em> a raw pointer.</td>
+</tr>
+</table>
+</div>
 <div class="listingblock">
 <div class="title">#include &lt;boost/synapse/connection.hpp&gt;</div>
 <div class="content">
@@ -1056,6 +1033,7 @@ To further facilitate the integration of Synapse with 3rd-partty callback system
 
     <span class="directive">protected</span>:
 
+        connection();
         ~connection();
 
     <span class="directive">public</span>:
@@ -1073,58 +1051,21 @@ To further facilitate the integration of Synapse with 3rd-partty callback system
         shared_ptr&lt;T&gt; receiver() <span class="directive">const</span>;
     };
 
-} }</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="title">#include &lt;boost/synapse/translate.hpp&gt;</div>
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">namespace</span> boost { <span class="keyword">namespace</span> synapse {
+    <span class="keyword">class</span> <span class="class">pconnection</span>: <span class="directive">protected</span> connection { <span class="comment">//abstract base</span>
 
-    <span class="keyword">template</span> &lt;
-        <span class="keyword">class</span> <span class="class">OriginalSignal</span>,  <span class="keyword">class</span> <span class="class">TranslatedSignal</span>,
-        <span class="keyword">class</span> <span class="class">OriginalEmitter</span>, <span class="keyword">class</span> <span class="class">TranslatedEmitter</span>&gt;
-    shared_ptr&lt;connection&gt; translate( OriginalEmitter * e1, TranslatedEmitter * e2 );
+    <span class="directive">protected</span>:
 
-    <span class="keyword">template</span> &lt;
-        <span class="keyword">class</span> <span class="class">OriginalSignal</span>,  <span class="keyword">class</span> <span class="class">TranslatedSignal</span>,
-        <span class="keyword">class</span> <span class="class">OriginalEmitter</span>, <span class="keyword">class</span> <span class="class">TranslatedEmitter</span>&gt;
-    weak_ptr&lt;connection&gt; translate( OriginalEmitter * e1, weak_ptr&lt;TranslatedEmitter&gt; <span class="directive">const</span> &amp; e2 );
+        pconnection();
+        ~pconnection();
 
-    <span class="keyword">template</span> &lt;
-        <span class="keyword">class</span> <span class="class">OriginalSignal</span>,  <span class="keyword">class</span> <span class="class">TranslatedSignal</span>,
-        <span class="keyword">class</span> <span class="class">OriginalEmitter</span>, <span class="keyword">class</span> <span class="class">TranslatedEmitter</span>&gt;
-    weak_ptr&lt;connection&gt; translate( OriginalEmitter * e1, shared_ptr&lt;TranslatedEmitter&gt; <span class="directive">const</span> &amp; e2 );
+    <span class="directive">public</span>:
 
-    <span class="keyword">template</span> &lt;
-        <span class="keyword">class</span> <span class="class">OriginalSignal</span>,  <span class="keyword">class</span> <span class="class">TranslatedSignal</span>,
-        <span class="keyword">class</span> <span class="class">OriginalEmitter</span>, <span class="keyword">class</span> <span class="class">TranslatedEmitter</span>&gt;
-    weak_ptr&lt;connection&gt; translate( weak_ptr&lt;OriginalEmitter&gt; <span class="directive">const</span> &amp; e1, TranslatedEmitter * e2 );
+        <span class="directive">using</span> connection::set_user_data;
+        <span class="directive">using</span> connection::get_user_data;
+        <span class="directive">using</span> connection::emitter;
+        <span class="directive">using</span> connection::receiver;
 
-    <span class="keyword">template</span> &lt;
-        <span class="keyword">class</span> <span class="class">OriginalSignal</span>,  <span class="keyword">class</span> <span class="class">TranslatedSignal</span>,
-        <span class="keyword">class</span> <span class="class">OriginalEmitter</span>, <span class="keyword">class</span> <span class="class">TranslatedEmitter</span>&gt;
-    weak_ptr&lt;connection&gt; translate( weak_ptr&lt;OriginalEmitter&gt; <span class="directive">const</span> &amp; e1, weak_ptr&lt;TranslatedEmitter&gt; <span class="directive">const</span> &amp; e2 );
-
-    <span class="keyword">template</span> &lt;
-        <span class="keyword">class</span> <span class="class">OriginalSignal</span>,  <span class="keyword">class</span> <span class="class">TranslatedSignal</span>,
-        <span class="keyword">class</span> <span class="class">OriginalEmitter</span>, <span class="keyword">class</span> <span class="class">TranslatedEmitter</span>&gt;
-    weak_ptr&lt;connection&gt; translate( weak_ptr&lt;OriginalEmitter&gt; <span class="directive">const</span> &amp; e1, shared_ptr&lt;TranslatedEmitter&gt; <span class="directive">const</span> &amp; e2 );
-
-    <span class="keyword">template</span> &lt;
-        <span class="keyword">class</span> <span class="class">OriginalSignal</span>,  <span class="keyword">class</span> <span class="class">TranslatedSignal</span>,
-        <span class="keyword">class</span> <span class="class">OriginalEmitter</span>, <span class="keyword">class</span> <span class="class">TranslatedEmitter</span>&gt;
-    weak_ptr&lt;connection&gt; translate( shared_ptr&lt;OriginalEmitter&gt; <span class="directive">const</span> &amp; e1, TranslatedEmitter * e2 );
-
-    <span class="keyword">template</span> &lt;
-        <span class="keyword">class</span> <span class="class">OriginalSignal</span>,  <span class="keyword">class</span> <span class="class">TranslatedSignal</span>,
-        <span class="keyword">class</span> <span class="class">OriginalEmitter</span>, <span class="keyword">class</span> <span class="class">TranslatedEmitter</span>&gt;
-    weak_ptr&lt;connection&gt; translate( shared_ptr&lt;OriginalEmitter&gt; <span class="directive">const</span> &amp; e1, weak_ptr&lt;TranslatedEmitter&gt; <span class="directive">const</span> &amp; e2 );
-
-    <span class="keyword">template</span> &lt;
-        <span class="keyword">class</span> <span class="class">OriginalSignal</span>,  <span class="keyword">class</span> <span class="class">TranslatedSignal</span>,
-        <span class="keyword">class</span> <span class="class">OriginalEmitter</span>, <span class="keyword">class</span> <span class="class">TranslatedEmitter</span>&gt;
-    weak_ptr&lt;connection&gt; translate( shared_ptr&lt;OriginalEmitter&gt; <span class="directive">const</span> &amp; e1, shared_ptr&lt;TranslatedEmitter&gt; <span class="directive">const</span> &amp; e2 );
+    };
 
 } }</code></pre>
 </div>
@@ -1137,13 +1078,7 @@ To further facilitate the integration of Synapse with 3rd-partty callback system
     <span class="keyword">class</span> <span class="class">blocker</span>;
 
     <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>&gt;
-    shared_ptr&lt;blocker&gt; block( Emitter * );
-
-    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>&gt;
-    shared_ptr&lt;blocker&gt; block( weak_ptr&lt;Emitter&gt; <span class="directive">const</span> &amp; );
-
-    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>&gt;
-    shared_ptr&lt;blocker&gt; block( shared_ptr&lt;Emitter&gt; <span class="directive">const</span> &amp; );
+    shared_ptr&lt;blocker&gt; block( &lt;&lt;Emitter&gt;&gt; e ); <i class="conum" data-value="1"></i><b>(1)</b>
 
     <span class="keyword">namespace</span> meta {
 
@@ -1156,6 +1091,14 @@ To further facilitate the integration of Synapse with 3rd-partty callback system
 
 } }</code></pre>
 </div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>&lt;&lt;Emitter&gt;&gt;</code>  is <code>Emitter *</code>, <code>weak_ptr&lt;Emitter&gt; const &amp;</code> or, equivalently, <code>shared_ptr&lt;Emitter&gt; const &amp;</code>.</td>
+</tr>
+</table>
 </div>
 <div class="listingblock">
 <div class="title">#include &lt;boost/synapse/blocker.hpp&gt;</div>
@@ -1193,19 +1136,13 @@ To further facilitate the integration of Synapse with 3rd-partty callback system
 } }</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p><br></p>
-</div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_reference">Reference</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>In Synapse, a signal</p>
-</div>
 <div class="sect2">
-<h3 id="__code_emit_code"><code>emit()</code></h3>
+<h3 id="emit"><code>emit</code></h3>
 <div class="exampleblock">
 <div class="content">
 <div class="listingblock">
@@ -1214,7 +1151,7 @@ To further facilitate the integration of Synapse with 3rd-partty callback system
 <pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">namespace</span> boost { <span class="keyword">namespace</span> synapse {
 
     <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span><span class="error">.</span>.. A&gt;
-    <span class="predefined-type">int</span> emit( <span class="directive">void</span> <span class="directive">const</span> *, A... );
+    <span class="predefined-type">int</span> emit( <span class="directive">void</span> <span class="directive">const</span> * e, A... );
 
 } }</code></pre>
 </div>
@@ -1225,7 +1162,7 @@ To further facilitate the integration of Synapse with 3rd-partty callback system
 <dl>
 <dt class="hdlist1">Effects: </dt>
 <dd>
-<p>Calls all function objects that are connected to the specified <code>Signal</code> from the emitter <code>e</code>, in the order in which they were connected by <code>connect</code> or <code>translate</code>, passing the specified arguments depending on the <code>Signal</code> signature, subject to the connection lifetime/blocking restrictions.</p>
+<p>Calls all function objects that are connected to the specified <code>Signal</code> from the emitter <code>e</code>, in the order in which they were connected by <a href="#connect"><code>connect</code></a> or <a href="#translate"><code>translate</code></a>, passing the specified arguments depending on the <code>Signal</code> signature, subject to the connection lifetime/blocking restrictions.</p>
 </dd>
 <dt class="hdlist1">Returns: </dt>
 <dd>
@@ -1233,11 +1170,11 @@ To further facilitate the integration of Synapse with 3rd-partty callback system
 </dd>
 </dl>
 </div>
-<div class="admonitionblock warning">
+<div class="admonitionblock important">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
+<i class="fa icon-important" title="Important"></i>
 </td>
 <td class="content">
 It is the responsibility of the caller to ensure that the emitter object e does not expire before <code>emit</code> returns, otherwise the behavior is undefined.
@@ -1259,10 +1196,10 @@ It is the responsibility of the caller to ensure that the emitter object e does 
 <p>Values returned by the connected function objects are ignored.</p>
 </li>
 <li>
-<p>If before <code>emit</code> returns <code>connect</code> is called on the same signal and the same emitter, any newly connected functions are not called during the same <code>emit</code>.</p>
+<p>If before <code>emit</code> returns <a href="#connect"><code>connect</code></a> is called on the same signal and the same emitter, any newly connected functions are not called during the same <code>emit</code>.</p>
 </li>
 <li>
-<p>If before <code>emit</code> returns a connection object expires, it may or may not get called during the same <code>emit</code>.</p>
+<p>If before <code>emit</code> returns a <a href="#connection"><code>connection</code></a> object expires, it may or may not get called during the same <code>emit</code>.</p>
 </li>
 <li>
 <p>If <code>e</code> is <code>0</code>, <code>emit</code> simply returns <code>0</code> without calling any functions. Because of this feature, if the emitter is held by a <code>shared_ptr</code> object <code>sp</code>, there is no harm in calling <code>emit&lt;Signal&gt;(sp.get(),&#8230;&#8203;)</code> even if <code>sp</code> is empty. Similarly, if the caller holds a <code>weak_ptr</code> to the emitter object which has expired, calling <code>emit&lt;Signal&gt;(wp.lock().get(),&#8230;&#8203;)</code> will simply return <code>0</code>.</p>
@@ -1273,30 +1210,16 @@ It is the responsibility of the caller to ensure that the emitter object e does 
 </ul>
 </div>
 </dd>
+<dt class="hdlist1">Thread safety: </dt>
+<dd>
+<p>By default <code>emit</code> will only call functions connected from the calling thread. In addition, the signal is pushed onto any <a href="#thread_local_queue"><code>thread_local_queue</code></a> objects created in other threads, but only if those threads currently have at least one active connection for the specified <code>Signal</code>. In this case <code>emit</code> captures its arguments similarly to <code>std::bind</code>, and it is the responsibility of the caller to ensure that they remain valid until the posted signal is processed in all other threads, by a call to <a href="#poll"><code>thread_local_queue::poll</code></a> or <a href="#wait"><code>thread_local_queue::wait</code></a>.</p>
+</dd>
 </dl>
 </div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-In case <code>Signal</code> connections exist in other threads in which the user has created <code>thread_local_queue</code> objects, the arguments passed to <code>emit</code> are copied and must remain valid until the <code>Signal</code> is consumed by <code>poll</code>.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p><br></p>
-</div>
 <hr>
-<div class="paragraph">
-<p><br></p>
-</div>
 </div>
 <div class="sect2">
-<h3 id="__code_connect_code"><code>connect()</code></h3>
+<h3 id="connect"><code>connect</code></h3>
 <div class="exampleblock">
 <div class="content">
 <div class="listingblock">
@@ -1307,10 +1230,18 @@ In case <code>Signal</code> connections exist in other threads in which the user
     <span class="keyword">class</span> <span class="class">connection</span>;
 
     <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>,<span class="keyword">class</span> <span class="class">F</span>&gt;
-    shared_ptr&lt;connection&gt; connect( &lt;&lt;Emitter&gt;&gt; e, F f ); <i class="conum" data-value="1"></i><b>(1)</b>
+    shared_ptr&lt;connection&gt; connect( Emitter * e, F f );
 
     <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>,<span class="keyword">class</span> <span class="class">Receiver</span>,<span class="keyword">class</span> <span class="class">F</span>&gt;
-    shared_ptr&lt;connection&gt; connect( &lt;&lt;Emitter&gt;&gt; e, &lt;&lt;Receiver&gt;&gt; r, F f ); <i class="conum" data-value="2"></i><b>(2)</b>
+    shared_ptr&lt;connection&gt; connect( Emitter * e, Receiver * r, F f );
+
+    <span class="keyword">class</span> <span class="class">pconnection</span>;
+
+    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>,<span class="keyword">class</span> <span class="class">F</span>&gt;
+    weak_ptr&lt;pconnection&gt; connect( &lt;&lt;Emitter&gt;&gt; e, F f ); <i class="conum" data-value="1"></i><b>(1)</b>
+
+    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>,<span class="keyword">class</span> <span class="class">Receiver</span>,<span class="keyword">class</span> <span class="class">F</span>&gt;
+    weak_ptr&lt;pconnection&gt; connect( &lt;&lt;Emitter&gt;&gt; e, &lt;&lt;Receiver&gt;&gt; r, F f ); <i class="conum" data-value="2"></i><b>(2)</b>
 
 } }</code></pre>
 </div>
@@ -1319,15 +1250,21 @@ In case <code>Signal</code> connections exist in other threads in which the user
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td><code>&lt;&lt;Emitter&gt;&gt;</code> is either <code>Emitter *</code>, <code>weak_ptr&lt;Emitter&gt;</code> or, equivalently, <code>shared_ptr&lt;Emitter&gt;</code>.</td>
+<td><code>&lt;&lt;Emitter&gt;&gt;</code>  is <code>weak_ptr&lt;Emitter&gt; const &amp;</code> or, equivalently, <code>shared_ptr&lt;Emitter&gt; const &amp;</code>;</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td><code>&lt;&lt;Receiver&gt;&gt;</code> by analogy.</td>
+<td><code>&lt;&lt;Emitter&gt;&gt;</code>  is <code>Emitter *</code>, <code>weak_ptr&lt;Emitter&gt; const &amp;</code> or, equivalently, <code>shared_ptr&lt;Emitter&gt; const &amp;</code>; at least one of <code>e</code> and <code>r</code> is <em>not</em> a raw pointer.</td>
 </tr>
 </table>
 </div>
 </div>
+</div>
+<div class="paragraph">
+<p>Overloads of <code>connect</code> that return <code>shared_ptr&lt;<a href="#connection">connection</a>&gt;</code> create connections whose lifetime is explicitly managed by the user. Such connections require that the caller keeps the returned <a href="#connection"><code>connection</code></a> object afloat for as long as the connection should persist.</p>
+</div>
+<div class="paragraph">
+<p>Overloads of <code>connect</code> that return <code>weak_ptr&lt;<a href="#pconnection">pconnection</a>&gt;</code> take at least one of <code>e</code> and <code>r</code> as a <code>weak_ptr</code> or <code>shared_ptr</code>. They create <em>persistent</em> connections which expire when either <code>e</code> or <code>r</code> expire.</p>
 </div>
 <div class="dlist">
 <dl>
@@ -1336,11 +1273,11 @@ In case <code>Signal</code> connections exist in other threads in which the user
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Connects the specified <code>Signal</code> from the emitter <code>e</code> to the function object <code>f</code>. The signature of <code>F</code> must match the signature of <code>Signal</code>, except for the return value which <code>emit</code> always discards. The signal is considered disconnected when either of the following occurs:</p>
+<p>Connects the specified <code>Signal</code> from the emitter <code>e</code> to the function object <code>f</code>. The arguments of <code>F</code> must match the arguments of <code>Signal</code>, except that if <code>r</code> is specified, it is dereferenced and prepended as the first argument to <code>F</code>, followed by the rest of the arguments as specified by the <code>Signal</code> signature. The signal is considered disconnected when either of the following occurs:</p>
 <div class="ulist">
 <ul>
 <li>
-<p>The returned <code>shared_ptr&lt;connection&gt;</code> object expires;</p>
+<p>The returned <code>shared_ptr&lt;<a href="#connection">connection</a>&gt;</code> object expires (this applies only to overloads that return <code>shared_ptr&lt;<a href="#connection">connection</a>&gt;</code>);</p>
 </li>
 <li>
 <p><code>e</code> (passed as either <code>weak_ptr&lt;Emitter&gt;</code> or <code>shared_ptr&lt;Emitter&gt;</code>) expires;</p>
@@ -1354,19 +1291,19 @@ In case <code>Signal</code> connections exist in other threads in which the user
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-The returned <code>connection</code> object does not assume ownership of <code>e</code> or <code>r</code>: passing <code>shared_ptr</code> is equivalent to passing <code>weak_ptr</code>.
+The returned object does not assume ownership of <code>e</code> or <code>r</code>: passing <code>shared_ptr</code> is equivalent to passing <code>weak_ptr</code>.
 </td>
 </tr>
 </table>
 </div>
-<div class="admonitionblock warning">
+<div class="admonitionblock important">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
+<i class="fa icon-important" title="Important"></i>
 </td>
 <td class="content">
-If either the emitter or the receiver, passed as a raw pointers, expire before the returned <code>connection</code> object has expired, the behavior is undefined.
+If either the emitter or the receiver, passed as raw pointers, expire before the returned <a href="#connection"><code>connection</code></a> object has expired, the behavior is undefined.
 </td>
 </tr>
 </table>
@@ -1376,12 +1313,14 @@ If either the emitter or the receiver, passed as a raw pointers, expire before t
 </div>
 </li>
 <li>
-<p>The <code>meta::emitter</code> emits the <code>meta::connected&lt;Signal&gt;</code> signal:</p>
+<p><a id="meta::connected"></a> The <code>meta::emitter</code> emits the <code>meta::connected&lt;Signal&gt;</code> signal:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">namespace</span> boost { <span class="keyword">namespace</span> synapse {
 
     <span class="keyword">namespace</span> meta {
+
+        weak_ptr&lt;<span class="directive">void</span> <span class="directive">const</span>&gt; emitter();
 
         <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>&gt;
         <span class="keyword">struct</span> connected {
@@ -1400,12 +1339,12 @@ If either the emitter or the receiver, passed as a raw pointers, expire before t
 </div>
 </div>
 <div class="paragraph">
-<p>The <code>meta::connected&lt;Signal&gt;</code> signal is also emitted when the returned <code>connection</code> object expires. Handlers of the meta signal take a mutable reference to the <code>connection</code> object being created or destroyed, and a second <code>unsigned</code> argument, <code>flags</code>, which indicates the circumstances under which the meta signal is emitted:</p>
+<p>The <code>meta::connected&lt;Signal&gt;</code> signal is also emitted when the returned object expires. Handlers of the meta signal take a mutable reference to the <a href="#connection"><code>connection</code></a> object being created or destroyed, and a second <code>unsigned</code> argument, <code>flags</code>, which indicates the circumstances under which the meta signal is emitted:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>If the <code>connection</code> object is being created, the <code>connecting</code> bit is set, otherwise it is clear;</p>
+<p>If the <a href="#connection"><code>connection</code></a> object is being created, the <code>connecting</code> bit is set, otherwise it is clear;</p>
 </li>
 <li>
 <p>If this is the first <code>Signal</code> connection being created for the emitter <code>e</code>, the <code>first_for_this_emitter</code> bit is set, otherwise it is clear;</p>
@@ -1419,7 +1358,19 @@ If either the emitter or the receiver, passed as a raw pointers, expire before t
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-The passed <code>connection</code> object can be used to access the emitter and receiver objects passed to <code>connect</code>.
+Because class <a href="#connection"><code>connection</code></a> is the protected base of class <a href="#pconnection"><code>pconnection</code></a>, handlers of <code>meta::connected&lt;Signal&gt;</code> take <code>connection &amp;</code> regardless of which <code>connect</code> overload was used.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+The passed <a href="#connection"><code>connection</code></a> object can be used to access the emitter and receiver objects passed to <code>connect</code>.
 </td>
 </tr>
 </table>
@@ -1431,215 +1382,18 @@ The passed <code>connection</code> object can be used to access the emitter and 
 </ol>
 </div>
 </dd>
+<dt class="hdlist1">Thread safety: </dt>
+<dd>
+<p>Please see <a href="#emit"><code>emit</code></a> and <a href="#thread_local_queue"><code>thread_local_queue</code></a>.</p>
+</dd>
 </dl>
 </div>
 <hr>
 </div>
 <div class="sect2">
-<h3 id="__code_pconnect_code"><code>pconnect()</code></h3>
+<h3 id="translate"><code>translate</code></h3>
 <div class="exampleblock">
 <div class="content">
-<div class="listingblock">
-<div class="title">#include &lt;boost/synapse/connect.hpp&gt;</div>
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">namespace</span> boost { <span class="keyword">namespace</span> synapse {
-
-    <span class="keyword">class</span> <span class="class">pconnection</span>;
-
-    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>,<span class="keyword">class</span> <span class="class">F</span>&gt;
-    weak_ptr&lt;pconnection&gt; pconnect( &lt;&lt;Emitter&gt;&gt; e, F f ); <i class="conum" data-value="1"></i><b>(1)</b>
-
-    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>,<span class="keyword">class</span> <span class="class">Receiver</span>,<span class="keyword">class</span> <span class="class">F</span>&gt;
-    weak_ptr&lt;pconnection&gt; pconnect( &lt;&lt;Emitter&gt;&gt; e, &lt;&lt;Receiver&gt;&gt; r, F f ); <i class="conum" data-value="2"></i><b>(2)</b>
-
-} }</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td><code>&lt;&lt;Emitter&gt;&gt;</code> is <code>weak_ptr&lt;Emitter&gt;</code> or, equivalently, <code>shared_ptr&lt;Emitter&gt;</code>.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td><code>&lt;&lt;Receiver&gt;&gt;</code> by analogy.</td>
-</tr>
-</table>
-</div>
-</div>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">Effects: </dt>
-<dd>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Connects the specified <code>Signal</code> from the emitter <code>e</code> to the function object <code>f</code>. The signature of <code>F</code> must match the signature of <code>Signal</code>, except for the return value which <code>emit</code> always discards. The signal is considered disconnected when either <code>e</code> or <code>r</code> expire.</p>
-</li>
-<li>
-<p>See <a href="#meta_connected"><code>meta::connected</code></a></p>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">namespace</span> boost { <span class="keyword">namespace</span> synapse {
-
-    <span class="keyword">namespace</span> meta {
-
-        <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>&gt;
-        <span class="keyword">struct</span> connected {
-            <span class="comment">//unspecified</span>
-        };
-
-        <span class="keyword">namespace</span> connect_flags {
-            <span class="predefined-type">unsigned</span> <span class="directive">const</span> connecting=<span class="integer">1</span>;
-            <span class="predefined-type">unsigned</span> <span class="directive">const</span> first_for_this_emitter=<span class="integer">2</span>;
-            <span class="predefined-type">unsigned</span> <span class="directive">const</span> last_for_this_emitter=<span class="integer">4</span>;
-        }
-
-    }
-
-} }</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The <code>meta::connected&lt;Signal&gt;</code> signal is also emitted when the returned <code>connection</code> object expires. Handlers of the meta signal take a mutable reference to the <code>connection</code> object being created or destroyed, and a second <code>unsigned</code> argument, <code>flags</code>, which indicates the circumstances under which the meta signal is emitted:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>If the <code>connection</code> object is being created, the <code>connecting</code> bit is set, otherwise it is clear;</p>
-</li>
-<li>
-<p>If this is the first <code>Signal</code> connection being created for the emitter <code>e</code>, the <code>first_for_this_emitter</code> bit is set, otherwise it is clear;</p>
-</li>
-<li>
-<p>If this is the last <code>Signal</code> connection being destroyed for the emitter <code>e</code>, the <code>last_for_this_emitter</code> bit is set, otherwise it is clear.</p>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-The passed <code>connection</code> object can be used to access the emitter and receiver objects passed to <code>connect</code>.
-</td>
-</tr>
-</table>
-</div>
-</li>
-</ul>
-</div>
-</li>
-</ol>
-</div>
-</dd>
-</dl>
-</div>
-</div>
-<div class="sect2">
-<h3 id="__code_block_code"><code>block()</code></h3>
-<div class="listingblock">
-<div class="title">#include &lt;boost/synapse/block.hpp&gt;</div>
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">namespace</span> boost { <span class="keyword">namespace</span> synapse {
-
-    <span class="keyword">class</span> <span class="class">blocker</span>;
-
-    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>&gt;
-    shared_ptr&lt;blocker&gt; block( Emitter * );
-
-    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>&gt;
-    shared_ptr&lt;blocker&gt; block( weak_ptr&lt;Emitter&gt; <span class="directive">const</span> &amp; );
-
-    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>&gt;
-    shared_ptr&lt;blocker&gt; block( shared_ptr&lt;Emitter&gt; <span class="directive">const</span> &amp; );
-
-} }</code></pre>
-</div>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">Effects: </dt>
-<dd>
-<p>Blocks the specified <code>Signal</code> from the emitter <code>e</code> until the returned <code>blocker</code> object expires. While the <code>Signal</code> is blocked, calls to <code>emit&lt;Signal&gt;</code> for <code>e</code> are ignored and return <code>0</code>.</p>
-</dd>
-</dl>
-</div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-If <code>block</code> is passed a raw pointer, deleting the emitter before the returned <code>blocker</code> object has expired results in undefined behavior.
-</td>
-</tr>
-</table>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">Notes: </dt>
-<dd>
-<div class="ulist">
-<ul>
-<li>
-<p>Blocking affects existing as well as future connections.</p>
-</li>
-<li>
-<p>The returned <code>blocker</code> object does not own <code>e</code> even if the <code>shared_ptr</code> block overload is used.</p>
-</li>
-</ul>
-</div>
-</dd>
-</dl>
-</div>
-<hr>
-</div>
-<div class="sect2">
-<h3 id="__code_meta_blocked_code"><code>meta::blocked&lt;&gt;</code></h3>
-<div class="listingblock">
-<div class="title">#include &lt;boost/synapse/block.hpp&gt;</div>
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">namespace</span> boost { <span class="keyword">namespace</span> synapse { <span class="keyword">namespace</span> meta {
-
-    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>&gt;
-    <span class="keyword">struct</span> blocked {
-        <span class="keyword">typedef</span> blocked&lt;Signal&gt;(*type)( blocker &amp;, <span class="predefined-type">bool</span> is_blocked );
-    };
-
-} } }</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This meta signal is emitted by the <code>meta::emitter</code> when another signal is blocked or unblocked:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>If <code>Signal</code> was not blocked for <code>e</code> at the time <code>block&lt;Signal&gt;</code> is called, the <code>meta::emitter</code> emits the signal <code>meta::blocked&lt;Signal&gt;</code>, passing <code>true</code> for the <code>is_blocked</code> argument;</p>
-</li>
-<li>
-<p>When the returned <code>blocker</code> object expires, if there are no other <code>blocker</code> objects blocking <code>Signal</code> for the same emitter <code>e</code>, the <code>meta::emitter</code> emits the signal <code>meta::blocked&lt;Signal&gt;</code> again, with <code>false</code> passed for the <code>is_blocked</code> argument;</p>
-</li>
-</ul>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-The <code>blocker</code> object is passed to handlers of <code>meta::blocked&lt;&gt;</code>. They can use it to access the emitter <code>e</code> passed to <code>block</code>.
-</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect2">
-<h3 id="__code_translate_code"><code>translate()</code></h3>
 <div class="listingblock">
 <div class="title">#include &lt;boost/synapse/translate.hpp&gt;</div>
 <div class="content">
@@ -1653,144 +1407,72 @@ The <code>blocker</code> object is passed to handlers of <code>meta::blocked&lt;
     <span class="keyword">template</span> &lt;
         <span class="keyword">class</span> <span class="class">OriginalSignal</span>,  <span class="keyword">class</span> <span class="class">TranslatedSignal</span>,
         <span class="keyword">class</span> <span class="class">OriginalEmitter</span>, <span class="keyword">class</span> <span class="class">TranslatedEmitter</span>&gt;
-    weak_ptr&lt;connection&gt; translate( OriginalEmitter * e1, weak_ptr&lt;TranslatedEmitter&gt; <span class="directive">const</span> &amp; e2 );
-
-    <span class="keyword">template</span> &lt;
-        <span class="keyword">class</span> <span class="class">OriginalSignal</span>,  <span class="keyword">class</span> <span class="class">TranslatedSignal</span>,
-        <span class="keyword">class</span> <span class="class">OriginalEmitter</span>, <span class="keyword">class</span> <span class="class">TranslatedEmitter</span>&gt;
-    weak_ptr&lt;connection&gt; translate( OriginalEmitter * e1, shared_ptr&lt;TranslatedEmitter&gt; <span class="directive">const</span> &amp; e2 );
-
-    <span class="keyword">template</span> &lt;
-        <span class="keyword">class</span> <span class="class">OriginalSignal</span>,  <span class="keyword">class</span> <span class="class">TranslatedSignal</span>,
-        <span class="keyword">class</span> <span class="class">OriginalEmitter</span>, <span class="keyword">class</span> <span class="class">TranslatedEmitter</span>&gt;
-    weak_ptr&lt;connection&gt; translate( weak_ptr&lt;OriginalEmitter&gt; <span class="directive">const</span> &amp; e1, TranslatedEmitter * e2 );
-
-    <span class="keyword">template</span> &lt;
-        <span class="keyword">class</span> <span class="class">OriginalSignal</span>,  <span class="keyword">class</span> <span class="class">TranslatedSignal</span>,
-        <span class="keyword">class</span> <span class="class">OriginalEmitter</span>, <span class="keyword">class</span> <span class="class">TranslatedEmitter</span>&gt;
-    weak_ptr&lt;connection&gt; translate( weak_ptr&lt;OriginalEmitter&gt; <span class="directive">const</span> &amp; e1, weak_ptr&lt;TranslatedEmitter&gt; <span class="directive">const</span> &amp; e2 );
-
-    <span class="keyword">template</span> &lt;
-        <span class="keyword">class</span> <span class="class">OriginalSignal</span>,  <span class="keyword">class</span> <span class="class">TranslatedSignal</span>,
-        <span class="keyword">class</span> <span class="class">OriginalEmitter</span>, <span class="keyword">class</span> <span class="class">TranslatedEmitter</span>&gt;
-    weak_ptr&lt;connection&gt; translate( weak_ptr&lt;OriginalEmitter&gt; <span class="directive">const</span> &amp; e1, shared_ptr&lt;TranslatedEmitter&gt; <span class="directive">const</span> &amp; e2 );
-
-    <span class="keyword">template</span> &lt;
-        <span class="keyword">class</span> <span class="class">OriginalSignal</span>,  <span class="keyword">class</span> <span class="class">TranslatedSignal</span>,
-        <span class="keyword">class</span> <span class="class">OriginalEmitter</span>, <span class="keyword">class</span> <span class="class">TranslatedEmitter</span>&gt;
-    weak_ptr&lt;connection&gt; translate( shared_ptr&lt;OriginalEmitter&gt; <span class="directive">const</span> &amp; e1, TranslatedEmitter * e2 );
-
-    <span class="keyword">template</span> &lt;
-        <span class="keyword">class</span> <span class="class">OriginalSignal</span>,  <span class="keyword">class</span> <span class="class">TranslatedSignal</span>,
-        <span class="keyword">class</span> <span class="class">OriginalEmitter</span>, <span class="keyword">class</span> <span class="class">TranslatedEmitter</span>&gt;
-    weak_ptr&lt;connection&gt; translate( shared_ptr&lt;OriginalEmitter&gt; <span class="directive">const</span> &amp; e1, weak_ptr&lt;TranslatedEmitter&gt; <span class="directive">const</span> &amp; e2 );
-
-    <span class="keyword">template</span> &lt;
-        <span class="keyword">class</span> <span class="class">OriginalSignal</span>,  <span class="keyword">class</span> <span class="class">TranslatedSignal</span>,
-        <span class="keyword">class</span> <span class="class">OriginalEmitter</span>, <span class="keyword">class</span> <span class="class">TranslatedEmitter</span>&gt;
-    weak_ptr&lt;connection&gt; translate( shared_ptr&lt;OriginalEmitter&gt; <span class="directive">const</span> &amp; e1, shared_ptr&lt;TranslatedEmitter&gt; <span class="directive">const</span> &amp; e2 );
+    weak_ptr&lt;pconnection&gt; translate( &lt;&lt;OriginalEmitter&gt;&gt; e1, &lt;&lt;TranslatedEmitter&gt;&gt; e2 ); <i class="conum" data-value="1"></i><b>(1)</b>
 
 } }</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>&lt;&lt;OriginalEmitter&gt;&gt;</code> is either <code>OriginalEmitter *</code>, <code>weak_ptr&lt;OriginalEmitter&gt; const &amp;</code> or, equivalently, <code>shared_ptr&lt;OriginalEmitter&gt; const &amp;</code>; <code>&lt;&lt;TranslatedEmitter&gt;&gt;</code> by analogy. At least one of <code>e1</code> and <code>e2</code> is <em>not</em> a raw pointer.</td>
+</tr>
+</table>
+</div>
 </div>
 </div>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">Effects: </dt>
 <dd>
-<p>As if:</p>
-</dd>
-</dl>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">return</span> connect&lt;OriginalSignal&gt;(
-    original_emitter, bind(&amp;emit&lt;TranslatedSignal&gt;,translated_emitter,_1,_2,...),connection_lifetime)</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This function can be used to translate one signal into another signal, as long as their arguments are compatible. For example, if we have a button btn and a dialog dlg, translate&lt;button_on_click,dialog_confirmed&gt;(btn,dlg) can be used to confirm the dialog when the button is clicked.
-Note:</p>
-</div>
-<div class="paragraph">
-<p>The returned connection itself does not count towards the return value of emit&lt;OriginalSignal&gt;; that is, the return value of emit&lt;OriginalSignal&gt; is as if emit&lt;TranslatedSignal&gt; was called instead.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_class_code_blocker_code">Class <code>blocker</code></h3>
-<div class="listingblock">
-<div class="title">#include &lt;boost/synapse/blocker.hpp&gt;</div>
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">namespace</span> boost { <span class="keyword">namespace</span> synapse {
-
-    <span class="keyword">class</span> <span class="class">blocker</span> { <span class="comment">//abstract base</span>
-
-    <span class="directive">protected</span>:
-
-        blocker();
-        ~blocker();
-
-    <span class="directive">public</span>:
-
-        <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">T</span>&gt;
-        shared_ptr&lt;T&gt; emitter() <span class="directive">const</span>;
-    };
-
-} }</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The <code>block</code> function returns <code>shared_ptr&lt;blocker const&gt;</code> that is used to control the time the signal remains blocked. As well, <code>blocker</code> objects are passed to handlers of the <code>meta::blocked</code> signal, which can use the <code>emitter</code> member function template to access the emitter object passed to <code>block</code></p>
-</div>
-<div class="sect3">
-<h4 id="__code_emitter_code"><code>emitter()</code></h4>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">T</span>&gt;
-shared_ptr&lt;T&gt; emitter() <span class="directive">const</span>;</code></pre>
-</div>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">Returns: </dt>
-<dd>
-<p>A <code>shared_ptr</code> that points the emitter that was passed to an overload of the <code>block</code> function template to get the <code>blocker</code> object.</p>
-</dd>
-<dt class="hdlist1">Notes: </dt>
-<dd>
+<p>The <code>translate</code> function template creates a connection which causes the emitter <code>e2</code> to emit <code>TranslatedSignal</code> each time the emitter <code>e1</code> emits <code>OriginalSignal</code> (the two signals must have campatible signatures). This behavior persists until:</p>
 <div class="ulist">
 <ul>
 <li>
-<p>An empty shared_ptr is returned if:</p>
-<div class="ulist">
-<ul>
-<li>
-<p><code>T</code> does not match the static type of the emitter passed to <code>block</code>, or</p>
+<p>the returned <a href="#connection"><code>connection</code></a> object expires (this applies only to the <code>translate</code> overload that takes <code>e1</code> and <code>e2</code> as raw pointers);</p>
 </li>
 <li>
-<p>the emitter was passed to <code>block</code> as a <code>shared</code>/<code>weak_ptr</code> and it has expired.</p>
-</li>
-</ul>
-</div>
+<p><code>e1</code> (passed as either <code>weak_ptr</code> or <code>shared_ptr</code> expires;</p>
 </li>
 <li>
-<p>If the emitter was passed to <code>block</code> as a raw pointer, the returned <code>shared_ptr</code> points that emitter but does not (can not) keep it afloat.</p>
+<p><code>e2</code> (passed as either <code>weak_ptr</code> or <code>shared_ptr</code> expires.</p>
 </li>
 </ul>
 </div>
 </dd>
 </dl>
 </div>
-<div class="paragraph">
-<p><br></p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The returned <a href="#connection"><code>connection</code></a> object does not assume ownership of <code>e1</code> or <code>e2</code>: passing <code>shared_ptr</code> is equivalent to passing <code>weak_ptr</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+If either <code>e1</code> or <code>e2</code>, passed as raw pointers, expire before the returned <a href="#connection"><code>connection</code></a> object has expired, the behavior is undefined.
+</td>
+</tr>
+</table>
 </div>
 <hr>
-<div class="paragraph">
-<p><br></p>
-</div>
-</div>
 </div>
 <div class="sect2">
-<h3 id="_class_code_connection_code">Class <code>connection</code></h3>
+<h3 id="connection"><code>connection</code></h3>
+<div class="exampleblock">
+<div class="content">
 <div class="listingblock">
 <div class="title">#include &lt;boost/synapse/connection.hpp&gt;</div>
 <div class="content">
@@ -1800,6 +1482,7 @@ shared_ptr&lt;T&gt; emitter() <span class="directive">const</span>;</code></pre>
 
     <span class="directive">protected</span>:
 
+        connection();
         ~connection();
 
     <span class="directive">public</span>:
@@ -1820,12 +1503,14 @@ shared_ptr&lt;T&gt; emitter() <span class="directive">const</span>;</code></pre>
 } }</code></pre>
 </div>
 </div>
+</div>
+</div>
 <div class="paragraph">
-<p>The connect and translate functions return shared_ptr&lt;connection&gt; that is used to control the lifetime of the connection. As well, connection objects are passed to handlers of the meta::connected signal, which can use the emitter member function template to access the emitter object passed to connect/translate, and the connection::set_user_data/connection::get_user_data member function templates to store auxiliary information in the connection object.</p>
+<p>The <a href="#connect"><code>connect</code></a> and <a href="#translate"><code>translate</code></a> functions return <code>shared_ptr&lt;connection&gt;</code> that is used to control the lifetime of the connection. As well, <code>connection</code> objects are passed to handlers of the <a href="#meta::connected"><code>meta::connected</code></a> signal, which can use the <a href="#connection::emitter"><code>emitter</code></a> member function template to access the emitter object passed to <a href="#connect"><code>connect</code></a>/<a href="#translate"><code>translate</code></a>, and the <a href="#connection::set_user_data"><code>set_user_data</code></a>/<a href="#connection::get_user_data"><code>get_user_data</code></a> member function templates to store auxiliary information in the <code>connection</code> object.</p>
 </div>
 <hr>
 <div class="sect3">
-<h4 id="__code_set_user_data_code"><code>set_user_data()</code></h4>
+<h4 id="connection::set_user_data"><code>set_user_data</code></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">T</span>&gt;
@@ -1836,14 +1521,14 @@ shared_ptr&lt;T&gt; emitter() <span class="directive">const</span>;</code></pre>
 <dl>
 <dt class="hdlist1">Description: </dt>
 <dd>
-<p>Stores a copy of data into this. Use <code>get_user_data()</code> to access it.</p>
+<p>Stores a copy of data into this. Use <code>get_user_data</code> to access it.</p>
 </dd>
 </dl>
 </div>
 <hr>
 </div>
 <div class="sect3">
-<h4 id="__code_get_user_data_code"><code>get_user_data()</code></h4>
+<h4 id="connection::get_user_data"><code>get_user_data</code></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">T</span>&gt;
@@ -1870,7 +1555,7 @@ T * get_user_data() <span class="directive">const</span>;</code></pre>
 <hr>
 </div>
 <div class="sect3">
-<h4 id="__code_emitter_code_2"><code>emitter()</code></h4>
+<h4 id="connection::emitter"><code>emitter</code></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">T</span>&gt;
@@ -1911,7 +1596,7 @@ shared_ptr&lt;T&gt; emitter() <span class="directive">const</span>;</code></pre>
 <hr>
 </div>
 <div class="sect3">
-<h4 id="__code_receiver_code"><code>receiver()</code></h4>
+<h4 id="connection::receiver"><code>receiver</code></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">T</span>&gt;
@@ -1952,55 +1637,350 @@ shared_ptr&lt;T&gt; receiver() <span class="directive">const</span>;</code></pre
 </dd>
 </dl>
 </div>
+<hr>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_signal_types">Signal types</h3>
-<div class="paragraph">
-<p>In synapse, the signal types used to instantiate the <code>emit()</code>  and <code>connect()</code> function templates must be function pointer types. The signal signature is used to deduce the arguments of <code>emit()</code>, and must be compatible with the function argument of <code>connect()</code>.</p>
-</div>
-<div class="paragraph">
-<p>The return type of a signal <code>typedef</code> is used to tell apart different signals that happen to have identical arguments. When calling connected functions, return values are discarded.</p>
-</div>
-<div class="paragraph">
-<p>In addition to function pointer types, the <code>emit()</code> and <code>connect()</code> templates may be instantiated with instances of the <code>meta::connected&lt;&gt;</code> and <code>meta::blocked&lt;&gt;</code> class templates. These meta signal templates must be instantiated with another signal type (that is, a function pointer type or an instance of <code>meta::connected&lt;&gt;</code> or <code>meta::blocked&lt;&gt;</code>).</p>
-</div>
-<div class="paragraph">
-<p>Example signal typedefs:</p>
-</div>
+<h3 id="pconnection"><code>pconnection</code></h3>
 <div class="exampleblock">
 <div class="content">
 <div class="listingblock">
+<div class="title">#include &lt;boost/synapse/connection.hpp&gt;</div>
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">typedef</span> <span class="keyword">struct</span> window_closed_(*window_closed)( Window * ); <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">namespace</span> boost { <span class="keyword">namespace</span> synapse {
 
-<span class="keyword">typedef</span> <span class="keyword">struct</span> button_clicked_(*button_clicked)( <span class="predefined-type">int</span> x, <span class="predefined-type">int</span> y ); <i class="conum" data-value="2"></i><b>(2)</b>
+    <span class="keyword">class</span> <span class="class">pconnection</span>: <span class="directive">protected</span> connection { <span class="comment">//abstract base</span>
 
-<span class="keyword">typedef</span> <span class="keyword">struct</span> mouse_moved_(*mouse_moved)( <span class="predefined-type">int</span> x, <span class="predefined-type">int</span> y ); <i class="conum" data-value="3"></i><b>(3)</b>
+    <span class="directive">protected</span>:
 
-meta::connected&lt;mouse_moved&gt; <i class="conum" data-value="4"></i><b>(4)</b></code></pre>
+        pconnection();
+        ~pconnection();
+
+    <span class="directive">public</span>:
+
+        <span class="directive">using</span> connection::set_user_data;
+        <span class="directive">using</span> connection::get_user_data;
+        <span class="directive">using</span> connection::emitter;
+        <span class="directive">using</span> connection::receiver;
+
+    };
+
+} }</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>pconnection</code> class represents <em>persistent</em> connections, returned by overloads of <a href="#connect"><code>connect</code></a> and <a href="#translate"><code>translate</code></a> which take at least one <code>weak_ptr</code> or <code>shared_ptr</code> argument. The user is not required to keep the returned <code>weak_ptr&lt;pconnection&gt;</code> afloat: the connection will be destroyed automatically when Synapse detects that either the emitter or the receiver argument to <a href="#connect"><code>connect</code></a> have expired.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+Use <a href="#release"><code>release</code></a> to convert a non-owning <code>weak_ptr&lt;pconnection&gt;</code> reference to an owning <code>shared_ptr&lt;<a href="#connection">connection</a>&gt;</code> reference.
+</td>
+</tr>
+</table>
+</div>
+<hr>
+</div>
+<div class="sect2">
+<h3 id="block"><code>block</code></h3>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/block.hpp&gt;</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">namespace</span> boost { <span class="keyword">namespace</span> synapse {
+
+    <span class="keyword">class</span> <span class="class">blocker</span>;
+
+    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>,<span class="keyword">class</span> <span class="class">Emitter</span>&gt;
+    shared_ptr&lt;blocker&gt; block( &lt;&lt;Emitter&gt;&gt; e ); <i class="conum" data-value="1"></i><b>(1)</b>
+
+} }</code></pre>
 </div>
 </div>
 <div class="colist arabic">
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>This signal may be used to indicate that a <code>Window</code> object is being closed.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>This signal <code>typedef</code> could be used to communicate a mouse button click at the given screen coordinates.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>A similar signal used to communicated mouse movement. We know this is a different signal from <code>button_clicked</code> because it uses a different return type (<code>struct mouse_moved_</code> vs. <code>struct button_clicked_</code>).</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>This signal type can be used to get notifications when the user connects or disconnects the <code>mouse_moved</code> signal.</td>
+<td><code>&lt;&lt;Emitter&gt;&gt;</code> is either <code>Emitter *</code>, <code>weak_ptr&lt;Emitter&gt;</code> or, equivalently, <code>shared_ptr&lt;Emitter&gt;</code>.</td>
 </tr>
 </table>
 </div>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Effects: </dt>
+<dd>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Blocks the specified <code>Signal</code> from the emitter <code>e</code> until the returned <code>blocker</code> object expires. While the <code>Signal</code> is blocked, calls to <code>emit&lt;Signal&gt;</code> for <code>e</code> are ignored and return <code>0</code>. The returned <code>blocker</code> object does not own <code>e</code> even if the <code>shared_ptr</code> <code>block</code> overload is used.</p>
+</li>
+<li>
+<p><a id="meta::blocked"></a> The <code>meta::emitter</code> emits the <code>meta::blocked&lt;Signal&gt;</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">namespace</span> boost { <span class="keyword">namespace</span> synapse { <span class="keyword">namespace</span> meta {
+
+    <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">Signal</span>&gt;
+    <span class="keyword">struct</span> blocked {
+        <span class="comment">//unspecified</span>
+    };
+
+} } }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>meta::blocked&lt;Signal&gt;</code> signal is also emitted when the returned <a href="#blocker"><code>blocker</code></a> object expires. Handlers of the meta signal take a reference to the <a href="#blocker"><code>blocker</code></a> object being created or destroyed, and a second <code>bool</code> argument, <code>is_blocked</code>, which is true if the signal is becoming blocked, false if it is becoming unblocked.</p>
+</div>
+</li>
+</ol>
+</div>
+</dd>
+</dl>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Blocking affects existing as well as future connections.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+If <code>block</code> is passed a raw pointer, deleting the emitter before the returned <code>blocker</code> object has expired results in undefined behavior.
+</td>
+</tr>
+</table>
+</div>
+<hr>
+</div>
+<div class="sect2">
+<h3 id="blocker"><code>blocker</code></h3>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/blocker.hpp&gt;</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">namespace</span> boost { <span class="keyword">namespace</span> synapse {
+
+    <span class="keyword">class</span> <span class="class">blocker</span> { <span class="comment">//abstract base</span>
+
+    <span class="directive">protected</span>:
+
+        blocker();
+        ~blocker();
+
+    <span class="directive">public</span>:
+
+        <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">T</span>&gt;
+        shared_ptr&lt;T&gt; emitter() <span class="directive">const</span>;
+    };
+
+} }</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <a href="#block"><code>block</code></a> function returns <code>shared_ptr&lt;blocker const&gt;</code> that is used to control the time the signal remains blocked. As well, <code>blocker</code> objects are passed to handlers of the <a href="#meta::blocked"><code>meta::blocked</code></a> signal, which can use the <code>emitter</code> member function template to access the emitter object passed to <a href="#block"><code>block</code></a>.</p>
+</div>
+<hr>
+<div class="sect3">
+<h4 id="blocker::emitter"><code>emitter</code></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="class">T</span>&gt;
+shared_ptr&lt;T&gt; emitter() <span class="directive">const</span>;</code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Returns: </dt>
+<dd>
+<p>A <code>shared_ptr</code> that points the emitter that was passed to an overload of the <a href="#block"><code>block</code></a> function template to get the <code>blocker</code> object.</p>
+</dd>
+<dt class="hdlist1">Notes: </dt>
+<dd>
+<div class="ulist">
+<ul>
+<li>
+<p>An empty shared_ptr is returned if:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>T</code> does not match the static type of the emitter passed to <a href="#block"><code>block</code></a>, or</p>
+</li>
+<li>
+<p>the emitter was passed to <a href="#block"><code>block</code></a> as a <code>shared</code>/<code>weak_ptr</code> and it has expired.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>If the emitter was passed to <a href="#block"><code>block</code></a> as a raw pointer, the returned <code>shared_ptr</code> points that emitter but does not (can not) keep it afloat.</p>
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+<hr>
+</div>
+</div>
+<div class="sect2">
+<h3 id="thread_local_queue"><code>thread_local_queue</code></h3>
+<div class="sect3">
+<h4 id="create_thread_local_queue"><code>create_thread_local_queue</code></h4>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/thread_local_queue.hpp&gt;</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">namespace</span> boost { <span class="keyword">namespace</span> synapse {
+
+    <span class="keyword">struct</span> thread_local_queue;
+    shared_ptr&lt;thread_local_queue&gt; create_thread_local_queue();
+
+} }</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Returns: </dt>
+<dd>
+<p>A thread-local object that can be used to queue signals emitted asynchronously from other threads. Use <a href="#poll"><code>poll</code></a> to emit the queued signals synchronously into the calling thread. See <a href="#_interthread_communication">Interthread communication</a>.</p>
+</dd>
+</dl>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+While any number of threads can use this function to create their own <a href="#thread_local_queue"><code>thread_local_queue</code></a>, it is invalid to create more than one <code>thread_local_queue</code> object per thread.
+</td>
+</tr>
+</table>
+</div>
+<hr>
+</div>
+<div class="sect3">
+<h4 id="poll"><code>poll</code></h4>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/thread_local_queue.hpp&gt;</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">namespace</span> boost { <span class="keyword">namespace</span> synapse {
+
+    <span class="predefined-type">int</span> poll( thread_local_queue &amp; );
+
+} }</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Effects: </dt>
+<dd>
+<p>Synchronously emits all signals queued asynchronously into <code>q</code> by calls to <a href="#emit"><code>emit</code></a> from other threads. See <a href="#_interthread_communication">Interthread communication</a>.</p>
+</dd>
+<dt class="hdlist1">Returns: </dt>
+<dd>
+<p>The total number of signals emitted.</p>
+</dd>
+</dl>
+</div>
+<hr>
+</div>
+<div class="sect3">
+<h4 id="wait"><code>wait</code></h4>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/thread_local_queue.hpp&gt;</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">namespace</span> boost { <span class="keyword">namespace</span> synapse {
+
+    <span class="predefined-type">int</span> wait( thread_local_queue &amp; );
+
+} }</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Effects: </dt>
+<dd>
+<p>The same as <code><a href="#poll">poll</a>(q)</code>, except that it blocks and does not return until at least one signal was delivered.</p>
+</dd>
+<dt class="hdlist1">Returns: </dt>
+<dd>
+<p>The total number of signals emitted (always greater than 1).</p>
+</dd>
+</dl>
+</div>
+<hr>
+</div>
+<div class="sect3">
+<h4 id="post"><code>post</code></h4>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/thread_local_queue.hpp&gt;</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">namespace</span> boost { <span class="keyword">namespace</span> synapse {
+
+    <span class="directive">void</span> post( thread_local_queue &amp;, function&lt;<span class="directive">void</span>()&gt; <span class="directive">const</span> &amp; );
+
+} }</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Effects: </dt>
+<dd>
+<p>Queues <code>f</code> to be called next time <code>q</code> is polled; that is, <code>f</code> will be executed synchronously in the thread that has created <code>q</code>.</p>
+</dd>
+</dl>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+While <a href="#poll"><code>poll</code></a> (or <a href="#wait"><code>wait</code></a>) must be called from the thread that created the <a href="#thread_local_queue"><code>thread_local_queue</code></a> object, <a href="#post"><code>post</code></a> may be called from any thread.
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -2009,7 +1989,250 @@ meta::connected&lt;mouse_moved&gt; <i class="conum" data-value="4"></i><b>(4)</b
 <div class="sect1">
 <h2 id="_programming_techniques">Programming techniques</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_synapsifying_c_callbacks">Synapsifying C callbacks</h3>
+<div class="paragraph">
+<p>Synapse can be used with any C-style callback API to install C++ functions, including lambdas, as callbacks. For example, consider the <code>SSL_set_info_callback</code> from <a href="https://www.openssl.org/">OpenSSL</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c"><span class="directive">void</span> SSL_set_info_callback(SSL *ssl,
+        <span class="directive">void</span> (*cb) (<span class="directive">const</span> SSL *ssl, <span class="predefined-type">int</span> type, <span class="predefined-type">int</span> val));</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can define the following Synapse signal to represent this callback:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">typedef</span> <span class="keyword">struct</span> SSL_info_callback_(*SSL_info_callback)( <span class="directive">const</span> SSL *ssl, <span class="predefined-type">int</span> type, <span class="predefined-type">int</span> val );</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Next, at a global scope or during initialization, we install a handler for the <code>meta::connected&lt;SSL_info_callback&gt;</code> signal, which the <a href="#meta::connected"><code>meta::emitter</code></a> emits every time the user connects or disconnects the <code>SSL_info_callback</code> signal:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="directive">void</span> emit_fwd( SSL <span class="directive">const</span> * ssl, <span class="predefined-type">int</span> type, <span class="predefined-type">int</span> val );
 
+<span class="predefined-type">int</span> main( <span class="predefined-type">int</span> argc, <span class="predefined-type">char</span> <span class="directive">const</span> * argv[ ] ) {
+
+    connect&lt;meta::connected&lt;SSL_info_callback&gt; &gt;( meta::emitter(),
+        [ ]( connection &amp; c, <span class="predefined-type">unsigned</span> flags ) { <i class="conum" data-value="1"></i><b>(1)</b>
+
+            <span class="keyword">if</span>( flags&amp;meta::connect_flags::connecting ) { <i class="conum" data-value="2"></i><b>(2)</b>
+
+                <span class="keyword">if</span>( flags&amp;meta::connect_flags::first_for_this_emitter ) <i class="conum" data-value="3"></i><b>(3)</b>
+                    SSL_set_info_callback(c.emitter&lt;SSL&gt;().get(),&amp;emit_fwd); <i class="conum" data-value="4"></i><b>(4)</b>
+
+            } <span class="keyword">else</span> { <i class="conum" data-value="5"></i><b>(5)</b>
+
+                <span class="keyword">if</span>( flags&amp;meta::connect_flags::last_for_this_emitter ) <i class="conum" data-value="6"></i><b>(6)</b>
+                    <span class="keyword">if</span>( <span class="directive">auto</span> ssl = c.emitter&lt;SSL&gt;() ) <i class="conum" data-value="7"></i><b>(7)</b>
+                        SSL_set_info_callback(ssl.get(),<span class="integer">0</span>); <i class="conum" data-value="8"></i><b>(8)</b>
+
+            }
+
+        } );
+
+}
+
+<span class="directive">void</span> emit_fwd( SSL <span class="directive">const</span> * ssl, <span class="predefined-type">int</span> type, <span class="predefined-type">int</span> val ) {
+    emit&lt;SSL_info_callback&gt;(ssl,ssl,type,val);
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>This lambda function is called every time the user connects or disconnects the <code>SSL_info_callback</code> Synapse signal.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The user is <em>connecting</em> the <code>SSL_info_callback</code> signal.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>This is the <em>first</em> time the <code>SSL_info_callback</code> signal is being connected for a particular <code>SSL</code> object (emitter).</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Use <a href="#connection::emitter"><code>connection::emitter</code></a> to get the emitter as a <code>shared_ptr&lt;SSL&gt;</code> (we know the emitter is of type <code>SSL *</code>), and use the OpenSSL API to install a C callback <code>emit_fwd</code>, which uses <code><a href="#emit">emit</a>&lt;SSL_info_callback&gt;</code> to call all connected Synapse functions.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>The user is <em>disconnecting</em> the <code>SSL_info_callback</code> signal.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>This is the <em>last</em> <code>SSL_info_callback</code> connection being destroyed for a particular <code>SSL</code> object (emitter).</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Check if the SSL object is still accessible (it may have been destroyed already).</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>Uninstall the <code>emit_fwd</code> callback.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Once this handler for the <code>meta::connected&lt;SSL_info_callback&gt;</code> signal is installed, we can simply use <a href="#connect"><code>connect</code></a> to install a C++ lamda handler for the <code>SSL_info_callback</code> signal we defined:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++">shared_ptr&lt;SSL&gt; ssl(SSL_new(ctx),&amp;SSL_free);
+
+connect&lt;SSL_info_callback&gt;( ssl,
+    [ ]( <span class="directive">const</span> SSL *ssl, <span class="predefined-type">int</span> type, <span class="predefined-type">int</span> val ) noexcept {
+
+    } );</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_reporting_exceptions_from_code_noexcept_code_signal_handlers">Reporting exceptions from <code>noexcept</code> signal handlers</h3>
+<div class="paragraph">
+<p>Sometimes connected functions are not permitted to throw exceptions&#8201;&#8212;&#8201;this is usually the case when the callback originates in C code. With synapse, such exceptions can be reported safely to a C++ context that can store them for later processing.</p>
+</div>
+<div class="paragraph">
+<p>First, we define a Synapse signal we will use to report exceptions:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">typedef</span> <span class="keyword">struct</span> exception_caught_(*exception_caught)();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we take a handler of the <code>SSL_info_callback</code> (see above) as an example, we could modify it like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++">shared_ptr&lt;SSL&gt; ssl(SSL_new(ctx),&amp;SSL_free);
+
+connect&lt;SSL_info_callback&gt;( ssl,
+    [ ]( <span class="directive">const</span> SSL *ssl, <span class="predefined-type">int</span> type, <span class="predefined-type">int</span> val ) noexcept {
+        <span class="keyword">try</span> {
+
+            <span class="comment">//code which may throw</span>
+
+        } <span class="keyword">catch</span>(...) {
+
+            <span class="predefined-type">int</span> n=synapse::emit&lt;exception_caught&gt;(ssl); <i class="conum" data-value="1"></i><b>(1)</b>
+            assert(n&gt;<span class="integer">0</span>); <i class="conum" data-value="2"></i><b>(2)</b>
+
+        }
+    } );</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><a href="#emit"><code>emit</code></a> the <code>exception_caught</code> Synapse signal from the <code>ssl</code> object. Handlers of this signal must be able to deal with any exception, for example they can use <code>std::current_exception</code> to capture the exception and rethrow it once control has exited the critical <code>noexcept</code> path.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><a href="#emit"><code>emit</code></a> returns the number of connected functions it called, so this <code>assert</code> ensures that the exception won&#8217;t get ignored.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_using_synapse_with_qt_to_avoid_mocing">Using Synapse with Qt to avoid MOCing</h3>
+<div class="paragraph">
+<p>The signal programming API that is used in <a href="https://www.qt.io/">Qt</a> is intrusive: signals must be specified in the definition of each type. For this reason, it is not possible to add signals to existing Qt types. When this is needed, users are directed to define the new signals in their own class which derives from the Qt type they wanted to add signal(s) to.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://wiki.qt.io/Qt_for_Beginners#Creating_custom_signals_and_slots">There is a special example that illustrates this approach</a>. Unfortunately, this requires the use of the proprietary Qt Meta Object Compiler which the author finds cumbersome. Below is the same example modified to use Synapse signals, which requires no MOCing (the changes made to the original program are marked with numbers):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="preprocessor">#include</span> <span class="include">&lt;boost/synapse/connect.hpp&gt;</span>
+<span class="preprocessor">#define</span> QT_NO_EMIT <span class="comment">//Suppress the #define emit from Qt since it clashes with synapse::emit.</span>
+<span class="preprocessor">#include</span> <span class="include">&lt;QtWidgets/QApplication&gt;</span>
+<span class="preprocessor">#include</span> <span class="include">&lt;QtWidgets/QPushButton&gt;</span>
+
+<span class="keyword">namespace</span> synapse=boost::synapse;
+
+<span class="keyword">class</span> <span class="class">Window</span> : <span class="directive">public</span> QWidget
+{
+<span class="directive">public</span>:
+    <span class="directive">explicit</span> Window(QWidget *parent = <span class="integer">0</span>);
+    <span class="label">signals:</span> <span class="comment">//Not needed with Synapse but okay</span>
+    <span class="keyword">typedef</span> <span class="keyword">struct</span> counterReached_(*counterReached)(); <i class="conum" data-value="1"></i><b>(1)</b>
+<span class="directive">private</span> slots: <span class="comment">//&lt;-- Not needed with Synapse but okay</span>
+    <span class="directive">void</span> slotButtonClicked(<span class="predefined-type">bool</span> checked);
+<span class="directive">private</span>:
+    <span class="predefined-type">int</span> m_counter;
+    QPushButton *m_button;
+    shared_ptr&lt;synapse::connection&gt; c_; <i class="conum" data-value="2"></i><b>(2)</b>
+};
+
+Window::Window(QWidget *parent) :
+    QWidget(parent)
+{
+     <span class="comment">// Set size of the window</span>
+     setFixedSize(<span class="integer">100</span>, <span class="integer">50</span>);
+
+    <span class="comment">// Create and position the button</span>
+    m_button = <span class="keyword">new</span> QPushButton(<span class="string"><span class="delimiter">&quot;</span><span class="content">Hello World</span><span class="delimiter">&quot;</span></span>, <span class="local-variable">this</span>);
+    m_button-&gt;setGeometry(<span class="integer">10</span>, <span class="integer">10</span>, <span class="integer">80</span>, <span class="integer">30</span>);
+    m_button-&gt;setCheckable(<span class="predefined-constant">true</span>);
+
+    <span class="comment">// Set the counter to 0</span>
+    m_counter = <span class="integer">0</span>;
+
+    connect(m_button, SIGNAL (clicked(<span class="predefined-type">bool</span>)), <span class="local-variable">this</span>, SLOT (slotButtonClicked(<span class="predefined-type">bool</span>)));
+
+    c_=synapse::connect&lt;counterReached&gt;(<span class="local-variable">this</span>,&amp;QApplication::quit); <i class="conum" data-value="3"></i><b>(3)</b>
+}
+
+<span class="directive">void</span> Window::slotButtonClicked(<span class="predefined-type">bool</span> checked)
+{
+    <span class="keyword">if</span> (checked)
+        m_button-&gt;setText(<span class="string"><span class="delimiter">&quot;</span><span class="content">Checked</span><span class="delimiter">&quot;</span></span>);
+    <span class="keyword">else</span>
+        m_button-&gt;setText(<span class="string"><span class="delimiter">&quot;</span><span class="content">Hello World</span><span class="delimiter">&quot;</span></span>);
+    m_counter ++;
+    <span class="keyword">if</span> (m_counter == <span class="integer">10</span>)
+        synapse::emit&lt;counterReached&gt;(<span class="local-variable">this</span>); <i class="conum" data-value="4"></i><b>(4)</b>
+}
+
+<span class="predefined-type">int</span> main(<span class="predefined-type">int</span> argc, <span class="predefined-type">char</span> **argv)
+{
+    QApplication app (argc, argv);
+
+    Window window;
+    window.show();
+
+    <span class="keyword">return</span> app.exec();
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Was: <code>void counterReached();</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Needed to keep the Synapse connection afloat.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Was: <code>connect(this, SIGNAL (counterReached()), QApplication::instance(), SLOT (quit()));</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Was: <code>emit counterReached();</code></td>
+</tr>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -2231,8 +2454,8 @@ meta::connected&lt;mouse_moved&gt; <i class="conum" data-value="4"></i><b>(4)</b
 <p>The main design difference is that in Boost Signals 2 emitting a signal requires a signal object. This is significant because in general it is not trivial to associate a Boost Signals 2 signal object with 3rd-party objects. When using Synapse such association is not necessary because the 3rd-party object itself can be passed to <code>emit</code>.</p>
 </li>
 <li>
-<p><em>What is the design rationale for ignoring the value returned by the connected functions?</em></p>
-<p>A typical use case for Synapse is when the caller of <code>emit</code> doesn&#8217;t care if there are 0, 1 or many connected functions. Allowing return values makes the zero/many case quite tricky to deal with. On the other hand, passing a reference or a (shared) pointer to <code>emit</code> to return/accumulate values from any number of connected functions (if needed) is simpler and fits that case nicely.</p>
+<p><em>What is the design rationale for ignoring the value returned by connected functions?</em></p>
+<p>A typical use case for Synapse is when the caller of <code>emit</code> doesn&#8217;t care if there are 0, 1 or many connected functions. Allowing return values makes the zero/many case quite tricky to deal with. On the other hand, passing a reference or a pointer to <code>emit</code> to return/accumulate values from any number of connected functions (if needed) is simpler and fits that case nicely.</p>
 </li>
 <li>
 <p><em>Is there a way to stop the emit loop before all connected functions have been called?</em></p>
