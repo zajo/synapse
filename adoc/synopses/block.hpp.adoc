@@ -19,4 +19,4 @@ namespace boost { namespace synapse {
 
 } }
 ----
-<1> `\<<Emitter>>`  is `Emitter *`, `weak_ptr<Emitter> const &` or, equivalently, `shared_ptr<Emitter> const &`.
+<1> Multiple overloads are provided: `\<<Emitter>>`  is `Emitter *`, `weak_ptr<Emitter> const &` or, equivalently, `shared_ptr<Emitter> const &`.

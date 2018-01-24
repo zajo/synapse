@@ -42,5 +42,5 @@ namespace boost { namespace synapse {
 
 } }
 ----
-<1> `\<<Emitter>>`  is `weak_ptr<Emitter> const &` or, equivalently, `shared_ptr<Emitter> const &`;
-<2> `\<<Emitter>>`  is `Emitter *`, `weak_ptr<Emitter> const &` or, equivalently, `shared_ptr<Emitter> const &`; at least one of `e` and `r` is _not_ a raw pointer.
+<1> Two overloads are provided: `\<<Emitter>>`  is `weak_ptr<Emitter> const &` or, equivalently, `shared_ptr<Emitter> const &`;
+<2> Multple overloads are provided: `\<<Emitter>>`  is `Emitter *`, `weak_ptr<Emitter> const &` or, equivalently, `shared_ptr<Emitter> const &`; at least one of `e` and `r` is _not_ a raw pointer.
