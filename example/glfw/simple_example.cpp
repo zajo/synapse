@@ -24,7 +24,7 @@
 //========================================================================
 //! [code]
 
-#include <boost/synapse/API/GLFW/synapsify.hpp>
+#include "synapsify.hpp"
 namespace synapse = boost::synapse;
 
 #if defined(__APPLE__)

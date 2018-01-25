@@ -8,6 +8,6 @@ project
         ../../../example/OpenSSL
     ;
 
-lib OpenSSL : : : : <include>/usr/local/opt/openssl/include ;
+lib ssl : : : : <include>/usr/local/opt/openssl/include <library-path>/usr/local/opt/openssl/lib ;
 
-exe openssl_example : example.cpp OpenSSL ../..//synapse/<link>static ;
+exe openssl_example : example.cpp ssl ../..//synapse/<link>static ;

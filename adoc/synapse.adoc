@@ -817,9 +817,354 @@ int main(int argc, char **argv)
 <4> Was: `connect(this, SIGNAL (counterReached()), QApplication::instance(), SLOT (quit()));`
 <5> Was: `emit counterReached();`
 
-== Examples
+== Example: synapsifying GLFW
 
-include::{sourcedir}/examples/glfw.adoc[]
+Synapse integrates well with some C event handling APIs. As an example, let's consider link:http://www.glfw.org/[GLFW].
+
+NOTE: GLFW is an Open Source, multi-platform library for OpenGL, OpenGL ES and Vulkan development on the desktop. It provides a simple API for creating windows, contexts and surfaces, *receiving input and events*.
+
+Here is the function provided by GLFW for installing a key event handler for a window:
+
+[source,c]
+----
+GLFWkeyfun glfwSetKeyCallback( GLFWwindow *window, GLFWkeyfun cbfun );
+----
+
+where `GLFWkeyfun` is declared as:
+
+[souce,c]
+----
+typedef void (*GLFWkeyfun)( GLFWwindow * window, int key, int scancode, int action, int mods );
+----
+
+With Synapse, we can define signals to represent this as well as all other GLFW http://www.glfw.org/docs/latest/input_guide.html[input] and http://www.glfw.org/docs/latest/window_guide.html#window_properties[window state] events:
+
+[source,c++]
+.glfw_signals.hpp:
+----
+extern "C" { typedef struct GLFWwindow GLFWwindow; }
+
+namespace glfw_signals
+{
+    //User input callbacks
+    typedef struct Key_(*Key)( GLFWwindow *, int key, int scancode, int action, int mods );
+    typedef struct Char_(*Char)( GLFWwindow *, unsigned int codepoint );
+    typedef struct CharMods_(*CharMods)( GLFWwindow *, unsigned int codepoint, int mods );
+    typedef struct CursorPos_ (*CursorPos)( GLFWwindow *, double xpos, double ypos );
+    typedef struct CursorEnter_(*CursorEnter)( GLFWwindow *, int entered );
+    typedef struct MouseButton_(*MouseButton)( GLFWwindow *, int button, int action, int mods );
+    typedef struct Scroll_(*Scroll)( GLFWwindow *, double xoffset, double yoffset );
+    typedef struct Drop_(*Drop)( GLFWwindow *, int count, char const * * paths );
+
+    //Window state callbacks
+    typedef struct WindowClose_(*WindowClose)( GLFWwindow * );
+    typedef struct WindowSize_(*WindowSize)( GLFWwindow *, int width, int height );
+    typedef struct FramebufferSize_(*FramebufferSize)( GLFWwindow *, int width, int height );
+    typedef struct WindowPos_(*WindowPos)( GLFWwindow *, int xpos, int ypos );
+    typedef struct WindowIconify_(*WindowIconify)( GLFWwindow *, int iconified );
+    typedef struct WindowFocus_(*WindowFocus)( GLFWwindow *, int focused );
+    typedef struct WindowRefresh_(*WindowRefresh)( GLFWwindow * );
+    
+    //This is emitted from the GLFWwindow object to report exceptions from connected signal handlers
+    typedef struct exception_caught_(*exception_caught)( GLFWwindow * );
+}
+----
+
+Next, in a different header we install `meta::connected` signal handlers for the signals above:
+
+[source,c++]
+.glfw_synapsify.hpp:
+----
+#include "glfw_signals.hpp"
+#include <boost/synapse/connect.hpp>
+#include <boost/synapse/connection.hpp>
+#include "GLFW/glfw3.h"
+
+namespace
+{
+	template <class Signal>
+	class synapsifier;
+
+	template <class R,class... A>
+	class synapsifier<R(*)(GLFWwindow *,A...)>
+	{
+		typedef R(*Signal)(GLFWwindow *,A...);
+		typedef void (*GLFWfun)( GLFWwindow *,A... );
+		static GLFWfun prev_;
+		
+		//This is the handler that GLFW calls. It emits the corresponding Synapse signal and calls the
+		//previous GLFW handler for the same event, if any.
+		static void handler( GLFWwindow * w, A... a )
+		{
+			using namespace boost::synapse;
+			try
+			{
+				(void) emit<Signal>(w,w,a...);
+			}
+			catch(...)
+			{
+				//We can't let exceptions propagate up into C code, so the window emits the exception_caught
+				//signal, which (if exceptions are expected) should be connected to capture and handle the
+				//current exception.
+				bool handled = emit<glfw_signals::exception_caught>(w,w)>0;
+				assert(handled);
+			}
+			if( prev_ )
+				prev_(w,a...);
+		}
+
+		public:
+
+		explicit synapsifier( GLFWfun (*setter)(GLFWwindow *,GLFWfun) )
+		{
+			using namespace boost::synapse;
+			//Here we connect the Synapse meta::connected<Signal> signal. This signal is emitted by the
+			//meta::emitter() when the Signal is being connected (the user calls synapse::connect<Signal>) or
+			//disconnected (when the connection expires). The emitter pointer passed to connect (which
+			//in this case is of type GLFWwindow) is stored in the synapse::connection object passed to the
+			//lambda below, and can be accessed by the connection::emitter member function template.
+			connect<meta::connected<Signal> >( meta::emitter(),
+				[setter]( connection & c, unsigned flags )
+				{
+					if( flags&meta::connect_flags::connecting )
+					{
+						//When the Signal is being connected for the first time, use the GLFW API to install our handler.
+						if( flags&meta::connect_flags::first_for_this_emitter )
+							prev_=setter(c.emitter<GLFWwindow>().get(),&handler);
+					}
+					else
+					{
+						//When the last Signal connection expires, use the GLFW API to uninstall our handler and
+						//restore the previous handler.
+						if( flags&meta::connect_flags::last_for_this_emitter )
+						{
+							GLFWfun p=setter(c.emitter<GLFWwindow>().get(),prev_);
+							assert(p==&handler);
+						}
+					}
+				} );
+		}
+	};
+
+	template <class R,class... A>
+	typename synapsifier<R(*)(GLFWwindow *,A...)>::GLFWfun synapsifier<R(*)(GLFWwindow *,A...)>::prev_;
+
+	//Install all the synapse::meta::connected<....> handlers
+	synapsifier<glfw_signals::WindowClose> s1(&glfwSetWindowCloseCallback);
+	synapsifier<glfw_signals::WindowSize> s2(&glfwSetWindowSizeCallback);
+	synapsifier<glfw_signals::FramebufferSize> s3(&glfwSetFramebufferSizeCallback);
+	synapsifier<glfw_signals::WindowPos> s4(&glfwSetWindowPosCallback);
+	synapsifier<glfw_signals::WindowIconify> s5(&glfwSetWindowIconifyCallback);
+	synapsifier<glfw_signals::WindowFocus> s6(&glfwSetWindowFocusCallback);
+	synapsifier<glfw_signals::WindowRefresh> s7(&glfwSetWindowRefreshCallback);
+	synapsifier<glfw_signals::Key> s8(&glfwSetKeyCallback);
+	synapsifier<glfw_signals::Char> s9(&glfwSetCharCallback);
+	synapsifier<glfw_signals::CharMods> s10(&glfwSetCharModsCallback);
+	synapsifier<glfw_signals::CursorPos> s11(&glfwSetCursorPosCallback);
+	synapsifier<glfw_signals::CursorEnter> s12(&glfwSetCursorEnterCallback);
+	synapsifier<glfw_signals::MouseButton> s13(&glfwSetMouseButtonCallback);
+	synapsifier<glfw_signals::Scroll> s14(&glfwSetScrollCallback);
+	synapsifier<glfw_signals::Drop> s15(&glfwSetDropCallback);
+}
+----
+
+IMPORTANT: The above `glfw_synapsify.hpp` should be included in exactly one compilation unit of a GLFW program, for example the main compilation unit. This will automatically install all `meta::connected` signal handlers.
+
+With this, we simply use <<connect,`connect`>> to hook up any `GLFWwindow` event. For example, if we have a `GLFWwindow` pointer `w`, we can install a key event handler like so:
+
+[source,c++]
+----
+auto c = synapse::connect<glfw_signals::key>(w,
+	[ ]( GLFWwindow * w, int key, int scancode, int action, int mods )
+	{
+		....
+	}
+----
+
+Finally, this is the example from the GLFW http://www.glfw.org/docs/latest/quick.html[Getting started page], modified to use the "synapsify" framework above (changes to the original example are marked with numbers):
+
+[source,c++]
+----
+//========================================================================
+// Simple GLFW example
+// Copyright (c) Camilla Löwy <elmindreda@glfw.org>
+//
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+//
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+//
+// 1. The origin of this software must not be misrepresented; you must not
+//    claim that you wrote the original software. If you use this software
+//    in a product, an acknowledgment in the product documentation would
+//    be appreciated but is not required.
+//
+// 2. Altered source versions must be plainly marked as such, and must not
+//    be misrepresented as being the original software.
+//
+// 3. This notice may not be removed or altered from any source
+//    distribution.
+//
+//========================================================================
+//! [code]
+
+#include "glfw_synapsify.hpp" <1>
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+#include "linmath.h"
+
+#include <stdlib.h>
+#include <stdio.h>
+
+static const struct
+{
+    float x, y;
+    float r, g, b;
+} vertices[3] =
+{
+    { -0.6f, -0.4f, 1.f, 0.f, 0.f },
+    {  0.6f, -0.4f, 0.f, 1.f, 0.f },
+    {   0.f,  0.6f, 0.f, 0.f, 1.f }
+};
+
+static const char* vertex_shader_text =
+"#version 110\n"
+"uniform mat4 MVP;\n"
+"attribute vec3 vCol;\n"
+"attribute vec2 vPos;\n"
+"varying vec3 color;\n"
+"void main()\n"
+"{\n"
+"    gl_Position = MVP * vec4(vPos, 0.0, 1.0);\n"
+"    color = vCol;\n"
+"}\n";
+
+static const char* fragment_shader_text =
+"#version 110\n"
+"varying vec3 color;\n"
+"void main()\n"
+"{\n"
+"    gl_FragColor = vec4(color, 1.0);\n"
+"}\n";
+
+static void error_callback(int error, const char* description)
+{
+    fprintf(stderr, "Error: %s\n", description);
+}
+
+/* <2>
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+}
+*/
+
+int main(void)
+{
+    GLFWwindow* window;
+    GLuint vertex_buffer, vertex_shader, fragment_shader, program;
+    GLint mvp_location, vpos_location, vcol_location;
+
+    glfwSetErrorCallback(error_callback);
+
+    if (!glfwInit())
+        exit(EXIT_FAILURE);
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+
+    window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
+    if (!window)
+    {
+        glfwTerminate();
+        exit(EXIT_FAILURE);
+    }
+
+    //glfwSetKeyCallback(window, key_callback); <2>
+
+    auto connected = synapse::connect<glfw_signals::Key>(window, <3>
+        [ ]( GLFWwindow * window, int key, int /*scancode*/, int action, int /*mods*/ )
+        {
+            if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+                glfwSetWindowShouldClose(window, GLFW_TRUE);
+        } );
+
+    glfwMakeContextCurrent(window);
+    gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+    glfwSwapInterval(1);
+
+    // NOTE: OpenGL error checks have been omitted for brevity
+
+    glGenBuffers(1, &vertex_buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
+    glCompileShader(vertex_shader);
+
+    fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment_shader, 1, &fragment_shader_text, NULL);
+    glCompileShader(fragment_shader);
+
+    program = glCreateProgram();
+    glAttachShader(program, vertex_shader);
+    glAttachShader(program, fragment_shader);
+    glLinkProgram(program);
+
+    mvp_location = glGetUniformLocation(program, "MVP");
+    vpos_location = glGetAttribLocation(program, "vPos");
+    vcol_location = glGetAttribLocation(program, "vCol");
+
+    glEnableVertexAttribArray(vpos_location);
+    glVertexAttribPointer(vpos_location, 2, GL_FLOAT, GL_FALSE,
+                          sizeof(vertices[0]), (void*) 0);
+    glEnableVertexAttribArray(vcol_location);
+    glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE,
+                          sizeof(vertices[0]), (void*) (sizeof(float) * 2));
+
+    while (!glfwWindowShouldClose(window))
+    {
+        float ratio;
+        int width, height;
+        mat4x4 m, p, mvp;
+
+        glfwGetFramebufferSize(window, &width, &height);
+        ratio = width / (float) height;
+
+        glViewport(0, 0, width, height);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        mat4x4_identity(m);
+        mat4x4_rotate_Z(m, m, (float) glfwGetTime());
+        mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+        mat4x4_mul(mvp, p, m);
+
+        glUseProgram(program);
+        glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*) mvp);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    glfwDestroyWindow(window);
+
+    glfwTerminate();
+    exit(EXIT_SUCCESS);
+}
+
+//! [code]
+----
+<1> Automatically install `meta::connected` signal handlers to synapsify GLFW.
+<2> Commented-out parts of the original example, and...
+<3> ...the C++ lambda function connected to the `Key` Synapse signal from `glfw_signals.hpp` to handle the `Esc` key.
 
 == Q&A
 

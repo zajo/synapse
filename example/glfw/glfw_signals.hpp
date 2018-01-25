@@ -12,6 +12,16 @@ extern "C" { typedef struct GLFWwindow GLFWwindow; }
 
 namespace glfw_signals
 {
+    //User input callbacks
+    typedef struct Key_(*Key)( GLFWwindow *, int key, int scancode, int action, int mods );
+    typedef struct Char_(*Char)( GLFWwindow *, unsigned int codepoint );
+    typedef struct CharMods_(*CharMods)( GLFWwindow *, unsigned int codepoint, int mods );
+    typedef struct CursorPos_ (*CursorPos)( GLFWwindow *, double xpos, double ypos );
+    typedef struct CursorEnter_(*CursorEnter)( GLFWwindow *, int entered );
+    typedef struct MouseButton_(*MouseButton)( GLFWwindow *, int button, int action, int mods );
+    typedef struct Scroll_(*Scroll)( GLFWwindow *, double xoffset, double yoffset );
+    typedef struct Drop_(*Drop)( GLFWwindow *, int count, char const * * paths );
+
     //Window state callbacks
     typedef struct WindowClose_(*WindowClose)( GLFWwindow * );
     typedef struct WindowSize_(*WindowSize)( GLFWwindow *, int width, int height );
@@ -21,16 +31,6 @@ namespace glfw_signals
     typedef struct WindowFocus_(*WindowFocus)( GLFWwindow *, int focused );
     typedef struct WindowRefresh_(*WindowRefresh)( GLFWwindow * );
     
-    //User input callbacks
-    typedef struct Key_ (*Key)( GLFWwindow *, int key, int scancode, int action, int mods );
-    typedef struct Char_(*Char)( GLFWwindow *, unsigned int codepoint );
-    typedef struct CharMods_(*CharMods)( GLFWwindow *, unsigned int codepoint, int mods );
-    typedef struct CursorPos_ (*CursorPos)( GLFWwindow *, double xpos, double ypos );
-    typedef struct CursorEnter_(*CursorEnter)( GLFWwindow *, int entered );
-    typedef struct MouseButton_(*MouseButton)( GLFWwindow *, int button, int action, int mods );
-    typedef struct Scroll_(*Scroll)( GLFWwindow *, double xoffset, double yoffset );
-    typedef struct Drop_(*Drop)( GLFWwindow *, int count, char const * * paths );
-
     //This is emitted from the GLFWwindow object to report exceptions from connected signal handlers
     typedef struct exception_caught_(*exception_caught)( GLFWwindow * );
 }
