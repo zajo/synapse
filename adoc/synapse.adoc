@@ -633,6 +633,38 @@ NOTE: While <<poll,`poll`>> (or <<wait,`wait`>>) must be called from the thread 
 
 == Programming techniques
 
+=== Analyzing the performance of complex dynamic environments
+
+It is often needed to monitor the operations of a complex dynamic system beyond the facilities available in its formal API. One possible option to accomplish this is to use a logging library. Synapse provides another.
+
+Consider a dynamic object environment in a video game, where various art assets may be loaded on the fly, cached, and eventually unloaded when they are no longer needed. Such events are typically not accessible through a formal interface because they are implementation details; yet there is still a need to analyze the efficiency of the caching algorithm.
+
+Using Synapse, we can easily define a set of signal typedefs to represent such events:
+
+[source,c++]
+----
+typedef struct object_loaded_(*object_loaded)( char const * type, char const * name );
+typedef struct object_unloaded_(*object_unloaded)( char const * type, char const * name );
+typedef struct cache_miss_(*cache_miss)( char const * type, char const * name );
+typedef struct cache_hit_(*cache_hit)( char const * type, char const * name );
+----
+
+As part of the implementation of the `object_cache` class, we call <<emit,`emit`>> to signal the corresponding events as they occur:
+
+[source,c++]
+----
+void object_cache::load_object( char const * type, char const * name ) {
+    ....
+    //load the object
+    ....
+    synapse::emit<object_loaded>(this,type,name);
+}
+----
+
+During development, users of the `object_cache` class may connect the Synapse signals in order to analyze its efficiency, yet there is no need to compile calls to `emit` out of release builds; typically it is sufficient to not connect the signals. Synapse is carefully designed to support this use case: programs that do not call <<connect,`connect`>> do not need to link with Synapse.
+
+On the other hand, because Synapse connections are dynamic, it is possible to connect the signals only when/if we need to monitor the `object_cache` operations. For example, they can be connected only while a diagnostic information window is visible.
+
 === Synapsifying C callbacks
 
 Synapse can be used with any C-style callback API to install C++ functions, including lambdas, as callbacks. For example, consider the `SSL_set_info_callback` from https://www.openssl.org/[OpenSSL]:
@@ -817,7 +849,7 @@ int main(int argc, char **argv)
 <4> Was: `connect(this, SIGNAL (counterReached()), QApplication::instance(), SLOT (quit()));`
 <5> Was: `emit counterReached();`
 
-== Example: synapsifying GLFW
+== Use case: synapsifying GLFW
 
 Synapse integrates well with some C event handling APIs. As an example, let's consider link:http://www.glfw.org/[GLFW].
 
@@ -880,92 +912,95 @@ Next, in a different header we install `meta::connected` signal handlers for the
 #include <boost/synapse/connection.hpp>
 #include "GLFW/glfw3.h"
 
-namespace
+template <class Signal>
+class synapsifier;
+
+template <class R,class... A>
+class synapsifier<R(*)(GLFWwindow *,A...)>
 {
-	template <class Signal>
-	class synapsifier;
+    typedef R(*Signal)(GLFWwindow *,A...);
+    typedef void (*GLFWfun)( GLFWwindow *,A... );
 
-	template <class R,class... A>
-	class synapsifier<R(*)(GLFWwindow *,A...)>
-	{
-		typedef R(*Signal)(GLFWwindow *,A...);
-		typedef void (*GLFWfun)( GLFWwindow *,A... );
-		static GLFWfun prev_;
-		
-		//This is the handler that GLFW calls. It emits the corresponding Synapse signal and calls the
-		//previous GLFW handler for the same event, if any.
-		static void handler( GLFWwindow * w, A... a )
-		{
-			using namespace boost::synapse;
-			try
-			{
-				(void) emit<Signal>(w,w,a...);
-			}
-			catch(...)
-			{
-				//We can't let exceptions propagate up into C code, so the window emits the exception_caught
-				//signal, which (if exceptions are expected) should be connected to capture and handle the
-				//current exception.
-				bool handled = emit<glfw_signals::exception_caught>(w,w)>0;
-				assert(handled);
-			}
-			if( prev_ )
-				prev_(w,a...);
-		}
+    static GLFWfun prev_;
+    
+    //This is the handler that GLFW calls. It emits the corresponding Synapse
+    //signal and calls the previous GLFW handler for the same event, if any.
+    static void handler( GLFWwindow * w, A... a )
+    {
+        using namespace boost::synapse;
+        try
+        {
+            (void) emit<Signal>(w,w,a...);
+        }
+        catch(...)
+        {
+            //We can't let exceptions propagate up into C code, so the window
+            //emits the exception_caught signal, which (if exceptions are
+            //expected) should be connected to capture and handle the current
+            //exception.
+            bool handled = emit<glfw_signals::exception_caught>(w,w)>0;
+            assert(handled);
+        }
+        if( prev_ )
+            prev_(w,a...);
+    }
 
-		public:
+    public:
 
-		explicit synapsifier( GLFWfun (*setter)(GLFWwindow *,GLFWfun) )
-		{
-			using namespace boost::synapse;
-			//Here we connect the Synapse meta::connected<Signal> signal. This signal is emitted by the
-			//meta::emitter() when the Signal is being connected (the user calls synapse::connect<Signal>) or
-			//disconnected (when the connection expires). The emitter pointer passed to connect (which
-			//in this case is of type GLFWwindow) is stored in the synapse::connection object passed to the
-			//lambda below, and can be accessed by the connection::emitter member function template.
-			connect<meta::connected<Signal> >( meta::emitter(),
-				[setter]( connection & c, unsigned flags )
-				{
-					if( flags&meta::connect_flags::connecting )
-					{
-						//When the Signal is being connected for the first time, use the GLFW API to install our handler.
-						if( flags&meta::connect_flags::first_for_this_emitter )
-							prev_=setter(c.emitter<GLFWwindow>().get(),&handler);
-					}
-					else
-					{
-						//When the last Signal connection expires, use the GLFW API to uninstall our handler and
-						//restore the previous handler.
-						if( flags&meta::connect_flags::last_for_this_emitter )
-						{
-							GLFWfun p=setter(c.emitter<GLFWwindow>().get(),prev_);
-							assert(p==&handler);
-						}
-					}
-				} );
-		}
-	};
+    explicit synapsifier( GLFWfun (*setter)(GLFWwindow *,GLFWfun) )
+    {
+        using namespace boost::synapse;
 
-	template <class R,class... A>
-	typename synapsifier<R(*)(GLFWwindow *,A...)>::GLFWfun synapsifier<R(*)(GLFWwindow *,A...)>::prev_;
+        //Here we connect the Synapse meta::connected<Signal> signal. This
+        //signal is emitted by the meta::emitter() when the Signal is being
+        //connected (the user calls synapse::connect<Signal>) or disconnected
+        //(when the connection expires). The emitter pointer passed to connect
+        //(which in this case is of type GLFWwindow) is stored in the
+        //synapse::connection object passed to the lambda below, and can be
+        //accessed by the connection::emitter member function template.
+        connect<meta::connected<Signal> >( meta::emitter(),
+            [setter]( connection & c, unsigned flags )
+            {
+                if( flags&meta::connect_flags::connecting )
+                {
+                    //When the Signal is being connected for the first time,
+                    //use the GLFW API to install our handler.
+                    if( flags&meta::connect_flags::first_for_this_emitter )
+                        prev_=setter(c.emitter<GLFWwindow>().get(),&handler);
+                }
+                else
+                {
+                    //When the last Signal connection expires, use the GLFW API
+                    //to uninstall our handler and restore the previous handler.
+                    if( flags&meta::connect_flags::last_for_this_emitter )
+                    {
+                        GLFWfun p=setter(c.emitter<GLFWwindow>().get(),prev_);
+                        assert(p==&handler);
+                    }
+                }
+            } );
+    }
+};
 
-	//Install all the synapse::meta::connected<....> handlers
-	synapsifier<glfw_signals::WindowClose> s1(&glfwSetWindowCloseCallback);
-	synapsifier<glfw_signals::WindowSize> s2(&glfwSetWindowSizeCallback);
-	synapsifier<glfw_signals::FramebufferSize> s3(&glfwSetFramebufferSizeCallback);
-	synapsifier<glfw_signals::WindowPos> s4(&glfwSetWindowPosCallback);
-	synapsifier<glfw_signals::WindowIconify> s5(&glfwSetWindowIconifyCallback);
-	synapsifier<glfw_signals::WindowFocus> s6(&glfwSetWindowFocusCallback);
-	synapsifier<glfw_signals::WindowRefresh> s7(&glfwSetWindowRefreshCallback);
-	synapsifier<glfw_signals::Key> s8(&glfwSetKeyCallback);
-	synapsifier<glfw_signals::Char> s9(&glfwSetCharCallback);
-	synapsifier<glfw_signals::CharMods> s10(&glfwSetCharModsCallback);
-	synapsifier<glfw_signals::CursorPos> s11(&glfwSetCursorPosCallback);
-	synapsifier<glfw_signals::CursorEnter> s12(&glfwSetCursorEnterCallback);
-	synapsifier<glfw_signals::MouseButton> s13(&glfwSetMouseButtonCallback);
-	synapsifier<glfw_signals::Scroll> s14(&glfwSetScrollCallback);
-	synapsifier<glfw_signals::Drop> s15(&glfwSetDropCallback);
-}
+template <class R,class... A>
+typename synapsifier<R(*)(GLFWwindow *,A...)>::GLFWfun synapsifier<R(*)(GLFWwindow *,A...)>::prev_;
+
+//Install all the synapse::meta::connected<....> handlers
+synapsifier<glfw_signals::WindowClose> s1(&glfwSetWindowCloseCallback);
+synapsifier<glfw_signals::WindowSize> s2(&glfwSetWindowSizeCallback);
+synapsifier<glfw_signals::FramebufferSize> s3(&glfwSetFramebufferSizeCallback);
+synapsifier<glfw_signals::WindowPos> s4(&glfwSetWindowPosCallback);
+synapsifier<glfw_signals::WindowIconify> s5(&glfwSetWindowIconifyCallback);
+synapsifier<glfw_signals::WindowFocus> s6(&glfwSetWindowFocusCallback);
+synapsifier<glfw_signals::WindowRefresh> s7(&glfwSetWindowRefreshCallback);
+synapsifier<glfw_signals::Key> s8(&glfwSetKeyCallback);
+synapsifier<glfw_signals::Char> s9(&glfwSetCharCallback);
+synapsifier<glfw_signals::CharMods> s10(&glfwSetCharModsCallback);
+synapsifier<glfw_signals::CursorPos> s11(&glfwSetCursorPosCallback);
+synapsifier<glfw_signals::CursorEnter> s12(&glfwSetCursorEnterCallback);
+synapsifier<glfw_signals::MouseButton> s13(&glfwSetMouseButtonCallback);
+synapsifier<glfw_signals::Scroll> s14(&glfwSetScrollCallback);
+synapsifier<glfw_signals::Drop> s15(&glfwSetDropCallback);
 ----
 
 IMPORTANT: The above `glfw_synapsify.hpp` should be included in exactly one compilation unit of a GLFW program, for example the main compilation unit. This will automatically install all `meta::connected` signal handlers.
