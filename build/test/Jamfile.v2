@@ -13,7 +13,7 @@ project
         <link>static
     ;
 
-# build-project ../example ;
+build-project ../example ;
 
 compile compile_block_hpp.cpp ;
 compile compile_blocker_hpp.cpp ;

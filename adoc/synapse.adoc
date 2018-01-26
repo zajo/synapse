@@ -14,13 +14,38 @@ Non-intrusive signal programming library for C++11
 
 Synapse is a C++ signal programming library. It can be used to define communication channels between objects of arbitrary types in a dynamic object environment.
 
-Synapse is non-intrusive: it allows any object of any type whatsoever to be used as a signal emitter: if two contexts in a given program happen to have access to the same object, they can use that object to communicate through Synapse signals.
+Synapse is non-intrusive: it allows any object of any type whatsoever to be used as a signal emitter; if two contexts in a given program happen to have access to the same object, they can use that object to communicate through Synapse signals.
+
+== Distribution
+
+Synapse is distributed under the http://www.boost.org/LICENSE_1_0.txt[Boost Software License, Version 1.0].
+
+The source code is available in https://github.com/zajo/boost-synapse[this GitHub repository].
+
+
+== Building
+
+Synapse has been formatted to be submitted for a Boost review, so its directory structure follows the common directory structure for Boost libraries—and it's built with Boost Build.
+
+Alternatively, just put `connect.cpp` and either `thread_local_queue.cpp` or `interthread_stub.cpp` into your favorite build system, depending on whether or not your program calls `create_thread_local_queue`. If your program calls the `block` function, you also need to compile and link `block.cpp`.
+
+However, note that if your program only emits signals (that is, it calls emit but it never creates any connections), there is no need to link any `.cpp` files; that is, `boost/synapse/emit.hpp` by itself is an independent header-only library. This way low level libraries that emit signals do not require the user to link Synapse, unless he cares to connect them.
+
+== Portability
+
+Synapse requires compiler support for the following C++11 features:
+
+- thread-safe dynamic initialization of local static objects;
+- `thread_local` objects;
+- lambda functions
+- `<thread>`
+- `<atomic>`
 
 == Tutorial
 
 === Signals, emitters, receivers
 
-In Synapse, signals are defined by function pointer typedefs. The return type is used to tell apart different signals that have otherwise identical signature.
+In Synapse, signals are defined by function pointer typedefs. The return type is ignored in function calls. Instead, it is used to tell apart different signals that have otherwise identical signature.
 
 To emit a signal, we instantiate the `emit` function template with a signal type, passing the emitter object as the first argument. The rest of the arguments follow, as defined by the signal signature.
 
@@ -74,11 +99,11 @@ NOTE: The `receiver` argument to `connect` is optional. If it is specified, a po
 
 === Emitting signals from objects of 3rd-party types
 
-In Synapse, any object whatsoever can be used as an emitter. This makes it possible to `emit` non-intrusively even if the emitter object was not designed to support signals. For example, a function that processes a file can use the standard `FILE` pointer as a Synapse emitter to report on its progress:
+In Synapse, any object whatsoever can be used as an emitter. This makes it possible to `emit` non-intrusively even if the emitter object was not designed to support signals. For example, a function that processes a file can use a standard `FILE` pointer as a Synapse emitter to report on its progress:
 
 [source,c++]
 ----
-typedef struct report_progress_(*report_progress)(int);
+typedef struct report_progress_(*report_progress)(int progress);
 
 void process_file( FILE * f ) {
 
@@ -99,8 +124,9 @@ Outside of `process_file` the `report_progress` signal can be connected to some 
 if( FILE * f=fopen("file.dat","rb") ) {
     QProgressBar pb(....);
     auto c=synapse::connect<report_progress>(f, &pb,
-		&QProgressBar::setValue);
+        &QProgressBar::setValue);
     process_file(f);
+    fclose(f);
 }
 ----
 
@@ -110,10 +136,12 @@ Notice that `process_file` is not coupled with `QProgressBar`: the `report_progr
 
 In Synapse there are two types of connection objects: <<connection,`connection`>> and <<pconnection,`pconnection`>>:
 
-- `shared_ptr<<<connection,connection>>>` objects are returned by overloads of <<connect,`connect`>> which take the emitter (and, if specified, the receiver) as a raw pointer. The user is required to keep this object afloat; the signal is disconnected when it expires.
-- `weak_ptr<<<pconnection,pconnection>>>` objects are returned by overloads of <<connect,`connect`>> which take at least one of the emitter or the receiver as a `weak_ptr` or `shared_ptr`. The user is not required to keep this object afloat; the connection is disconnected when Synapse detects that the emitter or the receiver have expired.
+- `shared_ptr<<<connection,connection>>>` objects are returned by overloads of <<connect,`connect`>> which take the emitter (and, if specified, the receiver) as a raw pointer. The user is required to keep the `connection` object afloat; the signal is disconnected when it expires.
+- `weak_ptr<<<pconnection,pconnection>>>` objects are returned by overloads of <<connect,`connect`>> which take at least one of the emitter or the receiver as a `weak_ptr` or `shared_ptr`. The user is _not_ required to keep `pconnection` objects afloat; the connection is disconnected when Synapse detects that the emitter or the receiver have expired.
 
-NOTE: The <<release,`release`>> function can be used to convert a <<pconnection,`pconnection`>> object to a <<connection,`connection`>> object.
+IMPORTANT: The <<release,`release`>> function can be used to convert a <<pconnection,`pconnection`>> object to a <<connection,`connection`>> object, in case we need to control its lifetime explicitly.
+
+NOTE: Earlier Synapse versions lacked support for `pconnection` objects, meaning the user was always required to manage connections explicitly. Legacy Synapse is available in the `legacy` branch of the https://github.com/zajo/boost-synapse[GitHub repository].
 
 === Blocking of signals
 
@@ -145,7 +173,7 @@ int main() {
     synapse::emit<print>(&emitter,"Hello World"); # <1>
 
     shared_ptr<synapse::blocker> b = synapse::block<print>(&emitter); # <2>
-    synapse::emit<print>(&emitter,"NOOP");
+    synapse::emit<print>(&emitter,"no-op");
 
     b.reset();
     synapse::emit<print>(&emitter,"Hello World"); # <3>
@@ -153,19 +181,19 @@ int main() {
 ----
 <1> `emit` calls the connected lambda, printing `Hello World`.
 
-<2> The `print` signal will be blocked until `b` expires, therefore the call to `emit` on the next line is a noop, even though `c` has not expired (meaning, the signal is still connected.)
+<2> The `print` signal will be blocked until `b` expires, therefore the call to `emit` on the next line is a no-op, even though the signal is still connected.
 
 <3> At this point `b` has expired, so the call to `emit` will call the connected lambda, printing `Hello World`, again.
 
 === Meta signals
 
-Synapse features a special global emitter that emits meta signals to notify connected functions about user interactions with other signals. It can be accessed by the `meta::emitter` function.
+Synapse features a special global emitter that emits meta signals to notify connected functions about user interactions with other signals. It can be accessed by the <<meta::connected,`meta::emitter`>> function.
 
-When a `Signal` is blocked or unblocked, the meta emitter emits the `meta::blocked<Signal>` signal. Connecting this signal allows the blocked state of the signal to be automatically reflected in other systems, for example user interface.
+When a `Signal` is blocked or unblocked, the meta emitter emits the `meta::blocked<Signal>` signal. Connecting this signal allows the blocked state of the signal to be automatically reflected in other systems, for example in user interface.
 
-Similarly, when a `Signal` is connected or disconnected, the meta emitter emits the <<meta::connected,`meta::connected<Signal>`>>. This meta signal is useful for integrating Synapse with 3rd-party callback systems; see <<Synapsifying C callbacks>>.
+Similarly, when a `Signal` is connected or disconnected, the meta emitter emits the <<meta::connected,`meta::connected<Signal>`>> signal. This meta signal is useful for integrating Synapse with 3rd-party callback systems; see <<Synapsifying C callbacks>>.
 
-NOTE: To further facilitate the integration of Synapse with 3rd-partty callback systems, `connection`  objects (returned by the `connect` function) can store arbitrary user data.
+NOTE: To further facilitate the integration of Synapse with 3rd-partty callback systems, <<connection,`connection`>>  objects (returned by the <<connect,`connect`>> function) can store arbitrary user data.
 
 === Interthread communication
 
@@ -204,24 +232,6 @@ The problem is that the address of `x` may be queued into other threads' queues,
 
 The <<post,`post`>> function can be used to queue into a <<thread_local_queue,`thread_local_queue`>> arbitrary functions for execution at the time <<poll,`poll`>> is called. This feature allows critical worker threads to minimize the amount of time they consume by offloading expensive non-critical computations to another, non-critical thread. This also removes the need for synchronization, since the queued functions are executed synchronously in the thread that owns the <<thread_local_queue,`thread_local_queue`>> object.
 
-== Building
-
-Synapse has been formatted to be submitted for a Boost review, so its directory structure follows the common directory structure for Boost libraries—and it's built with Boost Build.
-
-Alternatively, just put `connect.cpp` and either `thread_local_queue.cpp` or `interthread_stub.cpp` into your favorite build system, depending on whether or not your program calls `create_thread_local_queue`. If your program calls the `block` function, you also need to compile and link `block.cpp`.
-
-However, note that if your program only emits signals (that is, it calls emit but it never creates any connections), there is no need to link any `.cpp` files; that is, `boost/synapse/emit.hpp` by itself is an independent header-only library. This way low level libraries that emit signals do not require the user to link Synapse, unless he cares to connect them.
-
-== Portability
-
-Synapse requires compiler support for the following C++11 features:
-
-- thread-safe dynamic initialization of local static objects;
-- `thread_local` objects;
-- lambda functions
-- `<thread>`
-- `<atomic>`
-
 == Synopsis
 
 include::{sourcedir}/synopses/emit.hpp.adoc[]
@@ -253,20 +263,20 @@ Calls all function objects that are connected to the specified `Signal` from the
 Returns: ::
 The count of the connected function objects that were called. Signals that are currently blocked are not included in the count returned by `emit`.
 
-IMPORTANT: It is the responsibility of the caller to ensure that the emitter object e does not expire before `emit` returns, otherwise the behavior is undefined.
+IMPORTANT: It is the responsibility of the caller to ensure that the emitter object `e` does not expire before `emit` returns, otherwise the behavior is undefined.
 
 Throws: ::
 Any exception thrown by one of the connected function objects, in which case the remaining function objects are not called.
 
 Notes: ::
-- Values returned by the connected function objects are ignored.
+- Values returned by the connected function objects are discarded.
 - If before `emit` returns <<connect,`connect`>> is called on the same signal and the same emitter, any newly connected functions are not called during the same `emit`.
 - If before `emit` returns a <<connection,`connection`>> object expires, it may or may not get called during the same `emit`.
 - If `e` is `0`, `emit` simply returns `0` without calling any functions. Because of this feature, if the emitter is held by a `shared_ptr` object `sp`, there is no harm in calling `emit<Signal>(sp.get(),...)` even if `sp` is empty. Similarly, if the caller holds a `weak_ptr` reference `wp` to an emitter object which has expired, calling `emit<Signal>(wp.lock().get(),...)` will simply return `0`.
 - `emit` takes its arguments by value. Use `boost::ref` to pass by reference (but beware of <<thread_local_queue,`thread_local_queue`>> objects).
 
 Thread safety: ::
-By default `emit` will only call functions connected from the calling thread. In addition, the signal is pushed onto any <<thread_local_queue,`thread_local_queue`>> objects created in other threads, but only if those threads currently have at least one active connection for the specified `Signal`. In this case `emit` captures its arguments similarly to `std::bind`, and it is the responsibility of the caller to ensure that they remain valid until the posted signal is processed in all other threads, by a call to <<poll,`thread_local_queue::poll`>> or <<wait,`thread_local_queue::wait`>>.
+By default `emit` will only call functions connected from the calling thread. In addition, the signal is pushed onto any <<thread_local_queue,`thread_local_queue`>> objects created by other threads, but only if those threads currently have at least one active connection for the specified `Signal`. In this case `emit` captures its arguments similarly to `std::bind`, and it is the responsibility of the caller to ensure that they remain valid until the posted signal is processed in all other threads, by a call to <<poll,`thread_local_queue::poll`>> or <<wait,`thread_local_queue::wait`>>.
 
 '''
 
@@ -379,8 +389,9 @@ IMPORTANT: If either `e1` or `e2`, passed as raw pointers, expire before the ret
 '''
 
 [[connection]]
+=== `connection`
 [[pconnection]]
-=== `(p)connection`
+=== `pconnection`
 
 ====
 include::{sourcedir}/synopses/connection.hpp.adoc[]
@@ -388,7 +399,7 @@ include::{sourcedir}/synopses/connection.hpp.adoc[]
 
 Overloads of <<connect,`connect`>> and <<translate,`translate`>> return either `shared_ptr<connection>`  or `weak_ptr<pconnection>`, depending on whether or not the emitter and the receiver are passed as raw pointers. The former is used to control the lifetime of the connection explicitly, while the latter represents persisent connections, which expire implicitly with the expiration of the emitter or the receiver object.
 
-Before being returned to the caller, `connection` objects are passed to handlers of the <<meta::connected,`meta::connected`>> signal, which can use the <<connection::emitter,`emitter`>>/<<connection::receiver,`receiver`>> member function templates to access the emitter/receiver object passed to <<connect,`connect`>> or <<translate,`translate`>>. The <<connection::set_user_data,`set_user_data`>>/<<connection::get_user_data,`get_user_data`>> member function templates can be used to store and access auxiliary information.
+Before being returned to the caller, `connection` objects are passed to handlers of the <<meta::connected,`meta::connected`>> signal, which can use the <<connection::emitter,`emitter`>>/<<connection::receiver,`receiver`>> member function templates to access the emitter/receiver object passed to <<connect,`connect`>>. The <<connection::set_user_data,`set_user_data`>>/<<connection::get_user_data,`get_user_data`>> member function templates can be used to store and access auxiliary information.
 
 TIP: Use <<release,`release`>> to convert a non-owning `weak_ptr<pconnection>` reference to an owning `shared_ptr<connection>` reference.
 
@@ -487,7 +498,7 @@ namespace boost { namespace synapse {
 
 Effects: ::
 . Blocks the specified `Signal` from the emitter `e` until the returned `blocker` object expires. While the `Signal` is blocked, calls to `emit<Signal>` for `e` are ignored and return `0`. The returned `blocker` object does not own `e` even if `block` was passed a `shared_ptr`.
-. [[meta::blocked]] The `meta::emitter` emits the `meta::blocked<Signal>` signal:
+. [[meta::blocked]] The <<meta::connected,`meta::emitter`>> emits the `meta::blocked<Signal>` signal:
 +
 [source,c++]
 ----
@@ -633,7 +644,7 @@ NOTE: While <<poll,`poll`>> (or <<wait,`wait`>>) must be called from the thread 
 
 == Programming techniques
 
-=== Analyzing the performance of complex dynamic environments
+=== Monitoring dynamic systems
 
 It is often needed to monitor the operations of a complex dynamic system beyond the facilities available in its formal API. One possible option to accomplish this is to use a logging library. Synapse provides another.
 
@@ -663,7 +674,7 @@ void object_cache::load_object( char const * type, char const * name ) {
 
 During development, users of the `object_cache` class may connect the Synapse signals in order to analyze its efficiency, yet there is no need to compile calls to `emit` out of release builds; typically it is sufficient to not connect the signals. Synapse is carefully designed to support this use case: programs that do not call <<connect,`connect`>> do not need to link with Synapse.
 
-On the other hand, because Synapse connections are dynamic, it is possible to connect the signals only when/if we need to monitor the `object_cache` operations. For example, they can be connected only while a diagnostic information window is visible.
+On the other hand, because Synapse connections are dynamic, it is possible to connect the signals only when/if we need to monitor the `object_cache` operations. For example, they can be connected only while a diagnostic information window is active.
 
 === Synapsifying C callbacks
 
@@ -1010,10 +1021,10 @@ With this, we simply use <<connect,`connect`>> to hook up any `GLFWwindow` event
 [source,c++]
 ----
 auto c = synapse::connect<glfw_signals::key>(w,
-	[ ]( GLFWwindow * w, int key, int scancode, int action, int mods )
-	{
-		....
-	}
+    [ ]( GLFWwindow * w, int key, int scancode, int action, int mods )
+    {
+        ....
+    }
 ----
 
 Finally, this is the example from the GLFW http://www.glfw.org/docs/latest/quick.html[Getting started page], modified to use the "synapsify" framework above (changes to the original example are marked with numbers):
@@ -1047,6 +1058,7 @@ Finally, this is the example from the GLFW http://www.glfw.org/docs/latest/quick
 //! [code]
 
 #include "glfw_synapsify.hpp" <1>
+namespace synapse = boost::synapse;
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>

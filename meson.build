@@ -27,7 +27,7 @@ block = declare_dependency( include_directories: includes, compile_args: defines
 	dependencies: [
 		boost_headers ] )
 
-all = declare_dependency( include_directories: includes,
+all = declare_dependency( include_directories: includes, compile_args: defines,
 	link_with: static_library(
 		'synapse',
 		dependencies: [
