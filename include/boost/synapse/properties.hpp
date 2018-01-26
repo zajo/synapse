@@ -1,3 +1,6 @@
+#ifndef UUID_A4F73A40022511E8AF2945EB4EA1BEAD
+#define UUID_A4F73A40022511E8AF2945EB4EA1BEAD
+
 #include <boost/synapse/connect.hpp>
 
 namespace
@@ -78,7 +81,7 @@ boost
         weak_ptr<pconnection>
         set( shared_ptr<Object> const & o, typename Property::type x )
             {
-            return synapse_detail::pset_<Property>(o,o,x);
+            return synapse_detail::pset_<Property>(o,o.get(),x);
             }
         template <class Property,class Object>
         weak_ptr<pconnection>
@@ -100,3 +103,5 @@ boost
             }
         }
     }
+
+#endif
