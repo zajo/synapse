@@ -30,7 +30,7 @@ boost
                 struct
                 inject_receiver
                     {
-                    typedef void signature(Receiver &,A...);
+                    typedef void signature(Receiver *,A...);
                     };
                 };
             template <class Signal>
