@@ -828,7 +828,7 @@ Window::Window(QWidget *parent) :
         [this]( bool checked )
         {
             slotButtonClicked(checked);
-        } ); <3>о
+        } ); <3>
 
     c_=synapse::connect<counterReached>(this,&QApplication::quit); <4>
 }
@@ -875,7 +875,7 @@ GLFWkeyfun glfwSetKeyCallback( GLFWwindow *window, GLFWkeyfun cbfun );
 
 where `GLFWkeyfun` is declared as:
 
-[souce,c]
+[source,c]
 ----
 typedef void (*GLFWkeyfun)( GLFWwindow * window, int key, int scancode, int action, int mods );
 ----
