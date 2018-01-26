@@ -1,0 +1,20 @@
+[source,c++]
+.#include <boost/synapse/blocker.hpp>
+----
+namespace boost { namespace synapse {
+
+    class blocker { //abstract base
+
+    protected:
+
+        blocker();
+        ~blocker();
+
+    public:
+
+        template <class T>
+        shared_ptr<T> emitter() const;
+    };
+
+} }
+----

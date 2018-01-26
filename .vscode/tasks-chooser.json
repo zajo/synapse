@@ -1,0 +1,202 @@
+{
+	"selectDescription": "Select build setting",
+	"items": [
+		{
+			"displayName": "All unit tests",
+			"description": "All unit tests",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2" ]
+		},
+		{
+			"displayName": "property_test",
+			"description": "property_test_test",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 property_test" ]
+		},
+		{
+			"displayName": "args_connect_test",
+			"description": "args_connect_test",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 args_connect_test" ]
+		},
+		{
+			"displayName": "args_translate_test",
+			"description": "args_translate_test",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 args_translate_test" ]
+		},
+		{
+			"displayName": "block_emit_test",
+			"description": "block_emit_test",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 block_emit_test" ]
+		},
+		{
+			"displayName": "block_test",
+			"description": "block_test",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 block_test" ]
+		},
+		{
+			"displayName": "connect_emit_test",
+			"description": "connect_emit_test",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 connect_emit_test" ]
+		},
+		{
+			"displayName": "connection_lifetime_test",
+			"description": "connection_lifetime_test",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 connection_lifetime_test" ]
+		},
+		{
+			"displayName": "connection_user_data_test",
+			"description": "connection_user_data_test",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 connection_user_data_test" ]
+		},
+		{
+			"displayName": "ct_basic_test",
+			"description": "ct_basic_test",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 ct_basic_test" ]
+		},
+		{
+			"displayName": "ct_lambda_test",
+			"description": "ct_lambda_test",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 ct_lambda_test" ]
+		},
+		{
+			"displayName": "ct_tlq_lifetime_test",
+			"description": "ct_tlq_lifetime_test",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 ct_tlq_lifetime_test" ]
+		},
+		{
+			"displayName": "ct_wait_test",
+			"description": "ct_wait_test",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 ct_wait_test" ]
+		},
+		{
+			"displayName": "emit_stub_test",
+			"description": "emit_stub_test",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 emit_stub_test" ]
+		},
+		{
+			"displayName": "emit_test",
+			"description": "emit_test",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 emit_test" ]
+		},
+		{
+			"displayName": "release_test",
+			"description": "release_test",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 release_test" ]
+		},
+		{
+			"displayName": "weak_store_test",
+			"description": "weak_store_test",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 weak_store_test" ]
+		},
+		{
+			"displayName": "shutdown_test1",
+			"description": "shutdown_test1",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test1" ]
+		},
+		{
+			"displayName": "shutdown_test2",
+			"description": "shutdown_test2",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test2" ]
+		},
+		{
+			"displayName": "shutdown_test3",
+			"description": "shutdown_test3",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test3" ]
+		},
+		{
+			"displayName": "shutdown_test4",
+			"description": "shutdown_test4",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test4" ]
+		},
+		{
+			"displayName": "shutdown_test5",
+			"description": "shutdown_test5",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test5" ]
+		},
+		{
+			"displayName": "shutdown_test6",
+			"description": "shutdown_test6",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test6" ]
+		},
+		{
+			"displayName": "shutdown_test7",
+			"description": "shutdown_test7",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test7" ]
+		},
+		{
+			"displayName": "shutdown_test8",
+			"description": "shutdown_test8",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test8" ]
+		},
+		{
+			"displayName": "shutdown_test9",
+			"description": "shutdown_test9",
+			"isBuildCommand": "true",
+			"command": "sh",
+			"args": [ "-c", "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test9" ]
+		}
+	],
+	"baseItem": {
+		"version": "0.1.0",
+		"problemMatcher": {
+			"fileLocation": ["relative", "${workspaceRoot}/bld/debug"],
+			"owner": "cpp",
+			"pattern": {
+				"regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|.*error|note):\\s+(.*)$",
+				"file": 1,
+				"line": 2,
+				"column": 3,
+				"severity": 4,
+				"message": 5
+			}
+		}
+	}
+}

@@ -1,0 +1,45 @@
+[source,c++]
+.#include <boost/synapse/connection.hpp>
+----
+namespace boost { namespace synapse {
+
+    class connection { //abstract base
+
+    protected:
+
+        connection();
+        ~connection();
+
+    public:
+        
+        template <class T>
+        void set_user_data( T const & );
+
+        template <class T>
+        T * get_user_data() const;
+
+        template <class T>
+        shared_ptr<T> emitter() const;
+
+        template <class T>
+        shared_ptr<T> receiver() const;
+    };
+
+    class pconnection: protected connection { //abstract base
+
+    protected:
+
+        pconnection();
+        ~pconnection();
+
+    public:
+        
+        using connection::set_user_data;
+        using connection::get_user_data;
+        using connection::emitter;
+        using connection::receiver;
+
+    };
+
+} }
+----

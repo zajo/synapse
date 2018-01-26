@@ -1,0 +1,18 @@
+[source,c++]
+.#include <boost/synapse/translate.hpp>
+----
+namespace boost { namespace synapse {
+
+    template <
+        class OriginalSignal,  class TranslatedSignal,
+        class OriginalEmitter, class TranslatedEmitter>
+    shared_ptr<connection> translate( OriginalEmitter * e1, TranslatedEmitter * e2 );
+
+    template <
+        class OriginalSignal,  class TranslatedSignal,
+        class OriginalEmitter, class TranslatedEmitter>
+    weak_ptr<pconnection> translate( <<OriginalEmitter>> e1, <<TranslatedEmitter>> e2 ); <1>
+
+} }
+----
+<1> Multiple overloads are provided: `\<<OriginalEmitter>>` is either `OriginalEmitter *`, `weak_ptr<OriginalEmitter> const &` or, equivalently, `shared_ptr<OriginalEmitter> const &`; `\<<TranslatedEmitter>>` by analogy. At least one of `e1` and `e2` is _not_ a raw pointer.

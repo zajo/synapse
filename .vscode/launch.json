@@ -1,0 +1,38 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "C++ Launch",
+			"type": "cppdbg",
+			"request": "launch",
+//			"program": "/Users/emildotchevski/Desktop/boost/bin.v2/libs/synapse/build/test/connection_lifetime_test.test/darwin-darwin-4.2.1/debug/link-static/threadapi-pthread/connection_lifetime_test",
+			"program": "/Users/emildotchevski/Desktop/boost/bin.v2/libs/synapse/build/example/glfw/darwin-darwin-4.2.1/debug/threadapi-pthread/glfw_example",
+			"cwd": "${workspaceRoot}",
+			"stopAtEntry": false,
+			"externalConsole": true,
+			"linux": {
+				"MIMode": "gdb",
+				"setupCommands": [
+					{
+						"description": "Enable pretty-printing for gdb",
+						"text": "-enable-pretty-printing",
+						"ignoreFailures": true
+					}
+				]
+			},
+			"osx": {
+				"MIMode": "lldb"
+			},
+			"windows": {
+				"MIMode": "gdb",
+				"setupCommands": [
+					{
+						"description": "Enable pretty-printing for gdb",
+						"text": "-enable-pretty-printing",
+						"ignoreFailures": true
+					}
+				]
+			}
+		}
+	]
+}

@@ -1,4 +1,4 @@
-//Copyright (c) 2015 Emil Dotchevski and Reverge Studios, Inc.
+//Copyright (c) 2015-2017 Emil Dotchevski and Reverge Studios, Inc.
 
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -18,8 +18,8 @@ boost
         {
         using std::shared_ptr;
         using std::weak_ptr;
-		using std::make_shared;
-		using std::get_deleter;
+        using std::make_shared;
+        using std::get_deleter;
         }
     }
 
@@ -37,10 +37,10 @@ boost
         {
         using boost::shared_ptr;
         using boost::weak_ptr;
-		using boost::make_shared;
-		using boost::get_deleter;
+        using boost::make_shared;
+        using boost::get_deleter;
         }
-	}
+    }
 
 #endif
 

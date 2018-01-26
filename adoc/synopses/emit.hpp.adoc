@@ -1,0 +1,10 @@
+[source,c++]
+.#include <boost/synapse/emit.hpp>
+----
+namespace boost { namespace synapse {
+
+    template <class Signal,class... A>
+    int emit( void const *, A... );
+
+} }
+----

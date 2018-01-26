@@ -1,4 +1,4 @@
-//Copyright (c) 2015 Emil Dotchevski and Reverge Studios, Inc.
+//Copyright (c) 2015-2017 Emil Dotchevski and Reverge Studios, Inc.
 
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -35,7 +35,7 @@ boost
                         }
                     public:
                     weak_store e_;
-                    blocker_impl( weak_store const &, shared_ptr<thread_local_signal_data::blocked_emitters_list> const & );
+                    blocker_impl( weak_store &&, shared_ptr<thread_local_signal_data::blocked_emitters_list> const & );
                     ~blocker_impl();
                     };
                 }
@@ -108,7 +108,7 @@ boost
                     tlsd_->emitter_blocked_=&emitter_blocked_stub;
                     }
                 shared_ptr<blocker>
-                block( shared_ptr<blocked_emitters_list> const & bl, weak_store const & e, shared_ptr<void const> const & sp )
+                block( shared_ptr<blocked_emitters_list> const & bl, weak_store && e, shared_ptr<void const> const & sp )
                     {
                     BOOST_SYNAPSE_ASSERT(bl);
                     BOOST_SYNAPSE_ASSERT(sp);
@@ -122,7 +122,7 @@ boost
                         }
                     else
                         {
-                        shared_ptr<blocker_impl> bb=make_shared<blocker_impl>(e,bl);
+                        shared_ptr<blocker_impl> bb=make_shared<blocker_impl>(std::move(e),bl);
                         bl_.push_back(bl_rec(sp.get(),bb));
                         return bb;
                         }
@@ -144,9 +144,9 @@ boost
             namespace
                 {
                 blocker_impl::
-                blocker_impl( weak_store const & e, shared_ptr<thread_local_signal_data::blocked_emitters_list> const & bl ):
+                blocker_impl( weak_store && e, shared_ptr<thread_local_signal_data::blocked_emitters_list> const & bl ):
                     bl_(bl),
-                    e_(e)
+                    e_(std::move(e))
                     {
                     BOOST_SYNAPSE_ASSERT(bl_);
                     BOOST_SYNAPSE_ASSERT(bl_->emit_meta_blocked_!=0);
@@ -172,12 +172,12 @@ boost
                     }
                 }
             shared_ptr<blocker>
-            block_( shared_ptr<thread_local_signal_data> const & tlsd, weak_store const & e, int(*emit_meta_blocked)(blocker &,bool) )
+            block_( shared_ptr<thread_local_signal_data> const & tlsd, weak_store && e, int(*emit_meta_blocked)(blocker &,bool) )
                 {
                 if( shared_ptr<void const> sp=e.maybe_lock<void const>() )
                     {
                     shared_ptr<thread_local_signal_data::blocked_emitters_list> bl=get_blocked_list_(tlsd,emit_meta_blocked);
-                    return bl->block(bl,e,sp);
+                    return bl->block(bl,std::move(e),sp);
                     }
                 else
                     return shared_ptr<blocker>();

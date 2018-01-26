@@ -1,0 +1,22 @@
+[source,c++]
+.#include <boost/synapse/block.hpp>
+----
+namespace boost { namespace synapse {
+
+    class blocker;
+
+    template <class Signal,class Emitter>
+    shared_ptr<blocker> block( <<Emitter>> e ); <1>
+
+    namespace meta {
+
+        template <class Signal>
+        struct blocked {
+            typedef blocked<Signal>(*type)( blocker &, bool is_blocked );
+        };
+        
+    }
+
+} }
+----
+<1> Multiple overloads are provided: `\<<Emitter>>`  is `Emitter *`, `weak_ptr<Emitter> const &` or, equivalently, `shared_ptr<Emitter> const &`.

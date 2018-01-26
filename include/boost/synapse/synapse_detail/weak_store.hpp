@@ -1,4 +1,4 @@
-//Copyright (c) 2015 Emil Dotchevski and Reverge Studios, Inc.
+//Copyright (c) 2015-2017 Emil Dotchevski and Reverge Studios, Inc.
 
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -28,38 +28,77 @@ boost
                 template <class> struct access;
                 template <class> static void type() { }
                 public:
-                template <class T>
-                explicit
-                weak_store( weak_ptr<T> const & w, T * px=0 )
+                weak_store & operator=( weak_store const & )=default;
+                weak_store( weak_store const & )=default;
+                weak_store( weak_store && )=default;
+                weak_store():
+                    px_(0),
+                    type_(0),
+                    ctype_(0)
                     {
-                    set(w,px);
+                    BOOST_SYNAPSE_ASSERT(empty());
+                    BOOST_SYNAPSE_ASSERT(!lockable());
                     }
                 template <class T>
-                explicit
-                weak_store( weak_ptr<T const> const & w, T const * px=0 )
+                weak_store( T * px ):
+                    px_(px),
+                    type_(&type<T>),
+                    ctype_(&type<T const>)
                     {
-                    set(w,px);
-                    }
-                template <class T>
-                void
-                set( weak_ptr<T> const & w, T * px=0 )
-                    {
-                    w_=w;
-                    px_=w_.lock()?0:px;
-                    type_=&type<T>;
-                    ctype_=&type<T const>;
-                    BOOST_SYNAPSE_ASSERT(px_!=0 || w_.lock());
+                    BOOST_SYNAPSE_ASSERT(!lockable());
                     BOOST_SYNAPSE_ASSERT(!empty());
                     }
                 template <class T>
-                void
-                set( weak_ptr<T const> const & w, T const * px=0 )
+                weak_store( T const * px ):
+                    px_(px),
+                    type_(0),
+                    ctype_(&type<T const>)
                     {
-                    w_=w;
-                    px_=w_.lock()?0:px;
-                    type_=0;
-                    ctype_=&type<T const>;
-                    BOOST_SYNAPSE_ASSERT(px_!=0 || w_.lock());
+                    BOOST_SYNAPSE_ASSERT(!lockable());
+                    BOOST_SYNAPSE_ASSERT(!empty());
+                    }
+                template <class T>
+                weak_store( weak_ptr<T> const & w ):
+                    w_(w),
+                    px_(0),
+                    type_(&type<T>),
+                    ctype_(&type<T const>)
+                    {
+                    BOOST_SYNAPSE_ASSERT(w_.lock());
+                    BOOST_SYNAPSE_ASSERT(lockable());
+                    BOOST_SYNAPSE_ASSERT(!empty());
+                    }
+                template <class T>
+                weak_store( weak_ptr<T const> const & w ):
+                    w_(w),
+                    px_(0),
+                    type_(0),
+                    ctype_(&type<T const>)
+                    {
+                    BOOST_SYNAPSE_ASSERT(w_.lock());
+                    BOOST_SYNAPSE_ASSERT(lockable());
+                    BOOST_SYNAPSE_ASSERT(!empty());
+                    }
+                template <class T>
+                weak_store( shared_ptr<T> const & w ):
+                    w_(w),
+                    px_(0),
+                    type_(&type<T>),
+                    ctype_(&type<T const>)
+                    {
+                    BOOST_SYNAPSE_ASSERT(w_.lock());
+                    BOOST_SYNAPSE_ASSERT(lockable());
+                    BOOST_SYNAPSE_ASSERT(!empty());
+                    }
+                template <class T>
+                weak_store( shared_ptr<T const> const & w ):
+                    w_(w),
+                    px_(0),
+                    type_(0),
+                    ctype_(&type<T const>)
+                    {
+                    BOOST_SYNAPSE_ASSERT(w_.lock());
+                    BOOST_SYNAPSE_ASSERT(lockable());
                     BOOST_SYNAPSE_ASSERT(!empty());
                     }
                 void
@@ -79,6 +118,11 @@ boost
                 expired() const
                     {
                     return !px_ && w_.expired();
+                    }
+                bool
+                lockable() const
+                    {
+                    return px_==0 && !empty();
                     }
                 template <class T>
                 shared_ptr<T>

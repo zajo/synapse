@@ -1,0 +1,46 @@
+[source,c++]
+.#include <boost/synapse/connect.hpp>
+----
+namespace boost { namespace synapse {
+
+    class connection;
+
+    template <class Signal,class Emitter,class F>
+    shared_ptr<connection> connect( Emitter * e, F f );
+
+    template <class Signal,class Emitter,class Receiver,class F>
+    shared_ptr<connection> connect( Emitter * e, Receiver * r, F f );
+
+    class pconnection;
+
+    template <class Signal,class Emitter,class F>
+    weak_ptr<pconnection> connect( <<Emitter>> e, F f ); <1>
+
+    template <class Signal,class Emitter,class Receiver,class F>
+    weak_ptr<pconnection> connect( <<Emitter>> e, <<Receiver>> r, F f ); <2>
+
+    shared_ptr<connection const> release( weak_ptr<pconnection const> const & c );
+    shared_ptr<connection> release( weak_ptr<pconnection> const & c );
+
+    namespace meta {
+
+        weak_ptr<void const> emitter();
+
+        namespace connect_flags {
+
+            unsigned const connecting=1;
+            unsigned const first_for_this_emitter=2;
+            unsigned const last_for_this_emitter=4;
+            
+        }
+
+        template <class Signal>
+        struct connected {
+            typedef connected<Signal>(*type)( connection & c, unsigned connect_flags cf );
+        };
+    }
+
+} }
+----
+<1> Two overloads are provided: `\<<Emitter>>`  is `weak_ptr<Emitter> const &` or, equivalently, `shared_ptr<Emitter> const &`;
+<2> Multple overloads are provided: `\<<Emitter>>`  is `Emitter *`, `weak_ptr<Emitter> const &` or, equivalently, `shared_ptr<Emitter> const &`; at least one of `e` and `r` is _not_ a raw pointer.
