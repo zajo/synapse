@@ -25,6 +25,7 @@ boost
                 {
                 typedef R(*signal_type)(A...);
                 typedef void signature(A...);
+                enum arity_ { arity=sizeof...(A) };
                 template <class Receiver>
                 struct
                 inject_receiver
