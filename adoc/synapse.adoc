@@ -65,12 +65,12 @@ Or we could use a lambda instead:
 [source,c++]
 ----
 synapse::connect<button::clicked>(emitter, receiver,
-    [ ](dialog & d) {
-        d.accept();
+    [ ](dialog * d) {
+        d->accept();
     } );
 ----
 
-NOTE: The `receiver` argument to `connect` is optional. If it is specified, it is dereferenced and passed as the first argument to the connected function, prepending all other arguments as specified by the signal signature.
+NOTE: The `receiver` argument to `connect` is optional. If it is specified, a pointer to the receiver object is passed as the first argument to the connected function, followed by all other arguments as specified by the signal signature.
 
 === Emitting signals from objects of 3rd-party types
 
@@ -307,7 +307,7 @@ Overloads of `connect` that return `weak_ptr<<<pconnection,pconnection>>>` take 
 
 Effects: ::
 
-. Connects the specified `Signal` from the emitter `e` to the function object `f`. The arguments of `F` must match the arguments of `Signal`, except that if `r` is specified, it is dereferenced and prepended as the first argument to `F`, followed by the rest of the arguments as specified by the `Signal` signature. The signal is considered disconnected when either of the following occurs:
+. Connects the specified `Signal` from the emitter `e` to the function object `f`. The arguments of `F` must match the arguments of `Signal`, except that if `r` is specified, a pointer to the receiver object is passed as the first argument to `F`, followed by the rest of the arguments as specified by the `Signal` signature. The signal is considered disconnected when either of the following occurs:
 +
 * The returned `shared_ptr<<<connection,connection>>>` object expires (this applies only to overloads that return `shared_ptr<<<connection,connection>>>`);
 * `e` (passed as either `weak_ptr<Emitter>` or `shared_ptr<Emitter>`) expires;
@@ -817,7 +817,7 @@ Window::Window(QWidget *parent) :
         [this]( bool checked )
         {
             slotButtonClicked(checked);
-        } ); <3>
+        } ); <3>о
 
     c_=synapse::connect<counterReached>(this,&QApplication::quit); <4>
 }

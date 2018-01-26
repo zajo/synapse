@@ -55,7 +55,7 @@ namespace
                 if( ++count0==3 )
                     lifetime.reset();
                 } );
-        (void) synapse::connect<my_signal>(&e,lifetime,[&count1]( int x ) { BOOST_TEST(x==42); ++count1; } );
+        (void) synapse::connect<my_signal>(&e,lifetime,[&count1]( int * x ) { BOOST_TEST(*x==42); ++count1; } );
         shared_ptr<synapse::connection> c2=synapse::connect<my_signal>(&e,[&count2]() { ++count2; } );
         BOOST_TEST(synapse::emit<my_signal>(&e)==3);
         BOOST_TEST(lifetime);

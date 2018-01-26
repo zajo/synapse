@@ -156,7 +156,7 @@ boost
                         get_thread_local_signal_data<Signal>(true),
                         std::move(e),
                         std::move(r),
-                        synapse::make_shared<function<typename signal_traits<Signal>::signature> >([=]( A... a ) { return f(*r.maybe_lock<Receiver>(),a...); }),
+                        synapse::make_shared<function<typename signal_traits<Signal>::signature> >([=]( A... a ) { return f(&*r.maybe_lock<Receiver>(),a...); }),
                         &emit_meta_connected<Signal> );
                     }
                 static
@@ -167,7 +167,7 @@ boost
                         get_thread_local_signal_data<Signal>(true),
                         std::move(e),
                         std::move(r),
-                        synapse::make_shared<function<typename signal_traits<Signal>::signature> >([=]( A... a ) { return f(*r.maybe_lock<Receiver>(),a...); }),
+                        synapse::make_shared<function<typename signal_traits<Signal>::signature> >([=]( A... a ) { return f(&*r.maybe_lock<Receiver>(),a...); }),
                         &emit_meta_connected<Signal> );
                     }
                 };

@@ -57,9 +57,9 @@ namespace
         int count2=0;
         BOOST_TEST(synapse::emit<test_signal1>(&emitter)==0);
         BOOST_TEST(synapse::emit<test_signal2>(&emitter)==0);
-        shared_ptr<synapse::connection const> c1 = synapse::connect<test_signal1>( &emitter, &receiver, [&count1,&receiver]( int & r ){ BOOST_TEST(&r==&receiver); ++count1;} );
+        shared_ptr<synapse::connection const> c1 = synapse::connect<test_signal1>( &emitter, &receiver, [&count1,&receiver]( int * r ){ BOOST_TEST(r==&receiver); ++count1;} );
         BOOST_TEST(c1.unique());
-        shared_ptr<synapse::connection> c2 = synapse::connect<test_signal2>( &emitter, &receiver, [&count2,&receiver]( int & r ){ BOOST_TEST(&r==&receiver); ++count2;} );
+        shared_ptr<synapse::connection> c2 = synapse::connect<test_signal2>( &emitter, &receiver, [&count2,&receiver]( int * r ){ BOOST_TEST(r==&receiver); ++count2;} );
         BOOST_TEST(c2.unique());
         BOOST_TEST(synapse::emit<test_signal1>(&emitter)==1);
         BOOST_TEST(count1==1);

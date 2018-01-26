@@ -127,12 +127,12 @@ namespace
         shared_ptr<int> lt4(new int(4));
         shared_ptr<int> lt5(new int(5));
         shared_ptr<int> lt6(new int(6));
-        (void) synapse::connect<my_signal>(&e1,lt1,[&count1]( int x ) { BOOST_TEST(x==1); ++count1; });
-        (void) synapse::connect<my_signal>(&e2,lt2,[&count2]( int x ) { BOOST_TEST(x==2); ++count2; });
-        (void) synapse::connect<my_signal>(&e1,lt3,[&count1]( int x ) { BOOST_TEST(x==3); ++count1; });
-        (void) synapse::connect<my_signal>(&e2,lt4,[&count2]( int x ) { BOOST_TEST(x==4); ++count2; });
-        (void) synapse::connect<my_signal>(&e1,lt5,[&count1]( int x ) { BOOST_TEST(x==5); ++count1; });
-        (void) synapse::connect<my_signal>(&e2,lt6,[&count2]( int x ) { BOOST_TEST(x==6); ++count2; });
+        (void) synapse::connect<my_signal>(&e1,lt1,[&count1]( int * x ) { BOOST_TEST(*x==1); ++count1; });
+        (void) synapse::connect<my_signal>(&e2,lt2,[&count2]( int * x ) { BOOST_TEST(*x==2); ++count2; });
+        (void) synapse::connect<my_signal>(&e1,lt3,[&count1]( int * x ) { BOOST_TEST(*x==3); ++count1; });
+        (void) synapse::connect<my_signal>(&e2,lt4,[&count2]( int * x ) { BOOST_TEST(*x==4); ++count2; });
+        (void) synapse::connect<my_signal>(&e1,lt5,[&count1]( int * x ) { BOOST_TEST(*x==5); ++count1; });
+        (void) synapse::connect<my_signal>(&e2,lt6,[&count2]( int * x ) { BOOST_TEST(*x==6); ++count2; });
         BOOST_TEST(synapse::emit<my_signal>(&e1)==3);
         BOOST_TEST(count1==3);
         BOOST_TEST(count2==0);
