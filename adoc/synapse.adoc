@@ -1217,7 +1217,7 @@ int main(void)
 
 [qanda]
 How does Synapse differ from Boost Signals 2, which is also "non-intrusive"?::
-    The main design difference is that in Boost Signals 2 emitting a signal requires a signal object. This is significant because in general it is not trivial to associate a Boost Signals 2 signal object with 3rd-party objects. When using Synapse such association is not necessary because the 3rd-party object itself can be passed to `emit`.
+    The main design difference is that in Boost Signals 2 emitting a signal requires a signal object. This is significant difference because in general it is not trivial to associate a Boost Signals 2 signal object with 3rd-party objects. When using Synapse such association is not necessary because the 3rd-party object itself can be passed to <<emit,`emit`>>.
 What is the design rationale for ignoring the value returned by connected functions?::
     A typical use case for Synapse is when the caller of `emit` doesn't care if there are 0, 1 or many connected functions. Allowing return values makes the zero/many case quite tricky to deal with. On the other hand, passing a reference or a pointer to `emit` to return/accumulate values from any number of connected functions (if needed) is simpler and fits that case nicely.
 Is there a way to stop the emit loop before all connected functions have been called?::
@@ -1226,3 +1226,7 @@ I am concerned about code size, does Synapse use a lot of templates?::
     Yes, there are templates instantiated for each signal type. This is done so that the dispatch by signal type occurs at compile-time, leaving only emitter dispatch at run-time. However, static types are erased as soon as possible, so template bloat is kept to a minimum.
 I do not need thread-safety, is there a way to configure Synapse to eliminate thread safety overhead?::
     Most data structures in Synapse are not thread-safe, instead they are thread-local. The overhead of using the library across multiple threads is contained only in `thread_local_queue.cpp`, which is an optional component.
+
+== Acknowledgements
+
+Special thanks to Peter Dimov for his valuable feedback on the Synapse design and for coming up with the perfect name for this library.
