@@ -9,6 +9,7 @@
 #include <boost/synapse/synapse_detail/signal_traits.hpp>
 #include <boost/synapse/dep/thread_local.hpp>
 #include <boost/synapse/dep/smart_ptr.hpp>
+#include <boost/synapse/dep/assert.hpp>
 #include <atomic>
 
 namespace
@@ -118,7 +119,7 @@ boost
                 keep_afloat( shared_ptr<thread_local_signal_data const> const & meta )
                     {
                     auto main_tlsd = get_thread_local_signal_data<Signal>(true);
-                    assert(!main_tlsd->keep_meta_connected_tlsd_afloat_);
+                    BOOST_SYNAPSE_ASSERT(!main_tlsd->keep_meta_connected_tlsd_afloat_);
                     main_tlsd->keep_meta_connected_tlsd_afloat_ = meta;
                     }
                 };
@@ -131,7 +132,7 @@ boost
                 keep_afloat( shared_ptr<thread_local_signal_data const> const & meta )
                     {
                     auto main_tlsd = get_thread_local_signal_data<Signal>(true);
-                    assert(!main_tlsd->keep_meta_blocked_tlsd_afloat_);
+                    BOOST_SYNAPSE_ASSERT(!main_tlsd->keep_meta_blocked_tlsd_afloat_);
                     main_tlsd->keep_meta_blocked_tlsd_afloat_ = meta;
                     }
                 };
