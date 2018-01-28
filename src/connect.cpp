@@ -118,24 +118,22 @@ boost
                         {
                         BOOST_SYNAPSE_ASSERT(!is_free());
                         BOOST_SYNAPSE_ASSERT(e!=0);
-                        if( ep_==e && !e_.expired() )
-                            {
-                            BOOST_SYNAPSE_ASSERT(ep_==e_.maybe_lock<void const>().get());
-                            if( shared_ptr<void const> lk=r_.maybe_lock<void const>() )
-                                {
-                                if( translated_ )
-                                    if( args )
-                                        return args->call_translated(fn_.get());
-                                    else
-                                        return (*static_cast<function<int()> const *>(fn_.get()))();
-                                else
-                                    if( args )
-                                        args->call(fn_.get());
-                                    else
-                                        (*static_cast<function<void()> const *>(fn_.get()))();
-                                return 1;
-                                }
-                            }
+                        if( ep_==e )
+							if( auto e_lk = e_.maybe_lock<void const>() )
+								if( auto r_lk=r_.maybe_lock<void const>() )
+									if( translated_ )
+										if( args )
+											return args->call_translated(fn_.get());
+										else
+											return (*static_cast<function<int()> const *>(fn_.get()))();
+									else
+										{
+										if( args )
+											args->call(fn_.get());
+										else
+											(*static_cast<function<void()> const *>(fn_.get()))();
+										return 1;
+										}
                         return 0;
                         };
                     };
