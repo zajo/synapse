@@ -1,4 +1,4 @@
-:sourcedir: .
+:sourcedir: adoc
 :last-update-label!:
 :source-highlighter: coderay
 :icons: font
