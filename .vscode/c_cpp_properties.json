@@ -12,8 +12,6 @@
                 "${workspaceRoot}/../.."
             ],
             "defines": [
-				"BOOST_SYNAPSE_USE_STD_SMART_PTR",
-				"BOOST_SYNAPSE_USE_STD_FUNCTION"
 			],
             "intelliSenseMode": "clang-x64",
             "browse": {
@@ -42,8 +40,6 @@
                 "${workspaceRoot}/../.."
             ],
             "defines": [
-				"BOOST_SYNAPSE_USE_STD_SMART_PTR",
-				"BOOST_SYNAPSE_USE_STD_FUNCTION"
 			],
             "intelliSenseMode": "clang-x64",
             "browse": {
@@ -65,8 +61,6 @@
                 "${workspaceRoot}/../.."
             ],
             "defines": [
-				"BOOST_SYNAPSE_USE_STD_SMART_PTR",
-				"BOOST_SYNAPSE_USE_STD_FUNCTION",
                 "_DEBUG",
                 "UNICODE"
             ],

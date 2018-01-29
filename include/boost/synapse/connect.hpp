@@ -182,7 +182,7 @@ boost
         shared_ptr<connection>
         connect( Emitter * e, Receiver * r, F f )
             {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::connect_fwd(e,r,f);
+            return synapse_detail::bind_front<Signal,Receiver,F,typename signal_traits<Signal>::signature>::connect_fwd(e,r,f);
             }
         template <class Signal,class Emitter,class F>
         weak_ptr<pconnection>
@@ -200,49 +200,49 @@ boost
         weak_ptr<pconnection>
         connect( Emitter * e, weak_ptr<Receiver> const & r, F f )
             {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
+            return synapse_detail::bind_front<Signal,Receiver,F,typename signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
             }
         template <class Signal,class Emitter,class Receiver,class F>
         weak_ptr<pconnection>
         connect( Emitter * e, shared_ptr<Receiver> const & r, F f )
             {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
+            return synapse_detail::bind_front<Signal,Receiver,F,typename signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
             }
         template <class Signal,class Emitter,class Receiver,class F>
         weak_ptr<pconnection>
         connect( weak_ptr<Emitter> const & e, Receiver * r, F f )
             {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
+            return synapse_detail::bind_front<Signal,Receiver,F,typename signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
             }
         template <class Signal,class Emitter,class Receiver,class F>
         weak_ptr<pconnection>
         connect( weak_ptr<Emitter> const & e, weak_ptr<Receiver> const & r, F f )
             {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
+            return synapse_detail::bind_front<Signal,Receiver,F,typename signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
             }
         template <class Signal,class Emitter,class Receiver,class F>
         weak_ptr<pconnection>
         connect( weak_ptr<Emitter> const & e, shared_ptr<Receiver> const & r, F f )
             {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
+            return synapse_detail::bind_front<Signal,Receiver,F,typename signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
             }
         template <class Signal,class Emitter,class Receiver,class F>
         weak_ptr<pconnection>
         connect( shared_ptr<Emitter> const & e, Receiver * r, F f )
             {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
+            return synapse_detail::bind_front<Signal,Receiver,F,typename signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
             }
         template <class Signal,class Emitter,class Receiver,class F>
         weak_ptr<pconnection>
         connect( shared_ptr<Emitter> const & e, weak_ptr<Receiver> const & r, F f )
             {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
+            return synapse_detail::bind_front<Signal,Receiver,F,typename signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
             }
         template <class Signal,class Emitter,class Receiver,class F>
         weak_ptr<pconnection>
         connect( shared_ptr<Emitter> const & e, shared_ptr<Receiver> const & r, F f )
             {
-            return synapse_detail::bind_front<Signal,Receiver,F,typename synapse_detail::signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
+            return synapse_detail::bind_front<Signal,Receiver,F,typename signal_traits<Signal>::signature>::pconnect_fwd(e,r,f);
             }
         }
     }

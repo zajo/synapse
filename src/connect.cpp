@@ -197,8 +197,9 @@ boost
                     BOOST_SYNAPSE_ASSERT(e!=0);
                     BOOST_SYNAPSE_ASSERT(!tlsd.cl_.expired());
                     int n1=0;
-                    if( interthread_interface * interthread=tlsd.interthread_.load() )
-                        n1=interthread->emit(tlsd,e,args);
+					if( tlsd.interthread_ )
+						if( interthread_interface * interthread=tlsd.interthread_->load() )
+							n1=interthread->emit(tlsd,e,args);
                     if( !tlsd.emitter_blocked_(tlsd,e) )
                         if( shared_ptr<thread_local_signal_data::connection_list> cl=tlsd.cl_.lock() )
                             {
@@ -224,8 +225,11 @@ boost
                     if( shared_ptr<thread_local_signal_data> tlsd=tlsd_.lock() )
                         {
                         BOOST_SYNAPSE_ASSERT(tlsd);
-                        int const n=--tlsd->cl_count_;
-                        BOOST_SYNAPSE_ASSERT(n>=0);
+						if( tlsd->cl_count_ )
+							{
+							int const n=--(*tlsd->cl_count_);
+							BOOST_SYNAPSE_ASSERT(n>=0);
+							}
                         tlsd->cl_.reset();
                         tlsd->emit_=&thread_local_signal_data::emit_stub;
                         tlsd->cleanup_=&thread_local_signal_data::cleanup_stub;
@@ -250,8 +254,11 @@ boost
                     tlsd->emit_=&emit_impl;
                     tlsd->cleanup_=&cleanup_impl;
                     check_invariants();
-                    int const n=++tlsd->cl_count_;
-                    BOOST_SYNAPSE_ASSERT(n>0);
+					if( tlsd->cl_count_ )
+						{
+						int const n=++(*tlsd->cl_count_);
+						BOOST_SYNAPSE_ASSERT(n>0);
+						}
                     }
                 ~connection_list()
                     {
@@ -412,11 +419,12 @@ boost
                         {
                         make_shared<thread_local_signal_data::connection_list>(tlsd,emit_meta_connected).swap(cl);
                         tlsd->cl_=cl;
-                        if( interthread_interface * interthread=get_interthread_api() )
-                            {
-                            tlsd->interthread_.store(interthread);
-                            interthread->notify_connection_list_created(tlsd);
-                            }
+						if( tlsd->interthread_ )
+							if( interthread_interface * interthread=get_interthread_api() )
+								{
+								tlsd->interthread_->store(interthread);
+								interthread->notify_connection_list_created(tlsd);
+								}
                         }
                     return cl;
                     }

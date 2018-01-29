@@ -18,12 +18,6 @@ boost
                 {
                 typedef access_property<Property>(*type)( typename Property::type *, bool update_value );
                 };
-            template <class Signal>
-            struct
-            signal_traits<access_property<Signal> >:
-                signal_traits<typename access_property<Signal>::type>
-                {
-                };
             template <class Property,class ObjectRef,class Object>
             shared_ptr<connection>
             set_( ObjectRef const & o, Object * op, typename Property::type x )
@@ -65,6 +59,13 @@ boost
                             });
                 }
             }
+		template <class Signal>
+		struct
+		signal_traits<synapse_detail::access_property<Signal> >:
+			signal_traits<typename synapse_detail::access_property<Signal>::type>
+			{
+			static bool const is_thread_local=true;
+			};
         template <class Tag,class T>
         struct
         property
