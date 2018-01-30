@@ -22,14 +22,11 @@ Synapse is distributed under the http://www.boost.org/LICENSE_1_0.txt[Boost Soft
 
 The source code is available in https://github.com/zajo/boost-synapse[this GitHub repository].
 
+NOTE: Synapse is not part of Boost.
 
-== Building
+== Feedback / support
 
-Synapse has been formatted to be submitted for a Boost review, so its directory structure follows the common directory structure for Boost libraries—and it's built with Boost Build.
-
-Alternatively, just put `connect.cpp` and either `thread_local_queue.cpp` or `interthread_stub.cpp` into your favorite build system, depending on whether or not your program calls `create_thread_local_queue`. If your program calls the `block` function, you also need to compile and link `block.cpp`.
-
-However, note that if your program only emits signals (that is, it calls emit but it never creates any connections), there is no need to link any `.cpp` files; that is, `boost/synapse/emit.hpp` by itself is an independent header-only library. This way low level libraries that emit signals do not require the user to link Synapse, unless he cares to connect them.
+Please use the link:https://lists.boost.org/mailman/listinfo.cgi/boost[Boost Developers mailing list].
 
 == Portability
 
@@ -1213,6 +1210,127 @@ int main(void)
 <2> Commented-out parts of the original example, and...
 <3> ...the C++ lambda function connected to the `Key` Synapse signal from `glfw_signals.hpp` to handle the `Esc` key.
 
+== Alternatives to Synapse
+
+See this https://en.wikipedia.org/wiki/Signals_and_slots#Alternative_implementations[Wikipedia page].
+
+== Macros and configuration
+
+----
+BOOST_SYNAPSE_ASSERT
+----
+All assertions in Synapse use this macro; if not `#defined`, Synapse header files `#define` it as link:http://www.boost.org/doc/libs/release/libs/assert/assert.html[`BOOST_ASSERT`].
+
+***
+
+----
+BOOST_SYNAPSE_USE_STD_FUNCTION
+----
+By default, Synapse uses `boost::function`. If this macro is `#defined`, it will use `std::function` instead.
+
+***
+
+----
+BOOST_SYNAPSE_USE_STD_SMART_PTR
+----
+By default, Synapse uses the following Boost smart pointer components:
+
+- `boost::shared_ptr`
+- `boost::weak_ptr`
+- `boost::make_shared`
+- `boost::get_deleter`
+
+If `BOOST_SYNAPSE_USE_STD_SMART_PTR` is `#defined`, the corresponding standard components will be used.
+
+***
+
+----
+BOOST_SYNAPSE_NO_THREADS
+----
+If `#defined`, Synapse assumes that static storage is equivalent to thread-local storage, and interthread communication support is disabled.
+
+If `BOOST_SYNAPSE_NO_THREADS` is not explicitly `#defined`, thread-safety depends on `BOOST_NO_THREADS`.
+
+***
+
+----
+BOOST_SYNAPSE_THREAD_LOCAL(type,object)
+----
+This macro is used to define objects with static thread-local storage; if not `#defined`, Synapse header files `#define` it as:
+
+[source,c++]
+----
+#define BOOST_SYNAPSE_THREAD_LOCAL(type,object) static thread_local type object
+----
+
+or, under `BOOST_SYNAPSE_NO_THREADS`, as:
+
+[source,c++]
+----
+#define BOOST_SYNAPSE_THREAD_LOCAL(type,object) static type object
+----
+
+***
+
+----
+BOOST_SYNAPSE_THREAD_LOCAL_INIT(type,object,init)
+----
+This macro is used to define objects with static thread-local storage and provide their initialization; if not `#defined`, Synapse header files `#define` it as:
+
+[source,c++]
+----
+#define BOOST_SYNAPSE_THREAD_LOCAL_INIT(type,object,init) static thread_local type object init
+----
+
+or, under `BOOST_SYNAPSE_NO_THREADS`, as:
+
+[source,c++]
+----
+#define BOOST_SYNAPSE_THREAD_LOCAL(type,object,init) static type object init
+----
+
+NOTE: The `init` argument passed will contain parentheses, so when the macro is expanded it results in calling a constructor.
+
+***
+
+----
+BOOST_SYNAPSE_STATIC(type,object)
+----
+This macro is used to define objects with static thread-local storage; if not `#defined`, Synapse header files `#define` it as:
+
+[source,c++]
+----
+#define BOOST_SYNAPSE_STATIC(type,object) static type object
+----
+
+***
+
+----
+BOOST_SYNAPSE_STATIC_INIT(type,object,init)
+----
+This macro is used to define objects with static thread-local storage and provide their initialization; if not `#defined`, Synapse header files `#define` it as:
+
+[source,c++]
+----
+#define BOOST_SYNAPSE_STATIC_INIT(type,object,init) static type object init
+----
+
+IMPORTANT: Except under `BOOST_SYNAPSE_NO_THREADS`, objects with static storage are expected to be thread-safe.
+
+NOTE: The `init` argument passed will contain parentheses, so when the macro is expanded it results in calling a constructor.
+
+== Building and installation
+
+Synapse has been formatted to be submitted for a Boost review, so its directory structure follows the common directory structure for Boost libraries—and it's built with Boost Build.
+
+Alternatively, just put `connect.cpp` and either `thread_local_queue.cpp` or `interthread_stub.cpp` into your favorite build system, depending on whether or not your program calls `create_thread_local_queue`. If your program calls the `block` function, you also need to compile and link `block.cpp`.
+
+However, note that if your program only emits signals (that is, it calls emit but it never creates any connections), there is no need to link any `.cpp` files; that is, `boost/synapse/emit.hpp` by itself is an independent header-only library. This way low level libraries that emit signals do not require the user to link Synapse, unless he cares to connect them.
+
+== Building the unit tests and the examples
+
+The unit tests and the examples can be built within the Boost framework: clone Synapse under the `libs` subdirectory in your boost installation, then `cd` into `synapse/build/test` and execute `b2` as usual.
+
 == Q&A
 
 [qanda]
@@ -1230,3 +1348,7 @@ I do not need thread-safety, is there a way to configure Synapse to eliminate th
 == Acknowledgements
 
 Special thanks to Peter Dimov for his valuable feedback on the Synapse design and for coming up with the perfect name for this library.
+
+***
+
+[.small]#_(C) 2015-2018 Emil Dotchevski_#
