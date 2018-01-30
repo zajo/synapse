@@ -10,8 +10,6 @@ Non-intrusive signal programming library for C++11
 
 [abstract]
 == Abstract
-(Note: Synapse is not part of Boost. Please post questions and suggestions on the Boost Developers Mailing List).
-
 Synapse is a C++ signal programming library. It can be used to define communication channels between objects of arbitrary types in a dynamic object environment.
 
 Synapse is non-intrusive: it allows any object of any type whatsoever to be used as a signal emitter; if two contexts in a given program happen to have access to the same object, they can use that object to communicate through Synapse signals.
