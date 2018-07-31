@@ -11,8 +11,7 @@
                 "${workspaceRoot}/include",
                 "${workspaceRoot}/../.."
             ],
-            "defines": [
-			],
+            "defines": [],
             "intelliSenseMode": "clang-x64",
             "browse": {
                 "path": [
@@ -21,8 +20,8 @@
                     "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.0.0/include",
                     "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include",
                     "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/usr/include",
-	                "${workspaceRoot}/include",
-	                "${workspaceRoot}/../.."
+                    "${workspaceRoot}/include",
+                    "${workspaceRoot}/../.."
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
@@ -39,15 +38,14 @@
                 "${workspaceRoot}/include",
                 "${workspaceRoot}/../.."
             ],
-            "defines": [
-			],
+            "defines": [],
             "intelliSenseMode": "clang-x64",
             "browse": {
                 "path": [
                     "/usr/include",
                     "/usr/local/include",
-	                "${workspaceRoot}/include",
-	                "${workspaceRoot}/../.."
+                    "${workspaceRoot}/include",
+                    "${workspaceRoot}/../.."
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
@@ -68,13 +66,13 @@
             "browse": {
                 "path": [
                     "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include/*",
-	                "${workspaceRoot}/include",
-	                "${workspaceRoot}/../.."
+                    "${workspaceRoot}/include",
+                    "${workspaceRoot}/../.."
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
             }
         }
     ],
-    "version": 3
+    "version": 4
 }

@@ -1,6 +1,6 @@
 :sourcedir: adoc
 :last-update-label!:
-:source-highlighter: coderay
+//:source-highlighter: coderay
 :icons: font
 = Synapse
 Non-intrusive signal programming library for C++11
@@ -131,8 +131,8 @@ Notice that `process_file` is not coupled with `QProgressBar`: the `report_progr
 
 In Synapse there are two types of connection objects: <<connection,`connection`>> and <<pconnection,`pconnection`>>:
 
-- `shared_ptr<<<connection,connection>>>` objects are returned by overloads of <<connect,`connect`>> which take the emitter (and, if specified, the receiver) as a raw pointer. The user is required to keep the `connection` object afloat; the signal is disconnected when it expires.
-- `weak_ptr<<<pconnection,pconnection>>>` objects are returned by overloads of <<connect,`connect`>> which take at least one of the emitter or the receiver as a `weak_ptr` or `shared_ptr`. The user is _not_ required to keep `pconnection` objects afloat; the connection is disconnected when Synapse detects that the emitter or the receiver have expired.
+- `shared_ptr<<<connection,connection>>>` objects are returned by overloads of <<connect,`connect`>> which take the emitter (and, if specified, the receiver) as a raw pointer. The user is required to keep the `connection` object alive; the signal is disconnected when that object expires.
+- `weak_ptr<<<pconnection,pconnection>>>` objects are returned by overloads of <<connect,`connect`>> which take at least one of the emitter or the receiver as a `weak_ptr` or `shared_ptr`. The user is _not_ required to keep `pconnection` objects alive; the connection is disconnected when Synapse detects that the emitter or the receiver have expired.
 
 IMPORTANT: The <<release,`release`>> function can be used to convert a <<pconnection,`pconnection`>> object to a <<connection,`connection`>> object, in case we need to control its lifetime explicitly.
 
@@ -140,7 +140,7 @@ NOTE: Earlier Synapse versions lacked support for `pconnection` objects, meaning
 
 === Blocking of signals
 
-It is possible to temporarily block a specific signal for a specific emitter. This allows to dynamically disable functionality implemented by emitting signals -- without having to disconnect them.
+It is possible to temporarily block a specific signal for a specific emitter. This allows users to dynamically disable functionality implemented by emitting signals -- without having to disconnect them.
 
 NOTE: Blocking affects pre-existing as well as future connections.
 
@@ -306,7 +306,7 @@ namespace boost { namespace synapse {
 <2> Multiple overloads are provided: `\<<Emitter>>`  is `Emitter *`, `weak_ptr<Emitter> const &` or, equivalently, `shared_ptr<Emitter> const &`; at least one of `e` and `r` is _not_ a raw pointer.
 ====
 
-Overloads of `connect` that return `shared_ptr<<<connection,connection>>>` create connections whose lifetime is explicitly managed by the user. Such connections require that the caller keeps the returned <<connection,`connection`>> object afloat for as long as the connection should persist.
+Overloads of `connect` that return `shared_ptr<<<connection,connection>>>` create connections whose lifetime is explicitly managed by the user. Such connections require that the caller keeps the returned <<connection,`connection`>> object alive for as long as the connection should persist.
 
 Overloads of `connect` that return `weak_ptr<<<pconnection,pconnection>>>` take at least one of `e` and `r` as a `weak_ptr` or `shared_ptr`. They create _persistent_ connections which expire when either `e` or `r` expire.
 
@@ -371,7 +371,7 @@ include::{sourcedir}/synopses/translate.hpp.adoc[]
 ====
 
 Effects: ::
-The `translate` function template creates a connection which causes the emitter `e2` to emit `TranslatedSignal` each time the emitter `e1` emits `OriginalSignal` (the two signals must have campatible signatures). This behavior persists until:
+The `translate` function template creates a connection which causes the emitter `e2` to emit `TranslatedSignal` each time the emitter `e1` emits `OriginalSignal` (the two signals must have compatible signatures). This behavior persists until:
 
 - the returned <<connection,`connection`>> object expires (this applies only to the `translate` overload that takes `e1` and `e2` as raw pointers);
 - `e1` (passed as either `weak_ptr` or `shared_ptr` expires;
@@ -406,7 +406,7 @@ TIP: Use <<release,`release`>> to convert a non-owning `weak_ptr<pconnection>` r
 [source,c++]
 ----
 template <class T>
-void set_user_data( shared_ptr<T> const & data );
+void set_user_data( T const & data );
 ----
 
 Description: ::
@@ -446,7 +446,7 @@ Notes: ::
 * An empty `shared_ptr` is returned if:
 ** `T` does not match the static type of the emitter passed to <<connect,`connect`>> (or <<translate,`translate`>>), or
 ** the emitter was passed to <<connect,`connect`>> (or <<translate,`translate`>>) as a `shared_ptr`/`weak_ptr` and it has expired.
-* If the emitter was passed to <<connect,`connect`>> (or <<tranlate,`translate`>>) as a raw pointer, the returned `shared_ptr` points that emitter but does not (can not) keep it afloat.
+* If the emitter was passed to <<connect,`connect`>> (or <<tranlate,`translate`>>) as a raw pointer, the returned `shared_ptr` points that emitter but does not (can not) keep it alive.
 
 '''
 
@@ -468,7 +468,7 @@ Notes: ::
 ** No receiver object was passed to <<connect,`connect`>> (or <<translate,`translate`>>), or
 ** `T` does not match the static type of the receiver passed to <<connect,`connect`>> (or <<translate,`translate`>>), or
 ** the receiver was passed to <<connect,`connect`>> (or <<translate,`translate`>>) as a `shared_ptr`/`weak_ptr` and it has expired.
-* If the receiver was passed to <<connect,`connect`>> (or <<tranlate,`translate`>>) as a raw pointer, the returned `shared_ptr` points that receiver but does not (can not) keep it afloat.
+* If the receiver was passed to <<connect,`connect`>> (or <<tranlate,`translate`>>) as a raw pointer, the returned `shared_ptr` points that receiver but does not (can not) keep it alive.
 
 '''
 
@@ -541,7 +541,7 @@ Notes: ::
 * An empty shared_ptr is returned if:
 ** `T` does not match the static type of the emitter passed to <<block,`block`>>, or
 ** the emitter was passed to <<block,`block`>> as a `shared`/`weak_ptr` and it has expired.
-* If the emitter was passed to <<block,`block`>> as a raw pointer, the returned `shared_ptr` points that emitter but does not (can not) keep it afloat.
+* If the emitter was passed to <<block,`block`>> as a raw pointer, the returned `shared_ptr` points that emitter but does not (can not) keep it alive.
 
 '''
 
@@ -613,7 +613,7 @@ Effects: ::
 The same as `<<poll,poll>>(q)`, except that it blocks and does not return until at least one signal was delivered.
 
 Returns: ::
-The total number of signals emitted (always greater than 1).
+The total number of signals emitted (always greater than 0).
 
 '''
 
@@ -850,7 +850,7 @@ int main(int argc, char **argv)
 }
 ----
 <1> Was: `void counterReached();`
-<2> Needed to keep the Synapse connection afloat.
+<2> Needed to keep the Synapse connection alive.
 <3> `Was: connect(m_button, SIGNAL (clicked(bool)), this, SLOT (slotButtonClicked(bool)));`
 <4> Was: `connect(this, SIGNAL (counterReached()), QApplication::instance(), SLOT (quit()));`
 <5> Was: `emit counterReached();`
@@ -1313,7 +1313,7 @@ This macro is used to define objects with static thread-local storage and provid
 #define BOOST_SYNAPSE_STATIC_INIT(type,object,init) static type object init
 ----
 
-IMPORTANT: Except under `BOOST_SYNAPSE_NO_THREADS`, objects with static storage are expected to be thread-safe.
+IMPORTANT: Except under `BOOST_SYNAPSE_NO_THREADS`, initialization of objects with static storage is expected to be serialized.
 
 NOTE: The `init` argument passed will contain parentheses, so when the macro is expanded it results in calling a constructor.
 
@@ -1323,7 +1323,7 @@ Synapse has been formatted to be submitted for a Boost review, so its directory 
 
 Alternatively, just put `connect.cpp` and either `thread_local_queue.cpp` or `interthread_stub.cpp` into your favorite build system, depending on whether or not your program calls `create_thread_local_queue`. If your program calls the `block` function, you also need to compile and link `block.cpp`.
 
-However, note that if your program only emits signals (that is, it calls emit but it never creates any connections), there is no need to link any `.cpp` files; that is, `boost/synapse/emit.hpp` by itself is an independent header-only library. This way low level libraries that emit signals do not require the user to link Synapse, unless he cares to connect them.
+However, note that if your program only emits signals (that is, it calls `emit` but it never creates any connections), there is no need to link any `.cpp` files; that is, `boost/synapse/emit.hpp` by itself is an independent header-only library. This way low level libraries that emit signals do not require the user to link Synapse, unless he cares to connect them.
 
 == Building the unit tests and the examples
 

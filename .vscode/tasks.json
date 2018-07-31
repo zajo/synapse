@@ -1,27 +1,163 @@
 {
-    "displayName": "All unit tests",
-    "description": "All unit tests",
-    "isBuildCommand": "true",
-    "command": "sh",
-    "args": [
-        "-c",
-        "cd ${workspaceRoot}/build/test && ../../../../b2"
-    ],
-    "version": "0.1.0",
-    "problemMatcher": {
-        "fileLocation": [
-            "relative",
-            "${workspaceRoot}/bld/debug"
-        ],
-        "owner": "cpp",
-        "pattern": {
-            "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|.*error|note):\\s+(.*)$",
-            "file": 1,
-            "line": 2,
-            "column": 3,
-            "severity": 4,
-            "message": 5
-        }
-    },
-    "chooserIndex": 0
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"group": { "kind": "test", "isDefault": true },
+			"label": "Run all unit tests",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"group": { "kind": "test", "isDefault": true },
+			"label": "All unit tests",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 args_connect_test",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "args_translate_test",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 args_translate_test",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "block_emit_test",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 block_emit_test",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "block_test",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 block_test",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "connect_emit_test",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 connect_emit_test",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "connection_lifetime_test",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 connection_lifetime_test",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "connection_user_data_test",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 connection_user_data_test",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "ct_basic_test",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 ct_basic_test",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "ct_lambda_test",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 ct_lambda_test",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "ct_tlq_lifetime_test",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 ct_tlq_lifetime_test",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "ct_wait_test",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 ct_wait_test",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "emit_stub_test",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 emit_stub_test",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "emit_test",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 emit_test",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "property_test",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 property_test",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "release_test",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 release_test",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "weak_store_test",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 weak_store_test",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "shutdown_test1",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test1",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "shutdown_test2",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test2",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "shutdown_test3",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test3",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "shutdown_test4",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test4",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "shutdown_test5",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test5",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "shutdown_test6",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test6",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "shutdown_test7",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test7",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "shutdown_test8",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test8",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"label": "shutdown_test9",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/test && ../../../../b2 shutdown_test9",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		}
+	]
 }
