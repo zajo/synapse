@@ -50,7 +50,7 @@ namespace
         boost::thread th2(boost::bind(&emitting_thread<sig2>,boost::ref(counter2)));
         while( counter1!=iteration_count || counter2!=iteration_count )
             {
-            int n=wait(*tlq);
+            int n=synapse::wait(*tlq);
             BOOST_TEST(n>0);
             BOOST_TEST(counter1>=0);
             BOOST_TEST(counter1<=iteration_count);
