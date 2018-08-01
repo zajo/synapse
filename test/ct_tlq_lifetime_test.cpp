@@ -74,8 +74,8 @@ namespace
         shared_ptr<int> terminate(make_shared<int>(42));
         for( int i=0; i!=emitting_thread_count; ++i )
             tgr.create_thread( [&b,&terminate]() { emitting_thread(b,terminate); } );
-        BOOST_TEST(terminate.unique());
         b.wait();
+        BOOST_TEST(terminate.unique());
         BOOST_TEST(connection_count==emitting_thread_count);
         shared_ptr<synapse::connection> c1=synapse::connect<signal1>(&emitter,[](){});
         shared_ptr<synapse::connection> c2=synapse::connect<signal2>(&emitter,[](){});

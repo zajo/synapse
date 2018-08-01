@@ -22,38 +22,12 @@ env:
   matrix:
     - BOGUS_JOB=true
 
-addons:
-  apt:
-    packages:
-      - g++-4.9
-      - g++-5
-      - g++-6
-      - clang-3.6
-      - clang-3.7
-      - clang-3.8
-    sources:
-      - ubuntu-toolchain-r-test
-      - llvm-toolchain-precise
-      - llvm-toolchain-precise-3.6
-      - llvm-toolchain-precise-3.7
-      - llvm-toolchain-precise-3.8
-
 matrix:
 
   exclude:
     - env: BOGUS_JOB=true
 
   include:
-    - os: linux
-      compiler: g++-4.7
-      env: TOOLSET=gcc COMPILER=g++-4.7 CXXSTD=11
-      addons:
-        apt:
-          packages:
-            - g++-4.7
-          sources:
-            - ubuntu-toolchain-r-test
-
     - os: linux
       compiler: g++-4.8
       env: TOOLSET=gcc COMPILER=g++-4.8 CXXSTD=11
@@ -217,14 +191,6 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-6.0
-
-    - os: linux
-      compiler: clang++-libc++
-      env: TOOLSET=clang COMPILER=clang++-libc++ CXXSTD=11,14,1z
-      addons:
-        apt:
-          packages:
-            - libc++-dev
 
     - os: osx
       compiler: clang++
