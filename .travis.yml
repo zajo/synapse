@@ -76,6 +76,7 @@ install:
   - git submodule update --init tools/inspect
   - git submodule update --init libs/config
   - git submodule update --init tools/boostdep
+  - mkdir libs/synapse
   - cp -r $TRAVIS_BUILD_DIR/* libs/synapse
   - python tools/boostdep/depinst/depinst.py synapse
   - ./bootstrap.sh
