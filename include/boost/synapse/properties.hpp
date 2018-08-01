@@ -59,13 +59,13 @@ boost
                             });
                 }
             }
-		template <class Signal>
-		struct
-		signal_traits<synapse_detail::access_property<Signal> >:
-			signal_traits<typename synapse_detail::access_property<Signal>::type>
-			{
-			static bool const is_thread_local=true;
-			};
+        template <class Signal>
+        struct
+        signal_traits<synapse_detail::access_property<Signal> >:
+            signal_traits<typename synapse_detail::access_property<Signal>::type>
+            {
+            static bool const is_thread_local=true;
+            };
         template <class Tag,class T>
         struct
         property

@@ -63,10 +63,10 @@ boost
                 std::atomic<interthread_interface *> * const interthread_;
                 thread_local_signal_data():
                     cleanup_(&cleanup_stub),
-					cl_count_(0),
+                    cl_count_(0),
                     emit_(&emit_stub),
                     emitter_blocked_(&emitter_blocked_stub),
-					get_cll_(0),
+                    get_cll_(0),
                     interthread_(0)
                     {
                     }
@@ -88,7 +88,7 @@ boost
                 int
                 emit_stub( thread_local_signal_data const & tlsd, void const * e, args_binder_base const * args )
                     {
-					if( tlsd.cl_count_ && *tlsd.cl_count_ )
+                    if( tlsd.cl_count_ && *tlsd.cl_count_ )
                         if( interthread_interface * interthread=tlsd.interthread_->load() )
                             return interthread->emit(tlsd,e,args);
                     return 0;
@@ -145,49 +145,49 @@ boost
                     main_tlsd->keep_meta_blocked_tlsd_afloat_ = meta;
                     }
                 };
-			template <class Signal,bool SignalIsThreadLocal=signal_traits<Signal>::is_thread_local>
-			struct thread_local_signal_data_;
-			template <class Signal>
-			struct
-			thread_local_signal_data_<Signal,false>
-				{
-				static
-				shared_ptr<thread_local_signal_data> const &
-				get( bool allocate )
-					{
-					BOOST_SYNAPSE_STATIC(std::atomic<int>,count);
-					BOOST_SYNAPSE_STATIC(std::atomic<interthread_interface *>,interthread);
-					BOOST_SYNAPSE_THREAD_LOCAL(shared_ptr<thread_local_signal_data>,obj);
-					if( !obj && (allocate || interthread.load()) )
-						{
-						obj=synapse::make_shared<thread_local_signal_data>(&get_connection_list_list<Signal>,count,interthread);
-						register_with_non_meta<Signal>::keep_afloat(obj);
-						}
-					return obj;
-					}
-				};
-			template <class Signal>
-			struct
-			thread_local_signal_data_<Signal,true>
-				{
-				static
-				shared_ptr<thread_local_signal_data> const &
-				get( bool allocate )
-					{
-					BOOST_SYNAPSE_THREAD_LOCAL(shared_ptr<thread_local_signal_data>,obj);
-					if( !obj && allocate )
-						{
-						obj=synapse::make_shared<thread_local_signal_data>();
-						register_with_non_meta<Signal>::keep_afloat(obj);
-						}
-					return obj;
-					}
-				};
+            template <class Signal,bool SignalIsThreadLocal=signal_traits<Signal>::is_thread_local>
+            struct thread_local_signal_data_;
+            template <class Signal>
+            struct
+            thread_local_signal_data_<Signal,false>
+                {
+                static
+                shared_ptr<thread_local_signal_data> const &
+                get( bool allocate )
+                    {
+                    BOOST_SYNAPSE_STATIC(std::atomic<int>,count);
+                    BOOST_SYNAPSE_STATIC(std::atomic<interthread_interface *>,interthread);
+                    BOOST_SYNAPSE_THREAD_LOCAL(shared_ptr<thread_local_signal_data>,obj);
+                    if( !obj && (allocate || interthread.load()) )
+                        {
+                        obj=synapse::make_shared<thread_local_signal_data>(&get_connection_list_list<Signal>,count,interthread);
+                        register_with_non_meta<Signal>::keep_afloat(obj);
+                        }
+                    return obj;
+                    }
+                };
+            template <class Signal>
+            struct
+            thread_local_signal_data_<Signal,true>
+                {
+                static
+                shared_ptr<thread_local_signal_data> const &
+                get( bool allocate )
+                    {
+                    BOOST_SYNAPSE_THREAD_LOCAL(shared_ptr<thread_local_signal_data>,obj);
+                    if( !obj && allocate )
+                        {
+                        obj=synapse::make_shared<thread_local_signal_data>();
+                        register_with_non_meta<Signal>::keep_afloat(obj);
+                        }
+                    return obj;
+                    }
+                };
             template <class Signal>
             shared_ptr<thread_local_signal_data> const &
             get_thread_local_signal_data( bool allocate )
                 {
-				return thread_local_signal_data_<Signal>::get(allocate);
+                return thread_local_signal_data_<Signal>::get(allocate);
                 }
             }
         } 
