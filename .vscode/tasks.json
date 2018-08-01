@@ -2,6 +2,20 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"group": { "kind": "build", "isDefault": true },
+			"label": "Build Synapse",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build && ../../../../b2",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
+			"group": { "kind": "build", "isDefault": true },
+			"label": "Build examples",
+			"type": "shell",
+			"command": "cd ${workspaceRoot}/build/example && ../../../../b2",
+            "problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] }
+		},
+		{
 			"group": { "kind": "test", "isDefault": true },
 			"label": "Run all unit tests",
 			"type": "shell",

@@ -6,4 +6,3 @@
 build-project logger ;
 build-project qt ;
 build-project glfw ;
-build-project OpenSSL ;
