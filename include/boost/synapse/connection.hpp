@@ -8,6 +8,7 @@
 
 #include <boost/synapse/dep/smart_ptr.hpp>
 #include <boost/synapse/synapse_detail/weak_store.hpp>
+#include <type_traits>
 
 namespace
 boost
@@ -74,7 +75,17 @@ boost
                 };
             }
         template <class T>
-        void
+        typename std::enable_if<std::is_assignable<T&, const T&>::value>::type
+        connection::
+        set_user_data( T const & x )
+            {
+            if( synapse_detail::deleter_user_data<T> * d=get_deleter<synapse_detail::deleter_user_data<T> >(user_data_) )
+                d->value = x;
+            else
+                user_data_.reset((void *)0,synapse_detail::deleter_user_data<T>(x));
+            }
+        template <class T>
+        typename std::enable_if<!std::is_assignable<T&, const T&>::value>::type
         connection::
         set_user_data( T const & x )
             {
