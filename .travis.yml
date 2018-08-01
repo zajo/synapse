@@ -247,7 +247,7 @@ install:
 script:
   - |-
     echo "using $TOOLSET : : $COMPILER : <cxxflags>-std=$CXXSTD ;" > ~/user-config.jam
-  - ./b2 libs/synapse/build/test toolset=$TOOLSET
+  - ./b2 -j3 libs/synapse/build/test toolset=$TOOLSET cxxstd=$CXXSTD ${CXXFLAGS:+cxxflags="$CXXFLAGS"}
 
 notifications:
   email:
