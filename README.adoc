@@ -115,7 +115,7 @@ NOTE: The `receiver` argument to `connect` is optional. If it is specified, a po
 
 === Emitting signals from objects of 3rd-party types
 
-In Synapse, any object whatsoever can be used as an emitter. This makes it possible to `emit` non-intrusively even if the emitter object was not designed to support signals. For example, a function that processes a file can use a standard `FILE` pointer as a Synapse emitter to report on its progress:
+The `button`/`dialog` example from the previous section could have been similarly implemented using any other signal programming library, because the `button` type is specifically designed to be able to emit the `clicked` signal. But in Synapse, any object whatsoever can be used as an emitter. This makes it possible to `emit` non-intrusively even if the emitter object was not designed to support signals. For example, a function that processes a file can use a standard `FILE` pointer as a Synapse emitter to report on its progress:
 
 [source,c++]
 ----
@@ -133,7 +133,7 @@ void process_file( FILE * f ) {
 }
 ----
 
-Outside of `process_file` the `report_progress` signal can be connected to some user interface function that updates a progress bar. Using Qt, this could look like this:
+Outside of `process_file` the `report_progress` signal can be connected to some user interface function that updates a progress bar. For example, using Synapse, we could easily connect it to a Qt `QProgressBar` object:
 
 [source,c++]
 ----
