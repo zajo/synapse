@@ -1,6 +1,6 @@
 :sourcedir: adoc
 :last-update-label!:
-//:source-highlighter: coderay
+:source-highlighter: coderay
 :icons: font
 = Synapse
 Non-intrusive signal programming library for C++11
@@ -35,6 +35,8 @@ Synapse requires compiler support for the following C++11 features:
 - lambda functions
 - `<thread>`
 - `<atomic>`
+
+See the link:https://travis-ci.org/zajo/boost-synapse[Synapse Travis CI Builds].
 
 == Tutorial
 
