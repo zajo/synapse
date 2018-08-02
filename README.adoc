@@ -10,7 +10,7 @@ Non-intrusive signal programming library for C++11
 
 [abstract]
 == Abstract
-Synapse is a C++ signal programming library. It can be used to define communication channels between objects of arbitrary types in a dynamic object environment.
+Synapse is a {CPP} signal programming library. It can be used to define communication channels between objects of arbitrary types in a dynamic object environment.
 
 Synapse is non-intrusive: it allows any object of any type whatsoever to be used as a signal emitter; if two contexts in a given program happen to have access to the same object, they can use that object to communicate through Synapse signals.
 
@@ -28,7 +28,7 @@ Please use the link:https://lists.boost.org/mailman/listinfo.cgi/boost[Boost Dev
 
 == Portability
 
-Synapse requires compiler support for the following C++11 features:
+Synapse requires compiler support for the following {CPP}11 features:
 
 - thread-safe dynamic initialization of local static objects;
 - `thread_local` objects;
@@ -42,11 +42,30 @@ See the link:https://travis-ci.org/zajo/boost-synapse[Synapse Travis CI Builds].
 
 === Signals, emitters, receivers
 
-In Synapse, signals are defined by function pointer typedefs. The return type is ignored in function calls. Instead, it is used to tell apart different signals that have otherwise identical signature.
+Typically, signal programming libraries allow user-defined objects to define _signals_ and to act as signal emitters. Like function types, each signal has a signature. Emitting a signal is similar to a function call, but instead of calling a particular function, it calls all functions that are currently connected to that particular signal from that particular emitter object. Naturally, the signature of any connected function must match the signature of the signal.
 
-To emit a signal, we instantiate the `emit` function template with a signal type, passing the emitter object as the first argument. The rest of the arguments follow, as defined by the signal signature.
+In Synapse, signals are defined as function pointer typedefs. When a signal is emitted, the value returned from any connected function is discarded.  This enables the return type of the signal signature to be used as an identifier of the signal. For example, the following typedefs define two different signals, each taking one `int`:
 
-Below we define a UI type `button` that emits a Synapse signal `clicked` (which takes no arguments) when the member function `click` is called:
+[source,c++]
+----
+struct sig1_;
+typedef sig1_(*sig1)(int);
+
+struct sig2_;
+typedef sig2_(*sig2)(int);
+----
+
+The two defined signals are different because the return value of their respective signatures are of different type (`sig1_` vs. `sig2_`). By convention, these types are defined implicitly within each `typedef`. This makes the signal definitions more compact, if perhaps less intuitive:
+
+[source,c++]
+----
+typedef struct sig1_(*sig1)(int);
+typedef struct sig2_(*sig2)(int);
+----
+
+To emit a Synapse signal, we instantiate the `emit` function template with a signal type, passing the emitter object as the first argument. The rest of the arguments follow, as defined by the signal signature.
+
+As an example, let's define a type `button` that emits a Synapse signal `clicked` (which takes no arguments) when the member function `click` is called:
 
 [source,c++]
 ----
@@ -62,9 +81,7 @@ class button {
 };
 ----
 
-To receive a signal emitted by an object, we need to connect at least one function to it. Emitting a signal calls all conected functions, in the order in which the connections were created.
-
-Below, we connect the signal `button::clicked` to the `accept` member function of a dialog box object:
+Next, let's connect the signal `button::clicked` to the `accept` member function of a dialog box object:
 
 [source,c++]
 ----
@@ -91,6 +108,8 @@ synapse::connect<button::clicked>(emitter, receiver,
         d->accept();
     } );
 ----
+
+With this setup, `click()`-ing  the `button` will `accept()` the `dialog`.
 
 NOTE: The `receiver` argument to `connect` is optional. If it is specified, a pointer to the receiver object is passed as the first argument to the connected function, followed by all other arguments as specified by the signal signature.
 
@@ -675,7 +694,7 @@ On the other hand, because Synapse connections are dynamic, it is possible to co
 
 === Synapsifying C callbacks
 
-Synapse can be used with any C-style callback API to install C++ functions, including lambdas, as callbacks. For example, consider the `SSL_set_info_callback` from https://www.openssl.org/[OpenSSL]:
+Synapse can be used with any C-style callback API to install {CPP} functions, including lambdas, as callbacks. For example, consider the `SSL_set_info_callback` from https://www.openssl.org/[OpenSSL]:
 
 [source,c]
 ----
@@ -731,7 +750,7 @@ void emit_fwd( SSL const * ssl, int type, int val ) {
 <7> Check if the SSL object is still accessible (it may have been destroyed already).
 <8> Uninstall the `emit_fwd` callback.
 
-Once the above handler for the `meta::connected<SSL_info_callback>` signal is installed, we can simply use <<connect,`connect`>> to install a C++ lamda handler for the `SSL_info_callback` signal we defined:
+Once the above handler for the `meta::connected<SSL_info_callback>` signal is installed, we can simply use <<connect,`connect`>> to install a {CPP} lamda handler for the `SSL_info_callback` signal we defined:
 
 [source,c++]
 ----
@@ -745,7 +764,7 @@ connect<SSL_info_callback>( ssl,
 
 === Reporting exceptions from `noexcept` signal handlers
 
-Sometimes connected functions are not permitted to throw exceptions -- this is usually the case when the callback originates in C code. With synapse, such exceptions can be reported safely to a C++ context that can store them for later processing.
+Sometimes connected functions are not permitted to throw exceptions -- this is usually the case when the callback originates in C code. With synapse, such exceptions can be reported safely to a {CPP} context that can store them for later processing.
 
 First, we define a Synapse signal we will use to report exceptions:
 
@@ -1208,7 +1227,7 @@ int main(void)
 ----
 <1> Automatically install `meta::connected` signal handlers to synapsify GLFW.
 <2> Commented-out parts of the original example, and...
-<3> ...the C++ lambda function connected to the `Key` Synapse signal from `glfw_signals.hpp` to handle the `Esc` key.
+<3> ...the {CPP} lambda function connected to the `Key` Synapse signal from `glfw_signals.hpp` to handle the `Esc` key.
 
 == Alternatives to Synapse
 
