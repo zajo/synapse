@@ -42,30 +42,30 @@ See the link:https://travis-ci.org/zajo/boost-synapse[Synapse Travis CI Builds].
 
 === Signals, emitters, receivers
 
-Typically, signal programming libraries allow user-defined objects to define _signals_ and to act as signal emitters. Like function types, each signal has a signature. Emitting a signal is similar to a function call, but instead of calling a particular function, it calls all functions that are currently connected to that particular signal from that particular emitter object. Naturally, the signature of any connected function must match the signature of the signal.
+Signal programming libraries allow user-defined objects to define _signals_ and to act as signal _emitters_. Like function types, each signal has a signature. Emitting a signal is similar to a function call, but instead of calling a particular function, it calls all functions that currently connect that particular signal from that particular emitter object. Naturally, the signature of any connected function must match the signature of the signal.
 
-In Synapse, signals are defined as function pointer typedefs. When a signal is emitted, the value returned from any connected function is discarded.  This enables the return type of the signal signature to be used as an identifier of the signal. For example, the following typedefs define two different signals, each taking one `int`:
-
-[source,c++]
-----
-struct sig1_;
-typedef sig1_(*sig1)(int);
-
-struct sig2_;
-typedef sig2_(*sig2)(int);
-----
-
-The two defined signals are different because the return value of their respective signatures are of different type (`sig1_` vs. `sig2_`). By convention, these types are defined implicitly within each `typedef`. This makes the signal definitions more compact, if perhaps less intuitive:
+In Synapse, signals are defined as function pointer typedefs. When a signal is emitted, the value returned from any connected function is discarded, but the return type of the signal definition is still important: it is used as an identifier of the signal, a way to tell apart different signals that have otherwise identical signatures. For example, the following typedefs define two different signals, even though they both take one `int` argument:
 
 [source,c++]
 ----
-typedef struct sig1_(*sig1)(int);
-typedef struct sig2_(*sig2)(int);
+struct this_signal_;
+typedef this_signal_(*this_signal)(int);
+
+struct that_signal_;
+typedef that_signal_(*that_signal)(int);
 ----
 
-To emit a Synapse signal, we instantiate the `emit` function template with a signal type, passing the emitter object as the first argument. The rest of the arguments follow, as defined by the signal signature.
+The two defined signals are different because they use different return types (`this_signal_` vs. `that_signal_`). By convention, these types are defined implicitly within each `typedef`. This makes the signal definitions more compact:
 
-As an example, let's define a type `button` that emits a Synapse signal `clicked` (which takes no arguments) when the member function `click` is called:
+[source,c++]
+----
+typedef struct this_signal_(*this_signal)(int);
+typedef struct that_signal_(*that_signal)(int);
+----
+
+To emit a Synapse signal, we instantiate the `emit` function template with a pre-defined signal `typedef` (e.g. `this_signal`), passing the emitter object as the first argument. The rest of the arguments follow, as defined by the signal signature (in this case a single `int` argument).
+
+As a more complete example, let's define a type `button` that emits a Synapse signal `clicked` (which takes no arguments) when the member function `click` is called:
 
 [source,c++]
 ----
