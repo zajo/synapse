@@ -65,7 +65,7 @@ typedef struct that_signal_(*that_signal)(int);
 
 To emit a Synapse signal, we instantiate the `emit` function template with a pre-defined signal `typedef` (e.g. `this_signal`), passing the emitter object as the first argument. The rest of the arguments follow, as defined by the signal signature (in this case a single `int` argument). Note that the emitter object passed as the first argument to `emit<S>` is not forwarded implicitly to the connected functions; its only purpose is to specify the _emitter_, that is, which object is emitting the signal `S`.
 
-As a more complete example, let's define a type `button` that emits a Synapse signal `clicked` (which takes no arguments) when the member function `click` is called:
+As a less abstract example, let's define a type `button` that emits a Synapse signal `clicked` (which takes no arguments) when the member function `click` is called:
 
 [source,c++]
 ----
@@ -111,11 +111,13 @@ synapse::connect<button::clicked>(emitter, receiver,
 
 With this setup, `click()`-ing  the `button` will `accept()` the `dialog`.
 
-NOTE: The `receiver` argument to `connect` is optional. If it is specified, a pointer to the receiver object is passed as the first argument to the connected function, followed by all other arguments as specified by the signal signature.
+NOTE: The `receiver` argument to `connect` is optional. If it is specified, a pointer to the receiver object is passed implicitly as the first argument to the connected function, followed by all other arguments as specified by the signal signature.
 
 === Emitting signals from objects of 3rd-party types
 
-The `button`/`dialog` example from the previous section could have been similarly implemented using any other signal programming library, because the `button` type is specifically designed to be able to emit the `clicked` signal. But in Synapse, any object whatsoever can be used as an emitter. This makes it possible to `emit` non-intrusively even if the type of the emitter object was not designed to support signals. For example, a function that processes a file can use a standard `FILE` pointer as a Synapse emitter to report on its progress:
+The `button`/`dialog` example from the previous section could have been similarly implemented using any other signal programming library, because the `button` type is specifically designed to be able to emit the `clicked` signal.
+
+But in Synapse, _any_ object whatsoever can be used as an emitter. This makes it possible to `emit` non-intrusively even if the type of the emitter object was not designed to support signals. For example, a function that processes a file can use a standard `FILE` pointer as a Synapse emitter to report on its progress:
 
 [source,c++]
 ----
@@ -148,14 +150,14 @@ if( FILE * f=fopen("file.dat","rb") ) {
 
 Notice that `process_file` is not coupled with `QProgressBar`: the `report_progress` signal could be connected to a different function or not connected at all, in which case the call to `emit` would be a no-op.
 
-The cautious reader has surely noticed that in the above example we had to capture the return value of `synapse::connect<report_progress>` in  `c`, while we didn't have to do this in the previous `button`/`dialog` example. This is explained below.
+The cautious reader has surely noticed that in the above example we had to capture the return value of `synapse::connect<report_progress>` in the local variable  `c`, while we didn't have to do this in the previous `button`/`dialog` example. This is explained below.
 
 === Managing connection lifetime
 
 In Synapse there are two types of connection objects: <<connection,`connection`>> and <<pconnection,`pconnection`>>:
 
-- `shared_ptr<<<connection,connection>>>` objects are returned by overloads of <<connect,`connect`>> which take the emitter (and, if specified, the receiver) as a raw pointer. The user is required to keep the `connection` object alive; the function will be disconnected when that object expires.
-- `weak_ptr<<<pconnection,pconnection>>>` objects are returned by overloads of <<connect,`connect`>> which take at least one of the emitter or the receiver as a `weak_ptr` or `shared_ptr`. The user is _not_ required to keep `pconnection` objects alive; the function is disconnected when Synapse detects that the emitter or the receiver have expired.
+- `shared_ptr<<<connection,connection>>>` objects are returned by overloads of <<connect,`connect`>> which take the emitter (and, if specified, the receiver) as a raw pointer. The user is required to keep the `connection` object alive; the function passed to `connect` will be disconnected when that object expires.
+- `weak_ptr<<<pconnection,pconnection>>>` objects are returned by overloads of <<connect,`connect`>> which take at least one of the emitter or the receiver as a `weak_ptr` or `shared_ptr`. The user is _not_ required to keep `pconnection` objects alive; the connected function is disconnected when Synapse detects that the emitter or the receiver have expired.
 
 IMPORTANT: The <<release,`release`>> function can be used to convert a <<pconnection,`weak_ptr<pconnection>`>> object to a <<connection,`shared_ptr<connection>`>> object, in case we need to disconnect the function before the receiver or the emitter have expired.
 
@@ -702,7 +704,7 @@ On the other hand, because Synapse connections are dynamic, it is possible to co
 
 === Synapsifying C callbacks
 
-Synapse can be used with any C-style callback API to install {CPP} functions, including lambdas, as callbacks. For example, consider the `SSL_set_info_callback` from https://www.openssl.org/[OpenSSL]:
+It is common for C APIs to use function pointers to implement callback systems. A typical example is the `SSL_set_info_callback` function from https://www.openssl.org/docs/manmaster/man3/SSL_set_info_callback.html[OpenSSL]:
 
 [source,c]
 ----
@@ -710,14 +712,20 @@ void SSL_set_info_callback(SSL *ssl,
         void (*cb) (const SSL *ssl, int type, int val));
 ----
 
-We can define the following Synapse signal to represent this callback:
+Once the user calls `SSL_set_info_callback`, the C function pointed to by `cb` will be called with state information for `ssl` during connection setup and use.
+
+One difficulty with such low level C APIs is that often the user needs to pass to the callback function program-specific data. Sometimes such callback setters can be given an additional `void * user_data` argument which they retain and pass verbatim when they invoke the callback function, together with its other arguments. While this solution is rather cumbersome, it's not even supported by `SSL_set_info_callback`.
+
+Synapse can be used with this, as well as any other C-style callback API, to install {CPP} function objects -- including lambda functions -- as callbacks. This enables additional objects needed by the callback to be captured as usual.
+
+To do this for the `SSL_set_info_callback` function, we first  define a Synapse signal with a matching signature:
 
 [source,c++]
 ----
 typedef struct SSL_info_callback_(*SSL_info_callback)( const SSL *ssl, int type, int val );
 ----
 
-Next, at a global scope or during initialization, we install a handler for the `meta::connected<SSL_info_callback>` signal, which the <<meta::connected,`meta::emitter`>> emits every time the user connects or disconnects the `SSL_info_callback` signal we defined:
+Next, at global scope or during initialization, we install a handler for the `meta::connected<SSL_info_callback>` signal, which the <<meta::connected,`meta::emitter`>> emits every time the user connects or disconnects the `SSL_info_callback` signal we defined:
 
 [source,c++]
 ----
@@ -728,14 +736,14 @@ int main( int argc, char const * argv[ ] ) {
     connect<meta::connected<SSL_info_callback> >( meta::emitter(),
         [ ]( connection & c, unsigned flags ) { <1>
 
-            if( flags&meta::connect_flags::connecting ) { <2>
+            if( flags & meta::connect_flags::connecting ) { <2>
 
-                if( flags&meta::connect_flags::first_for_this_emitter ) <3>
+                if( flags & meta::connect_flags::first_for_this_emitter ) <3>
                     SSL_set_info_callback(c.emitter<SSL>().get(),&emit_fwd); <4>
 
             } else { <5>
 
-                if( flags&meta::connect_flags::last_for_this_emitter ) <6>
+                if( flags & meta::connect_flags::last_for_this_emitter ) <6>
                     if( auto ssl = c.emitter<SSL>() ) <7>
                         SSL_set_info_callback(ssl.get(),0); <8>
 
@@ -750,10 +758,10 @@ void emit_fwd( SSL const * ssl, int type, int val ) {
 }
 ----
 <1> This lambda function is called every time the user connects or disconnects the `SSL_info_callback` Synapse signal.
-<2> The user is _connecting_ the `SSL_info_callback` signal.
+<2> The `SSL_info_callback` signal is being _connected_.
 <3> This is the _first_ time the `SSL_info_callback` signal is being connected for a particular `SSL` object (emitter).
 <4> Call <<connection::emitter,`connection::emitter`>> to get the emitter as a `shared_ptr<SSL>` (we know the emitter is of type `SSL *`), and then use the OpenSSL API to install a C callback `emit_fwd`, which uses `<<emit,emit>><SSL_info_callback>` to call all connected Synapse functions.
-<5> The user is _disconnecting_ the `SSL_info_callback` signal.
+<5> The `SSL_info_callback` signal is being _disconnected_.
 <6> This is the _last_ `SSL_info_callback` connection being destroyed for a particular `SSL` object (emitter).
 <7> Check if the SSL object is still accessible (it may have been destroyed already).
 <8> Uninstall the `emit_fwd` callback.
@@ -772,7 +780,7 @@ connect<SSL_info_callback>( ssl,
 
 === Reporting exceptions from `noexcept` signal handlers
 
-Sometimes connected functions are not permitted to throw exceptions -- this is usually the case when the callback originates in C code. With synapse, such exceptions can be reported safely to a {CPP} context that can store them for later processing.
+Sometimes connected functions are not permitted to throw exceptions -- this is usually the case when the callback originates in C code. With Synapse, such exceptions can be reported safely to a {CPP} context that can store them for later processing.
 
 First, we define a Synapse signal we will use to report exceptions:
 
