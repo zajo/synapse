@@ -55,7 +55,7 @@ struct that_signal_;
 typedef that_signal_(*that_signal)(int);
 ----
 
-The two defined signals are different because they use different return types (`this_signal_` vs. `that_signal_`). By convention, these types are defined implicitly within each `typedef`. This makes the signal definitions more compact:
+The two defined signals are different because they use different return types (`this_signal_` vs. `that_signal_`). By convention, the return types are defined implicitly within each `typedef`. This makes the signal definitions more compact:
 
 [source,c++]
 ----
@@ -63,7 +63,7 @@ typedef struct this_signal_(*this_signal)(int);
 typedef struct that_signal_(*that_signal)(int);
 ----
 
-To emit a Synapse signal, we instantiate the `emit` function template with a pre-defined signal `typedef` (e.g. `this_signal`), passing the emitter object as the first argument. The rest of the arguments follow, as defined by the signal signature (in this case a single `int` argument).
+To emit a Synapse signal, we instantiate the `emit` function template with a pre-defined signal `typedef` (e.g. `this_signal`), passing the emitter object as the first argument. The rest of the arguments follow, as defined by the signal signature (in this case a single `int` argument). Note that the emitter object passed as the first argument to `emit<S>` is not forwarded implicitly to the connected functions; its only purpose is to specify the _emitter_, that is, which object is emitting the signal `S`.
 
 As a more complete example, let's define a type `button` that emits a Synapse signal `clicked` (which takes no arguments) when the member function `click` is called:
 
@@ -115,7 +115,7 @@ NOTE: The `receiver` argument to `connect` is optional. If it is specified, a po
 
 === Emitting signals from objects of 3rd-party types
 
-The `button`/`dialog` example from the previous section could have been similarly implemented using any other signal programming library, because the `button` type is specifically designed to be able to emit the `clicked` signal. But in Synapse, any object whatsoever can be used as an emitter. This makes it possible to `emit` non-intrusively even if the emitter object was not designed to support signals. For example, a function that processes a file can use a standard `FILE` pointer as a Synapse emitter to report on its progress:
+The `button`/`dialog` example from the previous section could have been similarly implemented using any other signal programming library, because the `button` type is specifically designed to be able to emit the `clicked` signal. But in Synapse, any object whatsoever can be used as an emitter. This makes it possible to `emit` non-intrusively even if the type of the emitter object was not designed to support signals. For example, a function that processes a file can use a standard `FILE` pointer as a Synapse emitter to report on its progress:
 
 [source,c++]
 ----
@@ -148,16 +148,16 @@ if( FILE * f=fopen("file.dat","rb") ) {
 
 Notice that `process_file` is not coupled with `QProgressBar`: the `report_progress` signal could be connected to a different function or not connected at all, in which case the call to `emit` would be a no-op.
 
+The cautious reader has surely noticed that in the above example we had to capture the return value of `synapse::connect<report_progress>` in  `c`, while we didn't have to do this in the previous `button`/`dialog` example. This is explained below.
+
 === Managing connection lifetime
 
 In Synapse there are two types of connection objects: <<connection,`connection`>> and <<pconnection,`pconnection`>>:
 
-- `shared_ptr<<<connection,connection>>>` objects are returned by overloads of <<connect,`connect`>> which take the emitter (and, if specified, the receiver) as a raw pointer. The user is required to keep the `connection` object alive; the signal is disconnected when that object expires.
-- `weak_ptr<<<pconnection,pconnection>>>` objects are returned by overloads of <<connect,`connect`>> which take at least one of the emitter or the receiver as a `weak_ptr` or `shared_ptr`. The user is _not_ required to keep `pconnection` objects alive; the connection is disconnected when Synapse detects that the emitter or the receiver have expired.
+- `shared_ptr<<<connection,connection>>>` objects are returned by overloads of <<connect,`connect`>> which take the emitter (and, if specified, the receiver) as a raw pointer. The user is required to keep the `connection` object alive; the function will be disconnected when that object expires.
+- `weak_ptr<<<pconnection,pconnection>>>` objects are returned by overloads of <<connect,`connect`>> which take at least one of the emitter or the receiver as a `weak_ptr` or `shared_ptr`. The user is _not_ required to keep `pconnection` objects alive; the function is disconnected when Synapse detects that the emitter or the receiver have expired.
 
-IMPORTANT: The <<release,`release`>> function can be used to convert a <<pconnection,`pconnection`>> object to a <<connection,`connection`>> object, in case we need to control its lifetime explicitly.
-
-NOTE: Earlier Synapse versions lacked support for `pconnection` objects, meaning the user was always required to manage connections explicitly. Legacy Synapse is available in the `legacy` branch of the https://github.com/zajo/boost-synapse[GitHub repository].
+IMPORTANT: The <<release,`release`>> function can be used to convert a <<pconnection,`weak_ptr<pconnection>`>> object to a <<connection,`shared_ptr<connection>`>> object, in case we need to disconnect the function before the receiver or the emitter have expired.
 
 === Blocking of signals
 
@@ -205,11 +205,11 @@ int main() {
 
 Synapse features a special global emitter that emits meta signals to notify connected functions about user interactions with other signals. It can be accessed by the <<meta::connected,`meta::emitter`>> function.
 
-When a `Signal` is blocked or unblocked, the meta emitter emits the `meta::blocked<Signal>` signal. Connecting this signal allows the blocked state of the signal to be automatically reflected in other systems, for example in user interface.
+When a signal `S` is blocked or unblocked, the meta emitter emits the `meta::blocked<S>` signal. Connecting this `meta::blocked<S>` signal allows the blocked state of the signal `S` to be automatically reflected in other systems, for example in user interface.
 
-Similarly, when a `Signal` is connected or disconnected, the meta emitter emits the <<meta::connected,`meta::connected<Signal>`>> signal. This meta signal is useful for integrating Synapse with 3rd-party callback systems; see <<Synapsifying C callbacks>>.
+Similarly, when a signal `S` is connected or disconnected, the meta emitter emits the <<meta::connected,`meta::connected<S>`>> signal, which is useful when integrating Synapse with 3rd-party callback systems; see <<Synapsifying C callbacks>>.
 
-NOTE: To further facilitate the integration of Synapse with 3rd-partty callback systems, <<connection,`connection`>>  objects (returned by the <<connect,`connect`>> function) can store arbitrary user data.
+NOTE: To further facilitate the integration of Synapse with 3rd-partty callback systems, <<connection,`connection`>>/<<pconnection,`pconnection`>>  objects (returned by overloads of <<connect,`connect`>>) can store arbitrary user data.
 
 === Interthread communication
 
