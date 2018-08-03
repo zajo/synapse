@@ -289,7 +289,7 @@ Notes: ::
 - If before `emit` returns <<connect,`connect`>> is called on the same signal and the same emitter, any newly connected functions are not called during the same `emit`.
 - If before `emit` returns a <<connection,`connection`>> object expires, it may or may not get called during the same `emit`.
 - If `e` is `0`, `emit` simply returns `0` without calling any functions. Because of this feature, if the emitter is held by a `shared_ptr` object `sp`, there is no harm in calling `emit<Signal>(sp.get(),...)` even if `sp` is empty. Similarly, if the caller holds a `weak_ptr` reference `wp` to an emitter object which has expired, calling `emit<Signal>(wp.lock().get(),...)` will simply return `0`.
-- `emit` takes its arguments by value. Use `boost::ref` to pass by reference (but beware of <<thread_local_queue,`thread_local_queue`>> objects).
+- `emit` takes its arguments by value. Use `std::ref` to pass by reference (but beware of <<thread_local_queue,`thread_local_queue`>> objects).
 
 Thread safety: ::
 By default `emit` will only call functions connected from the calling thread. In addition, the signal is pushed onto any <<thread_local_queue,`thread_local_queue`>> objects created by other threads, but only if those threads currently have at least one active connection for the specified `Signal`. In this case `emit` captures its arguments similarly to `std::bind`, and it is the responsibility of the caller to ensure that they remain valid until the posted signal is processed in all other threads, by a call to <<poll,`thread_local_queue::poll`>> or <<wait,`thread_local_queue::wait`>>.
@@ -329,7 +329,7 @@ namespace boost { namespace synapse {
 
 Overloads of `connect` that return `shared_ptr<<<connection,connection>>>` create connections whose lifetime is explicitly managed by the user. Such connections require that the caller keeps the returned <<connection,`connection`>> object alive for as long as the connection should persist.
 
-Overloads of `connect` that return `weak_ptr<<<pconnection,pconnection>>>` take at least one of `e` and `r` as a `weak_ptr` or `shared_ptr`. They create _persistent_ connections which expire when either `e` or `r` expire.
+Overloads of `connect` that return `weak_ptr<<<pconnection,pconnection>>>` take at least one of `e` and `r` as a `weak_ptr` or `shared_ptr`. They create _persistent_ connections which expire automatically when either `e` or `r` expire.
 
 Effects: ::
 
@@ -341,7 +341,7 @@ Effects: ::
 +
 NOTE: The returned object does not assume ownership of `e` or `r`: passing `shared_ptr` to `connect` is equivalent to passing `weak_ptr`.
 +
-IMPORTANT: If either the emitter or the receiver, passed as raw pointers, expire before the returned <<connection,`connection`>> object has expired, the behavior is undefined.
+IMPORTANT: If either the emitter or the receiver, if passed as raw pointers, expire before the returned <<connection,`connection`>> object has expired, the behavior is undefined.
 +
 .  [[meta::connected]] The `meta::emitter` emits the `meta::connected<Signal>` signal:
 +
@@ -375,7 +375,11 @@ The `meta::connected<Signal>` signal is also emitted when the returned object ex
 * If this is the first `Signal` connection being created for the emitter `e`, the `first_for_this_emitter` bit is set, otherwise it is clear;
 * If this is the last `Signal` connection being destroyed for the emitter `e`, the `last_for_this_emitter` bit is set, otherwise it is clear.
 +
-NOTE: Because class <<connection,`connection`>> is the protected base of class <<pconnection,`pconnection`>>, handlers of `meta::connected<Signal>` take `connection &` regardless of which `connect` overload was used.
+[NOTE]
+====
+* Because class <<connection,`connection`>> is the protected base of class <<pconnection,`pconnection`>>, handlers of `meta::connected<Signal>` take `connection &` regardless of which `connect` overload was used.
+* The `meta::connected<Signal>` signal is thread-local; it will never be queued into other threads' `thread_local_queue` objects.
+====
 +
 TIP: The passed <<connection,`connection`>> object can be used to access the emitter and receiver objects passed to `connect`.
 
@@ -529,7 +533,11 @@ namespace boost { namespace synapse { namespace meta {
 ----
 The `meta::blocked<Signal>` signal is also emitted when the returned <<blocker,`blocker`>> object expires. Handlers of the meta signal take a reference to the <<blocker,`blocker`>> object being created or destroyed, and a second `bool` argument, `is_blocked`, which is true if the signal is becoming blocked, false if it is becoming unblocked.
 
-NOTE: Blocking affects existing as well as future connections.
+[NOTE]
+====
+* Blocking affects existing as well as future connections.
+* The `meta::blocked<Signal>` signal is thread-local; it will never be queued into other threads' `thread_local_queue` objects.
+====
 
 IMPORTANT: If `block` is passed a raw pointer, deleting the emitter before the returned `blocker` object has expired results in undefined behavior.
 
@@ -662,7 +670,7 @@ NOTE: While <<poll,`poll`>> (or <<wait,`wait`>>) must be called from the thread 
 
 === Monitoring dynamic systems
 
-It is often needed to monitor the operations of a complex dynamic system beyond the facilities available in its formal API. One possible option to accomplish this is to use a logging library. Synapse provides another.
+It is often needed to monitor the operations of a complex dynamic system beyond the facilities available in its public API. One possible option to accomplish this is to use a logging library. Synapse provides another.
 
 Consider a dynamic object environment in a video game, where various art assets may be loaded on the fly, cached, and eventually unloaded when they are no longer needed. Such events are typically not accessible through a formal interface because they are implementation details; yet there is still a need to analyze the efficiency of the caching algorithm.
 
@@ -709,7 +717,7 @@ We can define the following Synapse signal to represent this callback:
 typedef struct SSL_info_callback_(*SSL_info_callback)( const SSL *ssl, int type, int val );
 ----
 
-Next, at a global scope or during initialization, we install a handler for the `meta::connected<SSL_info_callback>` signal, which the <<meta::connected,`meta::emitter`>> emits every time the user connects or disconnects the `SSL_info_callback` signal:
+Next, at a global scope or during initialization, we install a handler for the `meta::connected<SSL_info_callback>` signal, which the <<meta::connected,`meta::emitter`>> emits every time the user connects or disconnects the `SSL_info_callback` signal we defined:
 
 [source,c++]
 ----
@@ -1353,10 +1361,8 @@ The unit tests and the examples can be built within the Boost framework: clone S
 == Q&A
 
 [qanda]
-How does Synapse differ from Boost Signals 2, which is also "non-intrusive"?::
-    The main design difference is that in Boost Signals 2 emitting a signal requires a signal object. This is significant difference because in general it is not trivial to associate a Boost Signals 2 signal object with 3rd-party objects. When using Synapse such association is not necessary because the 3rd-party object itself can be passed to <<emit,`emit`>>.
-What is the design rationale for ignoring the value returned by connected functions?::
-    A typical use case for Synapse is when the caller of `emit` doesn't care if there are 0, 1 or many connected functions. Allowing return values makes the zero/many case quite tricky to deal with. On the other hand, passing a reference or a pointer to `emit` to return/accumulate values from any number of connected functions (if needed) is simpler and fits that case nicely.
+How does Synapse differ from Boost Signals 2?::
+    The main design difference is that in Boost Signals 2 is intrusive; only objects of a specific Boost Signals 2 type can emit signals. This is a significant limitation because in general it is not trivial to associate a Boost Signals 2 signal object with 3rd-party objects. When using Synapse such association is not necessary because the 3rd-party object itself can be passed to <<emit,`emit`>>.
 Is there a way to stop the emit loop before all connected functions have been called?::
     No, except by throwing an exception.
 I am concerned about code size, does Synapse use a lot of templates?::
