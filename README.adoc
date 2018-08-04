@@ -10,9 +10,11 @@ Non-intrusive signal programming library for C++11
 
 [abstract]
 == Abstract
-Synapse is a {CPP} signal programming library. It can be used to define communication channels between objects of arbitrary types in a dynamic object environment.
+Synapse is a {CPP} signal programming library.
 
-Synapse is non-intrusive: it allows any object of any type whatsoever to be used as a signal emitter; if two contexts in a given program happen to have access to the same object, they can use that object to communicate through Synapse signals.
+While other similar libraries allow users to create types that can emit signals, Synapse is able to emit any signal from any object of any type whatsoever. If two contexts in a given program happen to have access to the same object, they can use that object, regardless of its type, to communicate through Synapse signals.
+
+Meta signals can be used to integrate Synapse with 3rd-party APIs. In particular, Synapse enables {CPP} function objects, including lambda functions, to be used as callbacks even with C-style interfaces which only support C function pointer callbacks.
 
 == Distribution
 
@@ -148,7 +150,7 @@ if( FILE * f=fopen("file.dat","rb") ) {
 }
 ----
 
-Notice that `process_file` is not coupled with `QProgressBar`: the `report_progress` signal could be connected to a different function or not connected at all, in which case the call to `emit` would be a no-op.
+Notice that `process_file` is not coupled with `QProgressBar`: the `report_progress` signal could be connected to a different function or not connected at all, in which case the call to `emit` in `process_file` would be a no-op.
 
 The cautious reader has surely noticed that in the above example we had to capture the return value of `synapse::connect<report_progress>` in the local variable  `c`, while we didn't have to do this in the previous `button`/`dialog` example. This is explained below.
 
@@ -1247,7 +1249,8 @@ int main(void)
 
 == Alternatives to Synapse
 
-See this https://en.wikipedia.org/wiki/Signals_and_slots#Alternative_implementations[Wikipedia page].
+For a list of other signal programming libraries, see this https://en.wikipedia.org/wiki/Signals_and_slots#Alternative_implementations[Wikipedia page], however Synapse is unique in that it is non-intrusive with respect to the signal emitter type. While other libraries allow users to create types that can emit signals, Synapse is able to emit any signal from any object of any type whatsoever.
+
 
 == Macros and configuration
 
