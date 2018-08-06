@@ -1255,15 +1255,15 @@ The unique design feature of Synapse is that it is non-intrusive with respect to
 
 Since Synapse is formatted for Boost review, people often ask what are the differences between Synapse and https://www.boost.org/doc/libs/release/doc/html/signals2.html[Boost Signals 2].
 
-.Comparison between Synapse and Signals 2
+.Comparison between Signals 2 and Synapse
 |====
 | | Signals 2     | Synapse
 | What is a signal? | An object of type `signal<T>`, which maintains a list of connected functions, and is callable like `std::function<T>`. | A type, similar to a C function pointer `typedef`.
-| How do I emit a signal? | Invoking `operator()` on a signal object calls all connected functions. | Calling <<emit,`emit<S>(e)`>> calls all functions connecting the signal `S` for the emitter `e`.
+| How do I emit a signal? | Invoking `operator()` on a signal object calls all connected functions. | Calling <<emit,`emit<S>(e,...)`>> calls all functions connecting the signal `S` for the emitter `e`.
 | What objects can emit signals? | Only instances of the `signal<T>` class template. | Any object of any type whatsoever: the <<emit,`emit<S>(e)`>> function template takes `e` as a `void` pointer.
-| Support for meta signals? | No (not possible, a signal is an object). | Yes. For example, connecting a signal of type `S` emits the signal <<meta::connected,`meta::connected<S>`>> from the <<meta::connected,`meta::emitter`>>.
+| Support for meta signals? | No (not possible, a signal is an object). | Yes. Connecting a signal of type `S` emits the signal <<meta::connected,`meta::connected<S>`>> from the <<meta::connected,`meta::emitter`>>.
 | Integration with C-style callback APIs? | No (not possible). | Yes, through meta signals, see <<Synapsifying C callbacks>>.
-| Thread safety? | Yes, the connection list maintained in each signal object is thread-safe. | Yes, the connection lists are thread-local, and signals are transported to other threads using <<thread_local_queue,`thread_local_queue`>> objects.
+| Multi-threading support? | Yes, the connection list maintained in each signal object is thread-safe. | Yes, the connection lists are thread-local, and signals are transported to other threads using <<thread_local_queue,`thread_local_queue`>> objects.
 |====
 
 == Macros and configuration
