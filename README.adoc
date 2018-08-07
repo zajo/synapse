@@ -71,11 +71,11 @@ As a less abstract example, let's define a type `button` that emits a Synapse si
 
 [source,c++]
 ----
+typedef struct clicked_(*clicked)();
+
 class button {
 
     public:
-
-    typedef struct clicked_(*clicked)();
 
     void click() {
         synapse::emit<clicked>(this);
@@ -83,7 +83,9 @@ class button {
 };
 ----
 
-Next, let's connect the signal `button::clicked` to the `accept` member function of a dialog box object:
+NOTE: It is possible to define the `clicked` `typedef` as a member of `class button`, but this coupling is usually not appropriate when using Synapse. It is better to treat signals as types with independent semantics that can be used with any appropriate object. In this case, anything clickable could emit the `clicked` signal.
+
+Next, let's connect the signal `clicked` to the `accept` member function of a dialog box object:
 
 [source,c++]
 ----
@@ -98,14 +100,14 @@ class dialog {
 ....
 shared_ptr<button> emitter=make_shared<button>();
 shared_ptr<dialog> receiver=make_shared<dialog>();
-synapse::connect<button::clicked>(emitter, receiver, &dialog::accept);
+synapse::connect<clicked>(emitter, receiver, &dialog::accept);
 ----
 
 Or we could use a lambda instead:
 
 [source,c++]
 ----
-synapse::connect<button::clicked>(emitter, receiver,
+synapse::connect<clicked>(emitter, receiver,
     [ ](dialog * d) {
         d->accept();
     } );
