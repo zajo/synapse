@@ -894,7 +894,7 @@ int main(int argc, char **argv)
 <4> Was: `connect(this, SIGNAL (counterReached()), QApplication::instance(), SLOT (quit()));`
 <5> Was: `emit counterReached();`
 
-== Use case: synapsifying GLFW
+== Case study: synapsifying GLFW
 
 Synapse integrates well with some C event handling APIs. As an example, let's consider link:http://www.glfw.org/[GLFW].
 
@@ -1089,7 +1089,6 @@ Finally, this is the example from the GLFW http://www.glfw.org/docs/latest/quick
 //    distribution.
 //
 //========================================================================
-//! [code]
 
 #include "glfw_synapsify.hpp" <1>
 namespace synapse = boost::synapse;
@@ -1241,7 +1240,6 @@ int main(void)
     exit(EXIT_SUCCESS);
 }
 
-//! [code]
 ----
 <1> Automatically install `meta::connected` signal handlers to synapsify GLFW.
 <2> Commented-out parts of the original example, and...
@@ -1249,21 +1247,33 @@ int main(void)
 
 == Alternatives to Synapse
 
+The unique design feature of Synapse is that it is non-intrusive with respect to the emitter object type. While other libraries provide users with types that can emit signals, Synapse is able to emit any signal from any object of any type whatsoever.
+
 For a list of other signal programming libraries, see this https://en.wikipedia.org/wiki/Signals_and_slots#Alternative_implementations[Wikipedia page].
 
-The unique design feature of Synapse is that it is non-intrusive with respect to the signal emitter type. While other libraries provide users with objects that can emit signals, Synapse is able to emit any signal from any object of any type whatsoever.
+=== Comparison to Boost Signals2
 
-Since Synapse is formatted for Boost review, people often ask what are the differences between Synapse and https://www.boost.org/doc/libs/release/doc/html/signals2.html[Boost Signals 2].
+Because Synapse is formatted for Boost review, people often ask what are the differences between Synapse and https://www.boost.org/doc/libs/release/doc/html/signals2.html[Boost Signals2].
 
-.Comparison between Signals 2 and Synapse
+.Comparison between Signals2 and Synapse
 |====
-| | Signals 2     | Synapse
-| What is a signal? | An object of type `signal<T>`, which maintains a list of connected functions, and is callable like `std::function<T>`. | A type, similar to a C function pointer `typedef`.
-| How do I emit a signal? | Invoking `operator()` on a signal object calls all connected functions. | Calling <<emit,`emit<S>(e,...)`>> calls all functions connecting the signal `S` for the emitter `e`.
+| | Signals2 | Synapse
+
+| What is a signal? | An object of type `signal<T>`, which maintains a list of connected functions, and is callable like `std::function<T>` is. | A type, a C function pointer `typedef`.
+
+| How does emitting a signal work? | Invoking `s(...)`, where `s` is of type `signal<T>`, calls all connected functions. | Invoking <<emit,`emit<S>(e,...)`>> calls all functions connecting the signal `S` for the object `e`.
+
 | What objects can emit signals? | Only instances of the `signal<T>` class template. | Any object of any type whatsoever: the <<emit,`emit<S>(e)`>> function template takes `e` as a `void` pointer.
+
+| How does connecting a signal work? | Calling `s.connect(f)`, where `s` is of type `signal<T>`, connects the function `f`. | Calling <<connect,`connect<S>(e,f)`>> connects the signal `S` from the emitter object `e` to the function `f`.
+
 | Support for meta signals? | No (not possible, a signal is an object). | Yes. Connecting a signal of type `S` emits the signal <<meta::connected,`meta::connected<S>`>> from the <<meta::connected,`meta::emitter`>>.
+
 | Integration with C-style callback APIs? | No (not possible). | Yes, through meta signals, see <<Synapsifying C callbacks>>.
+
 | Multi-threading support? | Yes, the connection list maintained in each signal object is thread-safe. | Yes, the connection lists are thread-local, and signals are transported to other threads using <<thread_local_queue,`thread_local_queue`>> objects.
+
+| Can connected functions return values? | Yes, there is an elaborate system for dealing with multiple returns when a signal is invoked. | No, but of course it's possible to pass an argument by reference or a custom object to collect and/or accumulate the results if needed.
 |====
 
 == Macros and configuration
@@ -1386,8 +1396,6 @@ The unit tests and the examples can be built within the Boost framework: clone S
 == Q&A
 
 [qanda]
-How does Synapse differ from Boost Signals 2?::
-    The main design difference is that in Boost Signals 2 is intrusive; only objects of a specific Boost Signals 2 type can emit signals. This is a significant limitation because in general it is not trivial to associate a Boost Signals 2 signal object with 3rd-party objects. When using Synapse such association is not necessary because the 3rd-party object itself can be passed to <<emit,`emit`>>.
 Is there a way to stop the emit loop before all connected functions have been called?::
     No, except by throwing an exception.
 I am concerned about code size, does Synapse use a lot of templates?::
