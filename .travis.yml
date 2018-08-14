@@ -38,6 +38,10 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
 
+    - os: osx
+      compiler: clang++
+      env: TOOLSET=clang COMPILER=clang++ CXXSTD=11,14,1z
+
     - os: linux
       compiler: g++-4.9
       env: TOOLSET=gcc COMPILER=g++-4.9 CXXSTD=11
@@ -192,10 +196,6 @@ matrix:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-6.0
 
-    - os: osx
-      compiler: clang++
-      env: TOOLSET=clang COMPILER=clang++ CXXSTD=11,14,1z
-
 install:
   - cd ..
   - git clone -b $TRAVIS_BRANCH --depth 1 https://github.com/boostorg/boost.git boost-root
@@ -213,7 +213,7 @@ install:
 script:
   - |-
     echo "using $TOOLSET : : $COMPILER ;" > ~/user-config.jam
-  - ./b2 -j3 libs/synapse/build/test toolset=$TOOLSET cxxstd=$CXXSTD ${CXXFLAGS:+cxxflags="$CXXFLAGS"}
+  - ./b2 -j3 libs/synapse/build/test toolset=$TOOLSET cxxstd=$CXXSTD ${CXXFLAGS:+cxxflags="$CXXFLAGS -w"}
 
 notifications:
   email:
