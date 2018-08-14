@@ -25,12 +25,11 @@ using synapse::shared_ptr;
 
 namespace
     {
-    int const iterations=10000;
     int emitter;
     typedef struct signal1_(*signal1)();
     typedef struct signal2_(*signal2)();
     void
-    emitting_thread( int consuming_thread_count )
+    emitting_thread( int consuming_thread_count, int iterations )
         {
         int local_count1=0; shared_ptr<synapse::connection> c1=synapse::connect<signal1>(&emitter, [&local_count1]() { ++local_count1; } );
         int local_count2=0; shared_ptr<synapse::connection> c2=synapse::connect<signal2>(&emitter, [&local_count2]() { ++local_count2; } );
@@ -64,10 +63,11 @@ namespace
             }
         }
     void
-    test( int emitting_thread_count, int consuming_thread_count )
+    test( int emitting_thread_count, int consuming_thread_count, int iterations )
         {
         assert(emitting_thread_count>0);
         assert(consuming_thread_count>0);
+        assert(iterations>0);
         boost::barrier b(consuming_thread_count+1);
         boost::thread_group tgr;
         int const total_count=emitting_thread_count*iterations;
@@ -75,7 +75,7 @@ namespace
             tgr.create_thread( [total_count,&b]() { consuming_thread(b,total_count); } );
         b.wait();
         for( int i=0; i!=emitting_thread_count; ++i )
-            tgr.create_thread( [consuming_thread_count]() { emitting_thread(consuming_thread_count); } );
+            tgr.create_thread( [consuming_thread_count,iterations]() { emitting_thread(consuming_thread_count,iterations); } );
         tgr.join_all();
         }
     }
@@ -83,10 +83,16 @@ namespace
 int
 main( int argc, char const * argv[] )
     {
-    test(1,1);
-    test(10,1);
-    test(1,10);
-    test(10,10);
+    test(1,1,1000);
+
+    test(10,1,1000);
+    test(1,10,1000);
+    test(10,10,1000);
+
+    test(300,1,1000);
+    test(1,300,1000);
+    test(10,300,1000);
+
     return boost::report_errors();
     }
 

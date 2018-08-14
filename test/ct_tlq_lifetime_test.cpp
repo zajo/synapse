@@ -53,7 +53,7 @@ namespace
         {
         shared_ptr<synapse::thread_local_queue> tlq=synapse::create_thread_local_queue();
         bool keep_going=true;
-        (void) synapse::connect<terminate_thread>(terminate,[&keep_going]() { keep_going=false; }).lock()->
+        synapse::connect<terminate_thread>(terminate,[&keep_going]() { keep_going=false; }).lock()->
             set_user_data(make_shared<thread_connection_counter>());
         b.wait();
         while( keep_going )
@@ -98,8 +98,9 @@ namespace
 int
 main( int argc, char const * argv[] )
     {
-    test(1,1000,10);
-    test(20,1000,100);
+    test(1,1,1000);
+    test(20,5,1000);
+    test(100,10,1000);
     return boost::report_errors();
     }
 
