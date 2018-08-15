@@ -30,7 +30,7 @@ matrix:
   include:
     - os: osx
       compiler: clang++
-      env: TOOLSET=clang COMPILER=clang++ CXXSTD=11,14,1z
+      env: TOOLSET=clang COMPILER=clang++ CXXSTD=11
 
     - os: linux
       compiler: g++-4.8
@@ -214,7 +214,7 @@ script:
   - |-
     echo "using $TOOLSET : : $COMPILER ;" > ~/user-config.jam
   - ./b2 -j3 libs/synapse/build/test toolset=$TOOLSET cxxstd=$CXXSTD cxxflags=-w ${CXXFLAGS:+cxxflags="$CXXFLAGS"}
-  - ./ct_tlq_lifetime_test
+  - ./libs/synapse/build/test/ct_tlq_lifetime_test
 
 notifications:
   email:
