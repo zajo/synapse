@@ -23,6 +23,10 @@ compile compile_emit_hpp.cpp ;
 compile compile_thread_local_queue_hpp.cpp : <threading>multi ;
 compile compile_translate_hpp.cpp ;
 
+exe ct_tlq_lifetime_test : ct_tlq_lifetime_test.cpp /boost//thread ..//synapse : <threading>multi ;
+install ct_tlq_lifetime_test_install : ct_tlq_lifetime_test : <location>. ;
+
+
 run args_connect_test.cpp ..//synapse ;
 run args_translate_test.cpp ..//synapse ;
 run block_emit_test.cpp ..//synapse ;
@@ -32,7 +36,7 @@ run connection_lifetime_test.cpp ..//synapse ;
 run connection_user_data_test.cpp ..//synapse ;
 run ct_basic_test.cpp /boost//thread ..//synapse : : : <threading>multi ;
 run ct_lambda_test.cpp /boost//thread ..//synapse : : : <threading>multi ;
-run ct_tlq_lifetime_test.cpp /boost//thread ..//synapse : : : <threading>multi ;
+# run ct_tlq_lifetime_test.cpp /boost//thread ..//synapse : : : <threading>multi ;
 run ct_wait_test.cpp /boost//thread ..//synapse : : : <threading>multi ;
 run emit_stub_test.cpp ..//emit ;
 run emit_test.cpp ..//synapse ;

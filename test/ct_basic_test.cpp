@@ -83,15 +83,15 @@ namespace
 int
 main( int argc, char const * argv[] )
     {
-    test(1,1,1000);
+    test(1,1,100);
 
-    test(10,1,1000);
-    test(1,10,1000);
-    test(10,10,1000);
+    test(10,1,100);
+    test(1,10,100);
+    test(10,10,100);
 
-    test(300,1,1000);
-    test(1,300,1000);
-    test(10,300,1000);
+    test(300,1,100);
+    test(1,300,100);
+    test(10,300,100);
 
     return boost::report_errors();
     }
