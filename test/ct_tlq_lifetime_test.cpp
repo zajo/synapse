@@ -90,9 +90,12 @@ namespace
                 j+=n;
                 }
             }
+        std::cout << "Requesting terminate..." << std::endl;
         int n=synapse::emit<terminate_thread>(terminate.get());
         BOOST_TEST(n==emitting_thread_count);
+        std::cout << "Joining..." << std::endl;
         tgr.join_all();
+        std::cout << "Joined." << std::endl;
         BOOST_TEST(connection_count==0);
         }
     }
