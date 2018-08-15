@@ -82,7 +82,6 @@ namespace
         shared_ptr<synapse::connection> c2=synapse::connect<signal2>(&emitter,[](){});
         for( int i=0; i!=series_count; ++i )
             {
-//            std::cout << i << std::endl;
             shared_ptr<synapse::thread_local_queue> tlq=synapse::create_thread_local_queue();
             for( int j=0; j<emitting_thread_count*per_thread_emit_count; )
                 {
