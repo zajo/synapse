@@ -396,6 +396,29 @@ Please see <<emit,`emit`>> and <<thread_local_queue,`thread_local_queue`>>.
 
 '''
 
+[[release]]
+=== `release`
+
+====
+[source,c++]
+.#include <boost/synapse/connect.hpp>
+----
+namespace boost { namespace synapse {
+
+    class connection;
+    class pconnection;
+
+    shared_ptr<connection const> release( weak_ptr<pconnection const> const & c );
+    shared_ptr<connection> release( weak_ptr<pconnection> const & c );
+
+} }
+----
+====
+
+Effects: :: Converts a weak <<pconnection,`pconnection`>> reference to shared ownership <<connection,`connection`>> reference. The lifetime of the connection is now explicitly managed by the returned `shared_ptr` object; see <<connect,`connect`>>.
+
+'''
+
 [[translate]]
 === `translate`
 
