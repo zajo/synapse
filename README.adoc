@@ -12,11 +12,11 @@ Non-intrusive signal programming library for C++11
 == Abstract
 Synapse is a non-intrusive {CPP} signal programming library.
 
-"Non-intrusive" in this context means that the library is able to register connections and emit signals from any C or {CPP} object of any type whatsoever. If two contexts share access to a C or {CPP} object, they can use that object as a randezvouz point of sorts, and communicate with each other through Synapse signals.
+It is able to register connections and emit signals from any C or {CPP} object of any type whatsoever. If two contexts share access to a C or {CPP} object, they can use that object as a randezvouz point of sorts, and communicate with each other through Synapse signals.
 
 A system of meta signals provides interoperability with other signal programming libraries and callback APIs. In particular Synapse can be used to safely register {CPP} function objects, including lambda functions, with any C-style callback API that is designed to work only with C function pointers.
 
-In a multi-thread environment signals can be emitted asynchronously and scheduled for synchronous execution when requested by other threads.
+In a multi-thread environment signals can be emitted asynchronously and scheduled for synchronous execution when requested in other threads.
 
 == Distribution
 
@@ -46,7 +46,7 @@ See the link:https://travis-ci.org/zajo/boost-synapse[Synapse Travis CI Builds].
 
 === Signals, emitters, receivers
 
-Signal programming libraries allow user-defined objects to define _signals_ and to act as signal _emitters_. Like function types, each signal has a signature. Emitting a signal is similar to a function call, but instead of calling a particular function, it calls all functions that currently connect that particular signal from that particular emitter object. Naturally, the signature of any connected function must match the signature of the signal.
+Signal programming libraries allow _signals_ to be associated with emitter objects. Like function types, each signal has a signature. Emitting a signal is similar to function invocation, except it may call multiple functions that currently connect that particular signal from that particular emitter object. Naturally, the signature of any connected function must match the signature of the signal.
 
 In Synapse, signals are defined as function pointer typedefs. When a signal is emitted, the value returned from any connected function is discarded, but the return type of the signal definition is still important: it is used as an identifier of the signal, a way to tell apart different signals that have otherwise identical signatures. For example, the following typedefs define two different signals, even though they both take one `int` argument:
 
@@ -85,7 +85,7 @@ class button {
 };
 ----
 
-NOTE: It is possible to define the `clicked` `typedef` as a member of `class button`, but this coupling is usually not appropriate when using Synapse. It is better to treat signals as types with independent semantics that can be used with any appropriate object. In this case, anything clickable could emit the `clicked` signal.
+TIP: It is possible to define the `clicked` `typedef` as a member of `class button`, but this coupling is usually not appropriate when using Synapse. It is better to treat signals as types with independent semantics that can be used with any appropriate object. In this case, anything clickable could emit the `clicked` signal.
 
 Next, let's connect the signal `clicked` to the `accept` member function of a dialog box object:
 
@@ -156,7 +156,7 @@ if( FILE * f=fopen("file.dat","rb") ) {
 
 Notice that `process_file` is not coupled with `QProgressBar`: the `report_progress` signal could be connected to a different function or not connected at all, in which case the call to `emit` in `process_file` would be a no-op.
 
-The cautious reader has surely noticed that in the above example we had to capture the return value of `synapse::connect<report_progress>` in the local variable  `c`, while we didn't have to do this in the previous `button`/`dialog` example. This is explained below.
+The observant reader has surely noticed that in the above example we had to capture the return value of `synapse::connect<report_progress>` in the local variable  `c`, while we didn't have to do this in the previous `button`/`dialog` example. This is explained below.
 
 === Managing connection lifetime
 
@@ -165,7 +165,7 @@ In Synapse there are two types of connection objects: <<connection,`connection`>
 - `shared_ptr<<<connection,connection>>>` objects are returned by overloads of <<connect,`connect`>> which take the emitter (and, if specified, the receiver) as a raw pointer. The user is required to keep the `connection` object alive; the function passed to `connect` will be disconnected when that object expires.
 - `weak_ptr<<<pconnection,pconnection>>>` objects are returned by overloads of <<connect,`connect`>> which take at least one of the emitter or the receiver as a `weak_ptr` or `shared_ptr`. The user is _not_ required to keep `pconnection` objects alive; the connected function is disconnected when Synapse detects that the emitter or the receiver have expired.
 
-IMPORTANT: The <<release,`release`>> function can be used to convert a <<pconnection,`weak_ptr<pconnection>`>> object to a <<connection,`shared_ptr<connection>`>> object, in case we need to disconnect the function before the receiver or the emitter have expired.
+TIP: The <<release,`release`>> function can be used to convert a <<pconnection,`weak_ptr<pconnection>`>> object to a <<connection,`shared_ptr<connection>`>> object, in case we need to disconnect the function before the receiver or the emitter have expired.
 
 === Blocking of signals
 
@@ -217,7 +217,7 @@ When a signal `S` is blocked or unblocked, the meta emitter emits the `meta::blo
 
 Similarly, when a signal `S` is connected or disconnected, the meta emitter emits the <<meta::connected,`meta::connected<S>`>> signal, which is useful when integrating Synapse with 3rd-party callback systems; see <<Synapsifying C callbacks>>.
 
-NOTE: To further facilitate the integration of Synapse with 3rd-partty callback systems, <<connection,`connection`>>/<<pconnection,`pconnection`>>  objects (returned by overloads of <<connect,`connect`>>) can store arbitrary user data.
+NOTE: To further facilitate interoperability between Synapse and other callback APIs, <<connection,`connection`>>/<<pconnection,`pconnection`>>  objects (returned by overloads of <<connect,`connect`>>) can store arbitrary user data.
 
 === Interthread communication
 
@@ -225,11 +225,11 @@ NOTE: To further facilitate the integration of Synapse with 3rd-partty callback 
 
 Synapse can be used to implement interthread communication using signals. The data structures created by <<connect,`connect`>> (or <<translate,`translate`>>) use thread-local storage, so by default calling <<emit,`emit`>> will call only functions connected by the calling thread (and will not return until all such functions have been called in order, or one of them throws.)
 
-The following diagram shows the connections created (by calls to `<<connect,connect>><S>`) in a single thread for a given signal type `S`, each connecting an emitter to a function. When `<<emit,emit>><S>(e1,arg,...)` is called, all functions connected (for `S`) to the given emitter `e1` are called (in the order in which the connections were created):
+The following diagram shows the connections created (by calls to `<<connect,connect>><S>`) in a single thread for a given signal type `S`, each connecting an emitter to a function. When `<<emit,emit>><S>(e1,arg,...)` is called, all functions connecing the signal `S` from the given emitter `e1` are called in the order in which the connections were created:
 
 image::fig1.png[]
 
-It is also possible for any thread to request to receive all signals emitted by other threads, by creating its own <<thread_local_queue,`thread_local_queue`>> object using <<create_thread_local_queue,`create_thread_local_queue`>>.
+It is also possible for any thread to request to receive all signals emitted by other threads, by creating its own <<thread_local_queue,`thread_local_queue`>> object.
 
 In this case, _in addition_ to the behavior described above, `<<emit,emit>><S>(e1,arg,...)` will capture its arguments (depending on the signature of `S`) and queue them into the <<thread_local_queue,`thread_local_queue`>> object created by any thread _other_ than the calling thread. Each such thread must poll its own <<thread_local_queue,`thread_local_queue`>> regularly; this "emits" the queued objects locally and removes them from the queue (note that <<poll,`poll`>> is not given an emitter or a signal type, it emits locally all queued objects, regardless of signal type or emitter).
 
@@ -239,7 +239,7 @@ image::fig2.png[]
 
 A typical use case for this system is to update user interface objects with data generated by one or multiple worker threads: the user interface objects themselves need not be thread-safe, because they will be updated only synchronously, at the time <<poll,`poll`>> is called.
 
-Special care must be taken to ensure that any objects referred to by arguments passed to <<emit,`emit`>> will remain valid until the time all other threads have polled their <<thread_local_queue,`thread_local_queue`>> objects. For example, the following code is incorrect in the presence of `thread_local_queue` objects:
+Special care must be taken to ensure that any objects referred to by arguments passed to <<emit,`emit`>> will remain valid at least until all other threads have polled their <<thread_local_queue,`thread_local_queue`>> objects. For example, the following code is incorrect in the presence of `thread_local_queue` objects:
 
 [source,c++]
 ----
