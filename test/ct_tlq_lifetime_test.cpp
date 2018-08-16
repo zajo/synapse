@@ -104,7 +104,7 @@ main( int argc, char const * argv[] )
     {
     test(1,1,50);
     test(20,5,50);
-    test(100,10,50);
+    test(30,10,50);
     return boost::report_errors();
     }
 
