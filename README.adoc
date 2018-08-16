@@ -10,11 +10,13 @@ Non-intrusive signal programming library for C++11
 
 [abstract]
 == Abstract
-Synapse is a {CPP} signal programming library.
+Synapse is a non-intrusive {CPP} signal programming library.
 
-While other similar libraries allow users to create types that can emit signals, Synapse is able to emit any signal from any object of any type whatsoever. If two contexts in a given program happen to have access to the same object, they can use that object, regardless of its type, to communicate through Synapse signals.
+"Non-intrusive" in this context means that the library is able to register connections and emit signals from any C or {CPP} object of any type whatsoever. If two contexts share access to a C or {CPP} object, they can use that object as a randezvouz point of sorts, and communicate with each other through Synapse signals.
 
-Meta signals can be used to integrate Synapse with 3rd-party APIs. In particular, Synapse enables {CPP} function objects, including lambda functions, to be used as callbacks even with C-style interfaces which only support C function pointer callbacks.
+A system of meta signals provides interoperability with other signal programming libraries and callback APIs. In particular Synapse can be used to safely register {CPP} function objects, including lambda functions, with any C-style callback API that is designed to work only with C function pointers.
+
+In a multi-thread environment signals can be emitted asynchronously and scheduled for synchronous execution when requested by other threads.
 
 == Distribution
 
