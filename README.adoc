@@ -189,7 +189,7 @@ int main() {
 
     int emitter;
 
-    auto c = synapse::connect<my_signal>(&emitter,
+    auto c = synapse::connect<print>(&emitter,
         [ ](std::string const & s) {
             std::cout << s;
         } );
