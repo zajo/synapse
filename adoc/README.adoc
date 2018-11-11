@@ -15,12 +15,12 @@ Synapse is a non-intrusive {CPP} signal programming library. Features:
 
 ====
 * Register connections and emit signals from any C or {CPP} object of any type whatsoever.
-* If two contexts share access to a C or {CPP} object, they can use that object as a randezvouz point, and communicate with each other through Synapse signals.
+* If two contexts share access to a C or {CPP} object, they can use that object as a rendezvouz point, and communicate with each other through Synapse signals.
 * A system of meta signals provides interoperability with other signal programming libraries and callback APIs.
 * In a multi-thread environment signals can be emitted asynchronously and scheduled for synchronous execution when polled in other threads.
 
 [.text-right]
-<<tutorial>> | <<techniques>> | <<synopsis>> | <<reference>>
+https://github.com/zajo/boost-synapse[GitHub] | <<tutorial>> | <<techniques>> | <<synopsis>> | <<reference>>
 ====
 
 [[tutorial]]
@@ -234,7 +234,7 @@ NOTE: To further facilitate interoperability between Synapse and other callback 
 
 Synapse can be used to implement interthread communication using signals. The data structures created by <<connect,`connect`>> (or <<translate,`translate`>>) use thread-local storage, so by default calling <<emit,`emit`>> will call only functions connected by the calling thread (and will not return until all such functions have been called in order, or one of them throws.)
 
-The following diagram shows the connections created (by calls to `<<connect,connect>><S>`) in a single thread for a given signal type `S`, each connecting an emitter to a function. When `<<emit,emit>><S>(e1,arg,...)` is called, all functions connecing the signal `S` from the given emitter `e1` are called in the order in which the connections were created:
+The following diagram shows the connections created (by calls to `<<connect,connect>><S>`) in a single thread for a given signal type `S`, each connecting an emitter to a function. When `<<emit,emit>><S>(e1,arg,...)` is called, all functions connecting the signal `S` from the given emitter `e1` are called in the order in which the connections were created:
 
 image::fig1.png[]
 
@@ -502,7 +502,7 @@ include::synopses/connection.hpp.adoc[]
 <<connection::set_user_data>> | <<connection::get_user_data>> | <<connection::emitter>> | <<connection::receiver>>
 ====
 
-Overloads of <<connect,`connect`>> and <<translate,`translate`>> return either `shared_ptr<connection>`  or `weak_ptr<pconnection>`, depending on whether or not the emitter and the receiver are passed as raw pointers. The former is used to control the lifetime of the connection explicitly, while the latter represents persisent connections, which expire implicitly with the expiration of the emitter or the receiver object.
+Overloads of <<connect,`connect`>> and <<translate,`translate`>> return either `shared_ptr<connection>`  or `weak_ptr<pconnection>`, depending on whether or not the emitter and the receiver are passed as raw pointers. The former is used to control the lifetime of the connection explicitly, while the latter represents persistent connections, which expire implicitly with the expiration of the emitter or the receiver object.
 
 Before being returned to the caller, `connection` objects are passed to handlers of the <<meta::connected,`meta::connected`>> signal, which can use the <<connection::emitter,`emitter`>>/<<connection::receiver,`receiver`>> member function templates to access the emitter/receiver object passed to <<connect,`connect`>>. The <<connection::set_user_data,`set_user_data`>>/<<connection::get_user_data,`get_user_data`>> member function templates can be used to store and access auxiliary information.
 
@@ -535,7 +535,7 @@ T * get_user_data() const;
 
 Returns: ::
 * If `this` contains object of type `T` previously copied by a call to <<connection::set_user_data,`set_user_data`>>, returns a pointer to that data.
-* If <<set_user_data,`set_user_data`>> has not been called for `this`, or if the type used to instantiate the `set_user_data` function template doesn't match the type used with `get_user_data`, returns `0`.
+* If <<connection::set_user_data,`set_user_data`>> has not been called for `this`, or if the type used to instantiate the `set_user_data` function template doesn't match the type used with `get_user_data`, returns `0`.
 
 '''
 
@@ -556,7 +556,7 @@ Notes: ::
 * An empty `shared_ptr` is returned if:
 ** `T` does not match the static type of the emitter passed to <<connect,`connect`>> (or <<translate,`translate`>>), or
 ** the emitter was passed to <<connect,`connect`>> (or <<translate,`translate`>>) as a `shared_ptr`/`weak_ptr` and it has expired.
-* If the emitter was passed to <<connect,`connect`>> (or <<tranlate,`translate`>>) as a raw pointer, the returned `shared_ptr` points that emitter but does not (can not) keep it alive.
+* If the emitter was passed to <<connect,`connect`>> (or <<translate,`translate`>>) as a raw pointer, the returned `shared_ptr` points that emitter but does not (can not) keep it alive.
 
 '''
 
@@ -578,7 +578,7 @@ Notes: ::
 ** No receiver object was passed to <<connect,`connect`>> (or <<translate,`translate`>>), or
 ** `T` does not match the static type of the receiver passed to <<connect,`connect`>> (or <<translate,`translate`>>), or
 ** the receiver was passed to <<connect,`connect`>> (or <<translate,`translate`>>) as a `shared_ptr`/`weak_ptr` and it has expired.
-* If the receiver was passed to <<connect,`connect`>> (or <<tranlate,`translate`>>) as a raw pointer, the returned `shared_ptr` points that receiver but does not (can not) keep it alive.
+* If the receiver was passed to <<connect,`connect`>> (or <<translate,`translate`>>) as a raw pointer, the returned `shared_ptr` points that receiver but does not (can not) keep it alive.
 
 '''
 
@@ -863,7 +863,7 @@ void emit_fwd( SSL const * ssl, int type, int val ) {
 <<connect>> | `<<meta::connected,meta::connected>>` | <<emit>>
 ====
 
-Once the above handler for the `meta::connected<SSL_info_callback>` signal is installed, we can simply use <<connect,`connect`>> to install a {CPP} lamda handler for the `SSL_info_callback` signal we defined:
+Once the above handler for the `meta::connected<SSL_info_callback>` signal is installed, we can simply use <<connect,`connect`>> to install a {CPP} lambda handler for the `SSL_info_callback` signal we defined:
 
 ====
 [source,c++]
