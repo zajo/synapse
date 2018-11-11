@@ -1,8 +1,8 @@
-Synapse is a non-intrusive {CPP} signal programming library. Features:
+Synapse is a non-intrusive C++ signal programming library. Features:
 
-* Register connections and emit signals from any C or {CPP} object of any type whatsoever.
+* Register connections and emit signals from any C or C++ object of any type whatsoever.
 
-* If two contexts share access to a C or {CPP} object, they can use that object as a randezvouz point, and communicate with each other through Synapse signals.
+* If two contexts share access to a C or C++ object, they can use that object as a randezvouz point, and communicate with each other through Synapse signals.
 
 * A system of meta signals provides interoperability with other signal programming libraries and callback APIs.
 
