@@ -28,7 +28,8 @@
             },
             "macFrameworkPath": [
                 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Frameworks"
-            ]
+            ],
+            "compileCommands": "/Users/emildotchevski/Desktop/zajo/boost/libs/leaf/bld/debug/compile_commands.json"
         },
         {
             "name": "Linux",

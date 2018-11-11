@@ -1,7 +1,8 @@
-:sourcedir: adoc
 :last-update-label!:
-:source-highlighter: coderay
 :icons: font
+:prewrap!:
+:source-highlighter: coderay
+:stylesheet: zajo.css
 = Synapse
 Non-intrusive signal programming library for C++11
 :toclevels: 3
@@ -10,38 +11,19 @@ Non-intrusive signal programming library for C++11
 
 [abstract]
 == Abstract
-Synapse is a non-intrusive {CPP} signal programming library.
+Synapse is a non-intrusive {CPP} signal programming library. Features:
 
-It is able to register connections and emit signals from any C or {CPP} object of any type whatsoever. If two contexts share access to a C or {CPP} object, they can use that object as a randezvouz point of sorts, and communicate with each other through Synapse signals.
+====
+* Register connections and emit signals from any C or {CPP} object of any type whatsoever.
+* If two contexts share access to a C or {CPP} object, they can use that object as a randezvouz point, and communicate with each other through Synapse signals.
+* A system of meta signals provides interoperability with other signal programming libraries and callback APIs.
+* In a multi-thread environment signals can be emitted asynchronously and scheduled for synchronous execution when polled in other threads.
 
-A system of meta signals provides interoperability with other signal programming libraries and callback APIs. In particular Synapse can be used to safely register {CPP} function objects, including lambda functions, with any C-style callback API that is designed to work only with C function pointers.
+[.text-right]
+<<tutorial>> | <<techniques>> | <<synopsis>> | <<reference>>
+====
 
-In a multi-thread environment signals can be emitted asynchronously and scheduled for synchronous execution when requested in other threads.
-
-== Distribution
-
-Synapse is distributed under the http://www.boost.org/LICENSE_1_0.txt[Boost Software License, Version 1.0].
-
-The source code is available in https://github.com/zajo/boost-synapse[this GitHub repository].
-
-NOTE: Synapse is not part of Boost.
-
-== Feedback / support
-
-Please use the link:https://lists.boost.org/mailman/listinfo.cgi/boost[Boost Developers mailing list].
-
-== Portability
-
-Synapse requires compiler support for the following {CPP}11 features:
-
-- thread-safe dynamic initialization of local static objects;
-- `thread_local` objects;
-- lambda functions
-- `<thread>`
-- `<atomic>`
-
-See the link:https://travis-ci.org/zajo/boost-synapse[Synapse Travis CI Builds].
-
+[[tutorial]]
 == Tutorial
 
 === Signals, emitters, receivers
@@ -71,6 +53,7 @@ To emit a Synapse signal, we instantiate the `emit` function template with a pre
 
 As a less abstract example, let's define a type `button` that emits a Synapse signal `clicked` (which takes no arguments) when the member function `click` is called:
 
+====
 [source,c++]
 ----
 typedef struct clicked_(*clicked)();
@@ -85,10 +68,15 @@ class button {
 };
 ----
 
+[.text-right]
+<<emit>>
+====
+
 TIP: It is possible to define the `clicked` `typedef` as a member of `class button`, but this coupling is usually not appropriate when using Synapse. It is better to treat signals as types with independent semantics that can be used with any appropriate object. In this case, anything clickable could emit the `clicked` signal.
 
 Next, let's connect the signal `clicked` to the `accept` member function of a dialog box object:
 
+====
 [source,c++]
 ----
 class dialog {
@@ -105,8 +93,13 @@ shared_ptr<dialog> receiver=make_shared<dialog>();
 synapse::connect<clicked>(emitter, receiver, &dialog::accept);
 ----
 
+[.text-right]
+<<connect>>
+====
+
 Or we could use a lambda instead:
 
+====
 [source,c++]
 ----
 synapse::connect<clicked>(emitter, receiver,
@@ -114,6 +107,10 @@ synapse::connect<clicked>(emitter, receiver,
         d->accept();
     } );
 ----
+
+[.text-right]
+<<connect>>
+====
 
 With this setup, `click()`-ing  the `button` will `accept()` the `dialog`.
 
@@ -125,6 +122,7 @@ The `button`/`dialog` example from the previous section could have been similarl
 
 But in Synapse, _any_ object whatsoever can be used as an emitter. This makes it possible to `emit` non-intrusively even if the type of the emitter object was not designed to support signals. For example, a function that processes a file can use a standard `FILE` pointer as a Synapse emitter to report on its progress:
 
+====
 [source,c++]
 ----
 typedef struct report_progress_(*report_progress)(int progress);
@@ -141,18 +139,26 @@ void process_file( FILE * f ) {
 }
 ----
 
+[.text-right]
+<<emit>>
+====
+
 Outside of `process_file` the `report_progress` signal can be connected to some user interface function that updates a progress bar. For example, using Synapse, we could easily connect it to a Qt `QProgressBar` object:
 
+====
 [source,c++]
 ----
 if( FILE * f=fopen("file.dat","rb") ) {
     QProgressBar pb(....);
-    auto c=synapse::connect<report_progress>(f, &pb,
-        &QProgressBar::setValue);
+    auto c=synapse::connect<report_progress>(f, &pb, &QProgressBar::setValue);
     process_file(f);
     fclose(f);
 }
 ----
+
+[.text-right]
+<<connect>> | <<connection>>
+====
 
 Notice that `process_file` is not coupled with `QProgressBar`: the `report_progress` signal could be connected to a different function or not connected at all, in which case the call to `emit` in `process_file` would be a no-op.
 
@@ -173,6 +179,7 @@ It is possible to temporarily block a specific signal for a specific emitter. Th
 
 NOTE: Blocking affects pre-existing as well as future connections.
 
+====
 [source,c++]
 .Example
 ----
@@ -204,10 +211,12 @@ int main() {
 }
 ----
 <1> `emit` calls the connected lambda, printing `Hello World`.
-
 <2> The `print` signal will be blocked until `b` expires, therefore the call to `emit` on the next line is a no-op, even though the signal is still connected.
-
 <3> At this point `b` has expired, so the call to `emit` will call the connected lambda, printing `Hello World`, again.
+
+[.text-right]
+<<emit>> | <<connect>> | <<connection>> | <<block>> | <<blocker>>
+====
 
 === Meta signals
 
@@ -241,6 +250,7 @@ A typical use case for this system is to update user interface objects with data
 
 Special care must be taken to ensure that any objects referred to by arguments passed to <<emit,`emit`>> will remain valid at least until all other threads have polled their <<thread_local_queue,`thread_local_queue`>> objects. For example, the following code is incorrect in the presence of `thread_local_queue` objects:
 
+====
 [source,c++]
 ----
 typedef struct my_signal_(*my_signal)( int * );
@@ -250,35 +260,76 @@ void emit_my_signal( void * emitter, int x ) {
 }
 ----
 
+[.text-right]
+<<emit>>
+====
+
 The problem is that the address of `x` may be queued into other threads' queues, and since `x` is local to `emit_my_signal`, it may be destroyed by the time these threads call <<poll,`poll`>>.
 
 ==== Scheduling function calls across thread boundaries
 
 The <<post,`post`>> function can be used to queue into a <<thread_local_queue,`thread_local_queue`>> arbitrary functions for execution at the time <<poll,`poll`>> is called. This feature allows critical worker threads to minimize the amount of time they consume by offloading expensive non-critical computations to another, non-critical thread. This also removes the need for synchronization, since the queued functions are executed synchronously in the thread that owns the <<thread_local_queue,`thread_local_queue`>> object.
 
+[[synopsis]]
 == Synopsis
 
-include::{sourcedir}/synopses/emit.hpp.adoc[]
+====
+include::synopses/emit.hpp.adoc[]
 
-include::{sourcedir}/synopses/connect.hpp.adoc[]
+[.text-right]
+<<emit>>
+====
 
-include::{sourcedir}/synopses/translate.hpp.adoc[]
+====
+include::synopses/connect.hpp.adoc[]
 
-include::{sourcedir}/synopses/connection.hpp.adoc[]
+[.text-right]
+<<connection>> |  `<<connection,pconnection>>` | <<connect>> | <<release>> | `<<meta::connected,meta::emitter>>` | `<<meta::connected,meta::connected>>`
+====
 
-include::{sourcedir}/synopses/block.hpp.adoc[]
+====
+include::synopses/translate.hpp.adoc[]
 
-include::{sourcedir}/synopses/blocker.hpp.adoc[]
+[.text-right]
+<<translate>>
+====
 
-include::{sourcedir}/synopses/thread_local_queue.hpp.adoc[]
+====
+include::synopses/connection.hpp.adoc[]
 
+[.text-right]
+<<connection>> | <<pconnection>> | <<connection::set_user_data>> | <<connection::get_user_data>> | <<connection::emitter>> | <<connection::receiver>>
+====
+
+====
+include::synopses/block.hpp.adoc[]
+
+[.text-right]
+<<blocker>> | <<block>> | `<<meta::blocked,meta::blocked>>`
+====
+
+====
+include::synopses/blocker.hpp.adoc[]
+
+[.text-right]
+<<blocker>> | <<blocker::emitter>>
+====
+
+====
+include::synopses/thread_local_queue.hpp.adoc[]
+
+[.text-right]
+<<thread_local_queue>> | <<create_thread_local_queue>> | <<poll>> | <<wait>> | <<post>>
+====
+
+[[reference]]
 == Reference
 
 [[emit]]
 === `emit`
 
 ====
-include::{sourcedir}/synopses/emit.hpp.adoc[]
+include::synopses/emit.hpp.adoc[]
 ====
 
 Effects: ::
@@ -423,7 +474,7 @@ Effects: :: Converts a weak <<pconnection,`pconnection`>> reference to shared ow
 === `translate`
 
 ====
-include::{sourcedir}/synopses/translate.hpp.adoc[]
+include::synopses/translate.hpp.adoc[]
 ====
 
 Effects: ::
@@ -445,7 +496,10 @@ IMPORTANT: If either `e1` or `e2`, passed as raw pointers, expire before the ret
 === `pconnection`
 
 ====
-include::{sourcedir}/synopses/connection.hpp.adoc[]
+include::synopses/connection.hpp.adoc[]
+
+[.text-right]
+<<connection::set_user_data>> | <<connection::get_user_data>> | <<connection::emitter>> | <<connection::receiver>>
 ====
 
 Overloads of <<connect,`connect`>> and <<translate,`translate`>> return either `shared_ptr<connection>`  or `weak_ptr<pconnection>`, depending on whether or not the emitter and the receiver are passed as raw pointers. The former is used to control the lifetime of the connection explicitly, while the latter represents persisent connections, which expire implicitly with the expiration of the emitter or the receiver object.
@@ -578,7 +632,10 @@ IMPORTANT: If `block` is passed a raw pointer, deleting the emitter before the r
 === `blocker`
 
 ====
-include::{sourcedir}/synopses/blocker.hpp.adoc[]
+include::synopses/blocker.hpp.adoc[]
+
+[.text-right]
+<<blocker::emitter>>
 ====
 
 The <<block,`block`>> function returns `shared_ptr<blocker>` that is used to control the time the signal remains blocked. As well, `blocker` objects are passed to handlers of the <<meta::blocked,`meta::blocked`>> signal, which can use the `emitter` member function template to access the emitter object passed to <<block,`block`>>.
@@ -697,6 +754,7 @@ Queues `f` to be called next time `q` is polled; that is, `f` will be executed s
 
 NOTE: While <<poll,`poll`>> (or <<wait,`wait`>>) must be called from the thread that created the <<thread_local_queue,`thread_local_queue`>> object, <<post,`post`>> may be called from any thread. 
 
+[[techniques]]
 == Programming techniques
 
 === Monitoring dynamic systems
@@ -717,6 +775,7 @@ typedef struct cache_hit_(*cache_hit)( char const * type, char const * name );
 
 As part of the implementation of the `object_cache` class, we call <<emit,`emit`>> to signal the corresponding events as they occur:
 
+====
 [source,c++]
 ----
 void object_cache::load_object( char const * type, char const * name ) {
@@ -726,6 +785,10 @@ void object_cache::load_object( char const * type, char const * name ) {
     synapse::emit<object_loaded>(this,type,name);
 }
 ----
+
+[.text-right]
+<<emit>>
+====
 
 During development, users of the `object_cache` class may connect the Synapse signals in order to analyze its efficiency, yet there is no need to compile calls to `emit` out of release builds; typically it is sufficient to not connect the signals. Synapse is carefully designed to support this use case: programs that do not call <<connect,`connect`>> do not need to link with Synapse.
 
@@ -756,6 +819,7 @@ typedef struct SSL_info_callback_(*SSL_info_callback)( const SSL *ssl, int type,
 
 Next, at global scope or during initialization, we install a handler for the `meta::connected<SSL_info_callback>` signal, which the <<meta::connected,`meta::emitter`>> emits every time the user connects or disconnects the `SSL_info_callback` signal we defined:
 
+====
 [source,c++]
 ----
 void emit_fwd( SSL const * ssl, int type, int val );
@@ -795,8 +859,13 @@ void emit_fwd( SSL const * ssl, int type, int val ) {
 <7> Check if the SSL object is still accessible (it may have been destroyed already).
 <8> Uninstall the `emit_fwd` callback.
 
+[.text-right]
+<<connect>> | `<<meta::connected,meta::connected>>` | <<emit>>
+====
+
 Once the above handler for the `meta::connected<SSL_info_callback>` signal is installed, we can simply use <<connect,`connect`>> to install a {CPP} lamda handler for the `SSL_info_callback` signal we defined:
 
+====
 [source,c++]
 ----
 shared_ptr<SSL> ssl(SSL_new(ctx),&SSL_free);
@@ -806,6 +875,10 @@ connect<SSL_info_callback>( ssl,
 
     } );
 ----
+
+[.text-right]
+<<connect>>
+====
 
 === Reporting exceptions from `noexcept` signal handlers
 
@@ -821,6 +894,7 @@ typedef struct exception_caught_(*exception_caught)();
 If we take a handler of the `SSL_info_callback` (see above) as an example, we could modify it like this:
 
 
+====
 [source,c++]
 ----
 shared_ptr<SSL> ssl(SSL_new(ctx),&SSL_free);
@@ -842,12 +916,17 @@ connect<SSL_info_callback>( ssl,
 <1> <<emit,`emit`>> the `exception_caught` Synapse signal from the `ssl` object. Handlers of this signal must be able to deal with any exception, for example they can use `std::current_exception` to capture the exception and rethrow it once control has exited the critical `noexcept` path.
 <2> <<emit,`emit`>> returns the number of connected functions it called, so this `assert` ensures that the exception won't get ignored.
 
+[.text-right]
+<<connect>> | <<emit>>
+====
+
 === Using Synapse with Qt to avoid MOCing
 
 The signal programming API that is used in https://www.qt.io/[Qt] is intrusive: signals must be specified in the definition of each type. For this reason, it is not possible to add signals to existing Qt types. When this is needed, users are directed to define the new signals in their own class which derives from the Qt type they wanted to add signal(s) to.
 
 https://wiki.qt.io/Qt_for_Beginners#Creating_custom_signals_and_slots[There is a special example that illustrates this approach]. Unfortunately, this requires the use of the proprietary Qt Meta Object Compiler which the author finds cumbersome. Below is the same example modified to use Synapse signals, which requires no MOCing (the changes made to the original program are marked with numbers):
 
+====
 [source,c++]
 ----
 #include <boost/synapse/connect.hpp>
@@ -921,6 +1000,10 @@ int main(int argc, char **argv)
 <4> Was: `connect(this, SIGNAL (counterReached()), QApplication::instance(), SLOT (quit()));`
 <5> Was: `emit counterReached();`
 
+[.text-right]
+<<connection>> | <<connect>> |  <<emit>>
+====
+
 == Case study: synapsifying GLFW
 
 Synapse integrates well with some C event handling APIs. As an example, let's consider link:http://www.glfw.org/[GLFW].
@@ -976,6 +1059,7 @@ namespace glfw_signals
 
 Next, in a different header we install `meta::connected` signal handlers for the signals above:
 
+====
 [source,c++]
 .glfw_synapsify.hpp:
 ----
@@ -1075,10 +1159,15 @@ synapsifier<glfw_signals::Scroll> s14(&glfwSetScrollCallback);
 synapsifier<glfw_signals::Drop> s15(&glfwSetDropCallback);
 ----
 
+[.text-right]
+<<emit>> | <<connect>> | `<<meta::connected,meta::connected>>`
+====
+
 IMPORTANT: The above `glfw_synapsify.hpp` should be included in exactly one compilation unit of a GLFW program, for example the main compilation unit. This will automatically install all `meta::connected` signal handlers.
 
 With this, we simply use <<connect,`connect`>> to hook up any `GLFWwindow` event. For example, if we have a `GLFWwindow` pointer `w`, we can install a key event handler like so:
 
+====
 [source,c++]
 ----
 auto c = synapse::connect<glfw_signals::key>(w,
@@ -1088,8 +1177,13 @@ auto c = synapse::connect<glfw_signals::key>(w,
     }
 ----
 
+[.text-right]
+<<connect>>
+====
+
 Finally, this is the example from the GLFW http://www.glfw.org/docs/latest/quick.html[Getting started page], modified to use the "synapsify" framework above (changes to the original example are marked with numbers):
 
+====
 [source,c++]
 ----
 //========================================================================
@@ -1272,6 +1366,10 @@ int main(void)
 <2> Commented-out parts of the original example, and...
 <3> ...the {CPP} lambda function connected to the `Key` Synapse signal from `glfw_signals.hpp` to handle the `Esc` key.
 
+[.text-right]
+<<connect>> | <<connection>>
+====
+
 == Alternatives to Synapse
 
 The unique design feature of Synapse is that it is non-intrusive with respect to the emitter object type. While other libraries provide users with types that can emit signals, Synapse is able to emit any signal from any object of any type whatsoever.
@@ -1407,6 +1505,30 @@ This macro is used to define objects with static thread-local storage and provid
 IMPORTANT: Except under `BOOST_SYNAPSE_NO_THREADS`, initialization of objects with static storage is expected to be serialized.
 
 NOTE: The `init` argument passed will contain parentheses, so when the macro is expanded it results in calling a constructor.
+
+== Distribution
+
+Synapse is distributed under the http://www.boost.org/LICENSE_1_0.txt[Boost Software License, Version 1.0].
+
+The source code is available in https://github.com/zajo/boost-synapse[this GitHub repository].
+
+NOTE: Synapse is not part of Boost.
+
+== Feedback / support
+
+Please use the link:https://lists.boost.org/mailman/listinfo.cgi/boost[Boost Developers mailing list].
+
+== Portability
+
+Synapse requires compiler support for the following {CPP}11 features:
+
+- thread-safe dynamic initialization of local static objects;
+- `thread_local` objects;
+- lambda functions
+- `<thread>`
+- `<atomic>`
+
+See the link:https://travis-ci.org/zajo/boost-synapse[Synapse Travis CI Builds].
 
 == Building and installation
 
