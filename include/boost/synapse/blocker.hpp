@@ -9,41 +9,30 @@
 #include <boost/synapse/synapse_detail/common.hpp>
 #include <boost/synapse/synapse_detail/weak_store.hpp>
 
-namespace
-boost
+namespace boost { namespace synapse {
+
+    class blocker
     {
-    namespace
-    synapse
-        {
-        class
-        blocker
-            {
-            virtual synapse_detail::weak_store const & emitter_() const=0;
-            protected:
-            blocker();
-            ~blocker();
-            public:
-            template <class T> shared_ptr<T> emitter() const;
-            };
-        }
-    }
+        virtual synapse_detail::weak_store const & emitter_() const=0;
+    protected:
+        blocker();
+        ~blocker();
+    public:
+        template <class T> shared_ptr<T> emitter() const;
+    };
+
+} }
 
 //Implementation details below.
 
-namespace
-boost
+namespace boost { namespace synapse {
+
+    template <class T>
+    shared_ptr<T> blocker::emitter() const
     {
-    namespace
-    synapse
-        {
-        template <class T>
-        shared_ptr<T>
-        blocker::
-        emitter() const
-            {
-            return emitter_().maybe_lock<T>();
-            }
-        } 
+        return emitter_().maybe_lock<T>();
     }
+
+} }
 
 #endif

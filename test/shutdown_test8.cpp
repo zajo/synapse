@@ -10,16 +10,15 @@ using synapse::shared_ptr;
 using synapse::make_shared;
 
 namespace
-    {
+{
     struct my_emitter_type { };
     typedef struct my_signal_(*my_signal)();
-    }
+}
 
-int
-main( int argc, char const * argv[] )
-    {
+int main( int argc, char const * argv[] )
+{
     shared_ptr<my_emitter_type> e=make_shared<my_emitter_type>();
     synapse::connect<synapse::meta::connected<my_signal> >( synapse::meta::emitter(), [ ]( synapse::connection &, unsigned ) { } );
     auto connected = synapse::connect<my_signal>( e, [ ] ( ) { } );
     exit(0);
-    }
+}

@@ -14,18 +14,14 @@
 #include <boost/synapse/dep/smart_ptr.hpp>
 #include <boost/synapse/dep/functional.hpp>
 
-namespace
-boost
-    {
-    namespace
-    synapse
-        {
-        struct thread_local_queue;
-        shared_ptr<thread_local_queue> create_thread_local_queue();
-        int poll( thread_local_queue & );
-        int wait( thread_local_queue & );
-        void post( thread_local_queue &, function<void()> const & );
-        }
-    }
+namespace boost { namespace synapse {
+
+    struct thread_local_queue;
+    shared_ptr<thread_local_queue> create_thread_local_queue();
+    int poll( thread_local_queue & );
+    int wait( thread_local_queue & );
+    void post( thread_local_queue &, function<void()> const & );
+
+} }
 
 #endif

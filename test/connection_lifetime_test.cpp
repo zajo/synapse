@@ -12,30 +12,30 @@ using synapse::shared_ptr;
 using synapse::make_shared;
 
 namespace
-    {
+{
     struct my_emitter_type { };
     typedef struct my_signal_(*my_signal)();
     int connection_count;
-    class
-    connection_counter
-        {
+
+    class connection_counter
+    {
         connection_counter( connection_counter const & );
         connection_counter & operator=( connection_counter const & );
-        public:
+    public:
         connection_counter()
-            {
-            ++connection_count;
-            }
-        ~connection_counter()
-            {
-            --connection_count;
-            }
-        };
-    void
-    test_owned_connections()
         {
+            ++connection_count;
+        }
+        ~connection_counter()
+        {
+            --connection_count;
+        }
+    };
+
+    void test_owned_connections()
+    {
         BOOST_TEST(connection_count==0);
-            {
+        {
             shared_ptr<int> em=make_shared<int>(42);
             shared_ptr<synapse::connection> c1=synapse::connect<my_signal>(&em,[ ]( ){ });
             shared_ptr<synapse::connection> c2=release(synapse::connect<my_signal>(em,[ ]( ){ }));
@@ -44,12 +44,12 @@ namespace
             BOOST_TEST(connection_count==2);
             em.reset();
             BOOST_TEST(connection_count==2);
-            }
-         BOOST_TEST(connection_count==0);
         }
-    void
-    test_reset_connection()
-        {
+         BOOST_TEST(connection_count==0);
+    }
+
+    void test_reset_connection()
+    {
         int count1=0, count2=0;
         my_emitter_type e1;
         my_emitter_type e2;
@@ -113,11 +113,12 @@ namespace
         BOOST_TEST(synapse::emit<my_signal>(&e2)==0);
         BOOST_TEST(count1==0);
         BOOST_TEST(count2==0);
-        }
+    }
+
     typedef struct my_signal_(*my_signal)();
-    void
-    test_reset_lifetime()
-        {
+
+    void test_reset_lifetime()
+    {
         int count1=0, count2=0;
         my_emitter_type e1;
         my_emitter_type e2;
@@ -187,11 +188,12 @@ namespace
         BOOST_TEST(synapse::emit<my_signal>(&e2)==0);
         BOOST_TEST(count1==0);
         BOOST_TEST(count2==0);
-        }
+    }
+
     struct null_deleter { void  operator()(void const *) { } };
-    void
-    test_emitter_expiring_before_connection()
-        {
+
+    void test_emitter_expiring_before_connection()
+    {
         int count=0;
         my_emitter_type e;
         shared_ptr<my_emitter_type> e1(&e,null_deleter());
@@ -199,14 +201,14 @@ namespace
         e1.reset();
         BOOST_TEST(count==0);
         BOOST_TEST(synapse::emit<my_signal>(&e)==0);
-        }
     }
-int
-main( int argc, char const * argv[] )
-    {
+}
+
+int main( int argc, char const * argv[] )
+{
     test_owned_connections();
     test_reset_connection();
     test_reset_lifetime();
     test_emitter_expiring_before_connection();
     return boost::report_errors();
-    }
+}

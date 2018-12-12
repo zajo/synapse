@@ -12,31 +12,29 @@ using synapse::shared_ptr;
 using synapse::make_shared;
 
 namespace
-    {
+{
     struct my_emitter_type { };
     typedef struct my_signal_(*my_signal)();
-    void
-    noop()
-        {
-        }
-    }
-
-int
-main( int argc, char const * argv[] )
+    void noop()
     {
-        {
+    }
+}
+
+int main( int argc, char const * argv[] )
+{
+    {
         my_emitter_type e;
         shared_ptr<synapse::connection> c=synapse::connect<my_signal>(&e,&noop);
         BOOST_TEST(!c->get_user_data<int>());
         c->set_user_data(42);
         BOOST_TEST(*c->get_user_data<int>()==42);
-        }
-        {
+    }
+    {
         auto e = make_shared<my_emitter_type>();
         shared_ptr<synapse::pconnection> c=synapse::connect<my_signal>(e,&noop).lock();
         BOOST_TEST(!c->get_user_data<int>());
         c->set_user_data(42);
         BOOST_TEST(*c->get_user_data<int>()==42);
-        }
-    return boost::report_errors();
     }
+    return boost::report_errors();
+}

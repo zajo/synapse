@@ -7,11 +7,10 @@
 
 #ifdef BOOST_SYNAPSE_NO_THREADS
 
-int
-main( int argc, char const * argv[ ] )
-    {
+int main( int argc, char const * argv[ ] )
+{
     return 0;
-    }
+}
 
 #else
 
@@ -26,12 +25,12 @@ using synapse::shared_ptr;
 using synapse::weak_ptr;
 
 namespace
-    {
+{
     int const thread_count=10;
     int const iteration_count=1000;
-    void
-    emitting_thread( weak_ptr<synapse::thread_local_queue> const & tlq, int & counter, boost::thread::id tid )
-        {
+
+    void emitting_thread( weak_ptr<synapse::thread_local_queue> const & tlq, int & counter, boost::thread::id tid )
+    {
         for(;;)
             if( shared_ptr<synapse::thread_local_queue> p=tlq.lock() )
                 post(*p,[&counter,tid]()
@@ -41,10 +40,10 @@ namespace
                     } );
             else
                 break;
-        }
-    void
-    consuming_thread( )
-        {
+    }
+
+    void consuming_thread( )
+    {
         assert(iteration_count>0);
         int count=0;
         shared_ptr<synapse::thread_local_queue> tlq=synapse::create_thread_local_queue();
@@ -53,17 +52,16 @@ namespace
             poll(*tlq);
         tlq.reset();
         th.join();
-        }
     }
+}
 
-int
-main( int argc, char const * argv[] )
-    {
+int main( int argc, char const * argv[] )
+{
     boost::thread_group tgr;
     for( int i=0; i!=thread_count; ++i )
         tgr.create_thread(&consuming_thread);
     tgr.join_all();
     return boost::report_errors();
-    }
+}
 
 #endif

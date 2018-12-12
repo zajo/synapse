@@ -14,10 +14,9 @@ typedef struct test_signal1_(*test_signal1)();
 typedef struct test_signal2_(*test_signal2)();
 
 namespace
+{
+    void test_fn()
     {
-    void
-    test_fn()
-        {
         int emitter;
         int count1=0;
         int count2=0;
@@ -47,10 +46,10 @@ namespace
         BOOST_TEST(synapse::emit<test_signal2>(&emitter)==0);
         BOOST_TEST(count1==2);
         BOOST_TEST(count2==2);
-        }
-    void
-    test_receiver_fn()
-        {
+    }
+
+    void test_receiver_fn()
+    {
         int emitter;
         int receiver;
         int count1=0;
@@ -81,25 +80,25 @@ namespace
         BOOST_TEST(synapse::emit<test_signal2>(&emitter)==0);
         BOOST_TEST(count1==2);
         BOOST_TEST(count2==2);
-        }
-    struct
-    test_class
-        {
+    }
+
+    struct test_class
+    {
         int & count;
         explicit
         test_class( int & count ):
             count(count)
-            {
-            }
+        {
+        }
         void
         fn()
-            {
-            ++count;
-            }
-        };
-    void
-    test_receiver_mem_fn()
         {
+            ++count;
+        }
+    };
+
+    void test_receiver_mem_fn()
+    {
         int emitter;
         int count1=0;
         int count2=0;
@@ -131,10 +130,10 @@ namespace
         BOOST_TEST(synapse::emit<test_signal2>(&emitter)==0);
         BOOST_TEST(count1==2);
         BOOST_TEST(count2==2);
-        }
-    void
-    test_receiver_mem_fn_bind()
-        {
+    }
+
+    void test_receiver_mem_fn_bind()
+    {
         int emitter;
         int count1=0;
         int count2=0;
@@ -166,14 +165,14 @@ namespace
         BOOST_TEST(synapse::emit<test_signal2>(&emitter)==0);
         BOOST_TEST(count1==2);
         BOOST_TEST(count2==2);
-        }
     }
-int
-main( int argc, char const * argv[] )
-    {
+}
+
+int main( int argc, char const * argv[] )
+{
     test_fn();
     test_receiver_fn();
     test_receiver_mem_fn();
     test_receiver_mem_fn_bind();
     return boost::report_errors();
-    }
+}

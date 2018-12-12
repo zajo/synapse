@@ -11,19 +11,17 @@ using synapse::shared_ptr;
 using synapse::weak_ptr;
 
 namespace
-    {
+{
     struct test_type { test_type() { } };
-    bool
-    shared( shared_ptr<void const> const & a, shared_ptr<void const> const & b )
-        {
-        return !(a<b) && !(b<a);
-        }
-    }
-
-int
-main( int argc, char const * argv[] )
+    bool shared( shared_ptr<void const> const & a, shared_ptr<void const> const & b )
     {
-        {
+        return !(a<b) && !(b<a);
+    }
+}
+
+int main( int argc, char const * argv[] )
+{
+    {
         test_type x;
         synapse::synapse_detail::weak_store sx=synapse::synapse_detail::weak_store(&x);
         BOOST_TEST(!sx.lockable());
@@ -40,8 +38,8 @@ main( int argc, char const * argv[] )
         sx.clear();
         BOOST_TEST(sx.empty());
         BOOST_TEST(sx.expired());
-        }
-        {
+    }
+    {
         test_type const x;
         synapse::synapse_detail::weak_store sx=synapse::synapse_detail::weak_store(&x);
         BOOST_TEST(!sx.lockable());
@@ -58,8 +56,8 @@ main( int argc, char const * argv[] )
         sx.clear();
         BOOST_TEST(sx.empty());
         BOOST_TEST(sx.expired());
-        }
-        {
+    }
+    {
         shared_ptr<test_type> x(new test_type);
         synapse::synapse_detail::weak_store sx=synapse::synapse_detail::weak_store(weak_ptr<test_type>(x));
         BOOST_TEST(sx.lockable());
@@ -83,8 +81,8 @@ main( int argc, char const * argv[] )
         sx.clear();
         BOOST_TEST(sx.empty());
         BOOST_TEST(sx.expired());
-        }
-        {
+    }
+    {
         shared_ptr<test_type const> x(new test_type);
         synapse::synapse_detail::weak_store sx=synapse::synapse_detail::weak_store(weak_ptr<test_type const>(x));
         BOOST_TEST(sx.lockable());
@@ -108,6 +106,6 @@ main( int argc, char const * argv[] )
         sx.clear();
         BOOST_TEST(sx.empty());
         BOOST_TEST(sx.expired());
-        }
-    return boost::report_errors();
     }
+    return boost::report_errors();
+}

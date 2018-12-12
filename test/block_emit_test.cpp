@@ -12,20 +12,19 @@ namespace synapse=boost::synapse;
 using synapse::shared_ptr;
 
 namespace
-    {
+{
     template <class Signal>
-    bool
-    emitter_blocked( void const * e )
-        {
+
+    bool emitter_blocked( void const * e )
+    {
         shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<Signal>(false);
         return tlsd && tlsd->emitter_blocked_(*tlsd,e);
-        }
-    typedef struct my_signal_(*my_signal)();
     }
+    typedef struct my_signal_(*my_signal)();
+}
 
-int
-main( int argc, char const * argv[] )
-    {
+int main( int argc, char const * argv[] )
+{
     int e1, e2;
     BOOST_TEST(!emitter_blocked<my_signal>(&e1));
     BOOST_TEST(!emitter_blocked<my_signal>(&e2));
@@ -48,4 +47,4 @@ main( int argc, char const * argv[] )
     BOOST_TEST(!emitter_blocked<my_signal>(&e1));
     BOOST_TEST(!emitter_blocked<my_signal>(&e2));
     return boost::report_errors();
-    }
+}

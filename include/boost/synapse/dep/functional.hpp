@@ -10,33 +10,25 @@
 
 #include <functional>
 
-namespace
-boost
-    {
-    namespace
-    synapse
-        {
-        using std::function;
-        using std::ref;
-        using std::cref;
-        }
-    }
+namespace boost { namespace synapse {
+
+    using std::function;
+    using std::ref;
+    using std::cref;
+
+} }
 
 #else
 
 #include <boost/function.hpp>
 
-namespace
-boost
-    {
-    namespace
-    synapse
-        {
-        using boost::function;
-        using boost::ref;
-        using boost::cref;
-        }
-    }
+namespace boost { namespace synapse {
+
+    using boost::function;
+    using boost::ref;
+    using boost::cref;
+
+} }
 
 #endif
 

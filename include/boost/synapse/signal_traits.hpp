@@ -9,37 +9,33 @@
 namespace boost { namespace synapse { namespace meta { template <class Signal>  struct connected; } } }
 namespace boost { namespace synapse { namespace meta { template <class Signal>  struct blocked; } } }
 
-namespace
-boost
+namespace boost { namespace synapse {
+
+    template <class Signal> struct signal_traits;
+
+    template <class R,class... A>
+    struct signal_traits<R(*)(A...)>
     {
-    namespace
-    synapse
-        {
-        template <class Signal> struct signal_traits;
-        template <class R,class... A>
-        struct
-        signal_traits<R(*)(A...)>
-            {
-            typedef R(*signal_type)(A...);
-            typedef void signature(A...);
-            static int const arity=sizeof...(A);
-            static bool const is_thread_local=false;
-            };
-        template <class Signal>
-        struct
-        signal_traits<meta::connected<Signal> >:
-            signal_traits<typename meta::connected<Signal>::type>
-            {
-            static bool const is_thread_local=true;
-            };
-        template <class Signal>
-        struct
-        signal_traits<meta::blocked<Signal> >:
-            signal_traits<typename meta::blocked<Signal>::type>
-            {
-            static bool const is_thread_local=true;
-            };
-        } 
-    }
+        typedef R(*signal_type)(A...);
+        typedef void signature(A...);
+        static int const arity=sizeof...(A);
+        static bool const is_thread_local=false;
+    };
+
+    template <class Signal>
+    struct signal_traits<meta::connected<Signal> >:
+        signal_traits<typename meta::connected<Signal>::type>
+    {
+        static bool const is_thread_local=true;
+    };
+
+    template <class Signal>
+    struct signal_traits<meta::blocked<Signal> >:
+        signal_traits<typename meta::blocked<Signal>::type>
+    {
+        static bool const is_thread_local=true;
+    };
+
+} }
 
 #endif

@@ -7,11 +7,10 @@
 
 #ifdef BOOST_SYNAPSE_NO_THREADS
 
-int
-main( int argc, char const * argv[ ] )
-    {
+int main( int argc, char const * argv[ ] )
+{
     return 0;
-    }
+}
 
 #else
 
@@ -27,45 +26,45 @@ using synapse::weak_ptr;
 using synapse::make_shared;
 
 namespace
-    {
+{
     std::atomic<int> connection_count;
     int emitter;
     typedef struct signal1_(*signal1)();
     typedef struct signal2_(*signal2)();
     typedef struct terminate_thread_(*terminate_thread)();
-    class
-    thread_connection_counter
-        {
+
+    class thread_connection_counter
+    {
         thread_connection_counter( thread_connection_counter const & );
         thread_connection_counter & operator=( thread_connection_counter const & );
-        public:
+    public:
         thread_connection_counter()
-            {
-            ++connection_count;
-            }
-        ~thread_connection_counter()
-            {
-            --connection_count;
-            }
-        };
-    void
-    emitting_thread( boost::barrier & b, weak_ptr<void> const & terminate )
         {
+            ++connection_count;
+        }
+        ~thread_connection_counter()
+        {
+            --connection_count;
+        }
+    };
+
+    void emitting_thread( boost::barrier & b, weak_ptr<void> const & terminate )
+    {
         shared_ptr<synapse::thread_local_queue> tlq=synapse::create_thread_local_queue();
         bool keep_going=true;
         synapse::connect<terminate_thread>(terminate,[&keep_going]() { keep_going=false; }).lock()->
             set_user_data(make_shared<thread_connection_counter>());
         b.wait();
         while( keep_going )
-            {
+        {
             (void) synapse::emit<signal1>(&emitter);
             (void) synapse::emit<signal2>(&emitter);
             (void) poll(*tlq);
-            }
         }
-    void
-    test( int emitting_thread_count, int per_thread_emit_count, int series_count )
-        {
+    }
+
+    void test( int emitting_thread_count, int per_thread_emit_count, int series_count )
+    {
         assert(emitting_thread_count>0);
         assert(per_thread_emit_count>0);
         assert(series_count>0);
@@ -81,14 +80,14 @@ namespace
         shared_ptr<synapse::connection> c1=synapse::connect<signal1>(&emitter,[](){});
         shared_ptr<synapse::connection> c2=synapse::connect<signal2>(&emitter,[](){});
         for( int i=0; i!=series_count; ++i )
-            {
+        {
             shared_ptr<synapse::thread_local_queue> tlq=synapse::create_thread_local_queue();
             for( int j=0; j<emitting_thread_count*per_thread_emit_count; )
-                {
+            {
                 int n=poll(*tlq);
                 j+=n;
-                }
             }
+        }
         std::cout << "Requesting terminate..." << std::endl;
         int n=synapse::emit<terminate_thread>(terminate.get());
         BOOST_TEST(n==emitting_thread_count);
@@ -96,16 +95,15 @@ namespace
         tgr.join_all();
         std::cout << "Joined." << std::endl;
         BOOST_TEST(connection_count==0);
-        }
     }
+}
 
-int
-main( int argc, char const * argv[] )
-    {
+int main( int argc, char const * argv[] )
+{
     test(1,1,50);
     test(20,5,50);
     test(30,10,50);
     return boost::report_errors();
-    }
+}
 
 #endif
