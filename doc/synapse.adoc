@@ -15,7 +15,7 @@ Synapse is a non-intrusive {CPP} signal programming library. Features:
 
 ====
 * Register connections and emit signals from any C or {CPP} object of any type whatsoever.
-* If two contexts share access to a C or {CPP} object, they can use that object as a rendezvouz point, and communicate with each other through Synapse signals.
+* If two contexts share access to a C or {CPP} object, they can use that object as a rendezvous point, and communicate with each other through Synapse signals.
 * A system of meta signals provides interoperability with other signal programming libraries and callback APIs.
 * In a multi-thread environment signals can be emitted asynchronously and scheduled for synchronous execution when polled in other threads.
 ====
@@ -209,7 +209,7 @@ Synapse features a special global emitter that emits meta signals to notify conn
 
 When a signal `S` is blocked or unblocked, the meta emitter emits the `meta::blocked<S>` signal. Connecting this `meta::blocked<S>` signal allows the blocked state of the signal `S` to be automatically reflected in other systems, for example in user interface.
 
-Similarly, when a signal `S` is connected or disconnected, the meta emitter emits the <<meta::connected,`meta::connected<S>`>> signal, which is useful when integrating Synapse with 3rd-party callback systems; see <<Synapsifying C callbacks>>.
+Similarly, when a signal `S` is connected or disconnected, the meta emitter emits the <<meta::connected,`meta::connected<S>`>> signal, which is useful when integrating Synapse with 3rd-party callback systems; see <<Synapsifying_C_Callbacks>>.
 
 NOTE: To further facilitate interoperability between Synapse and other callback APIs, <<connection,`connection`>>/<<pconnection,`pconnection`>>  objects (returned by overloads of <<connect,`connect`>>) can store arbitrary user data.
 
@@ -752,6 +752,7 @@ During development, users of the `object_cache` class may connect the Synapse si
 
 On the other hand, because Synapse connections are dynamic, it is possible to connect the signals only when/if we need to monitor the `object_cache` operations. For example, they can be connected only while a diagnostic information window is active.
 
+[[Synapsifying_C_Callbacks]]
 === Synapsifying C Callbacks
 
 It is common for C APIs to use function pointers to implement callback systems. A typical example is the `SSL_set_info_callback` function from https://www.openssl.org/docs/manmaster/man3/SSL_set_info_callback.html[OpenSSL]:
@@ -1338,7 +1339,7 @@ Because Synapse is formatted for Boost review, people often ask what are the dif
 
 | Support for meta signals? | No (not possible, a signal is an object). | Yes. Connecting a signal of type `S` emits the signal <<meta::connected,`meta::connected<S>`>> from the <<meta::connected,`meta::emitter`>>.
 
-| Integration with C-style callback APIs? | No (not possible). | Yes, through meta signals, see <<Synapsifying C callbacks>>.
+| Integration with C-style callback APIs? | No (not possible). | Yes, through meta signals, see <<Synapsifying_C_Callbacks>>.
 
 | Multi-threading support? | Yes, the connection list maintained in each signal object is thread-safe. | Yes, the connection lists are thread-local, and signals are transported to other threads using <<thread_local_queue,`thread_local_queue`>> objects.
 
