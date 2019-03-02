@@ -55,7 +55,7 @@ matrix:
       script:
         - |-
           echo "using asciidoctor ;" > ~/user-config.jam
-        - ../../b2 doc
+        - ./b2 libs/synapse/doc
       deploy:
         local-dir: ../boost-root/libs/leaf/doc/html
         provider: pages
