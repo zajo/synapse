@@ -12,4 +12,4 @@ Copyright (c) 2015-2018 Emil Dotchevski. Distributed under the [Boost Software L
 
 Please post questions and feedback on the Boost Developers Mailing List (Synapse is not part of Boost).
 
-Official documentation: https://zajo.github.io/boost-synapse/
+Official documentation: https://zajo.github.io/synapse/

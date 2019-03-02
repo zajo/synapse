@@ -17,10 +17,31 @@ branches:
   only:
     - master
     - develop
+    - /^feature.*/
 
 env:
   matrix:
     - BOGUS_JOB=true
+
+addons:
+  apt:
+    packages:
+      - g++-4.9
+      - g++-5
+      - g++-6
+      - clang-3.6
+      - clang-3.7
+      - clang-3.8
+      - ruby-full
+#      - python-3.6
+      - ninja-build
+
+    sources:
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-precise
+      - llvm-toolchain-precise-3.6
+      - llvm-toolchain-precise-3.7
+      - llvm-toolchain-precise-3.8
 
 matrix:
 
@@ -28,6 +49,22 @@ matrix:
     - env: BOGUS_JOB=true
 
   include:
+
+    - os: linux
+      env: DOC=1
+      script:
+        - |-
+          echo "using asciidoctor ;" > ~/user-config.jam
+        - ../../b2 doc
+      deploy:
+        local-dir: ../boost-root/libs/leaf/doc/html
+        provider: pages
+        skip-cleanup: true
+        github-token: $GH_PAGES_TOKEN
+        keep-history: false
+        on:
+          branch: master
+
     - os: osx
       compiler: clang++
       env: TOOLSET=clang COMPILER=clang++ CXXSTD=11,14,1z
@@ -115,6 +152,7 @@ matrix:
         apt:
           packages:
             - clang-3.5
+            - libstdc++-4.9-dev
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-precise-3.5
@@ -148,6 +186,7 @@ matrix:
         apt:
           packages:
             - clang-3.8
+            - libstdc++-4.9-dev
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-precise-3.8
@@ -159,6 +198,7 @@ matrix:
         apt:
           packages:
             - clang-3.9
+            - libstdc++-4.9-dev
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-precise-3.9
@@ -197,8 +237,11 @@ matrix:
             - llvm-toolchain-trusty-6.0
 
 install:
+  - gem install asciidoctor
+  - gem install coderay
+#  - pip3 install meson
   - cd ..
-  - git clone -b $TRAVIS_BRANCH --depth 1 https://github.com/boostorg/boost.git boost-root
+  - git clone -b master --depth 1 https://github.com/boostorg/boost.git boost-root
   - cd boost-root
   - git submodule update --init tools/build
   - git submodule update --init tools/inspect
@@ -213,6 +256,7 @@ install:
 script:
   - |-
     echo "using $TOOLSET : : $COMPILER ;" > ~/user-config.jam
+  - ./b2 variant=debug libs/synapse/build/test toolset=$TOOLSET cxxstd=$CXXSTD cxxflags=-w ${CXXFLAGS:+cxxflags="$CXXFLAGS"}
   - ./b2 variant=release libs/synapse/build/test toolset=$TOOLSET cxxstd=$CXXSTD cxxflags=-w ${CXXFLAGS:+cxxflags="$CXXFLAGS"}
 
 notifications:

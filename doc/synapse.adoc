@@ -18,10 +18,12 @@ Synapse is a non-intrusive {CPP} signal programming library. Features:
 * If two contexts share access to a C or {CPP} object, they can use that object as a rendezvouz point, and communicate with each other through Synapse signals.
 * A system of meta signals provides interoperability with other signal programming libraries and callback APIs.
 * In a multi-thread environment signals can be emitted asynchronously and scheduled for synchronous execution when polled in other threads.
-
-[.text-right]
-https://github.com/zajo/boost-synapse[GitHub] | <<tutorial>> | <<techniques>> | <<synopsis>> | <<reference>>
 ====
+
+[grid=none, frame=none]
+|====
+| <<tutorial>> \| <<techniques>> \| <<synopsis>> \| <<reference>> >| https://github.com/zajo/synapse[GitHub]
+|====
 
 [[tutorial]]
 == Tutorial
@@ -385,7 +387,7 @@ IMPORTANT: If either the emitter or the receiver, if passed as raw pointers, exp
 namespace boost { namespace synapse {
 
     namespace meta {
-    
+
         weak_ptr<void const> emitter();
 
         template <class Signal>
@@ -581,7 +583,7 @@ namespace boost { namespace synapse { namespace meta {
     struct blocked {
         //unspecified
     };
-        
+
 } } }
 ----
 The `meta::blocked<Signal>` signal is also emitted when the returned <<blocker,`blocker`>> object expires. Handlers of the meta signal take a reference to the <<blocker,`blocker`>> object being created or destroyed, and a second `bool` argument, `is_blocked`, which is true if the signal is becoming blocked, false if it is becoming unblocked.
@@ -710,7 +712,7 @@ namespace boost { namespace synapse {
 Effects: ::
 Queues `f` to be called next time `q` is polled; that is, `f` will be executed synchronously in the thread that has created `q`.
 
-NOTE: While <<poll,`poll`>> (or <<wait,`wait`>>) must be called from the thread that created the <<thread_local_queue,`thread_local_queue`>> object, <<post,`post`>> may be called from any thread. 
+NOTE: While <<poll,`poll`>> (or <<wait,`wait`>>) must be called from the thread that created the <<thread_local_queue,`thread_local_queue`>> object, <<post,`post`>> may be called from any thread.
 
 [[techniques]]
 == Programming Techniques
@@ -999,7 +1001,7 @@ namespace glfw_signals
     typedef struct WindowIconify_(*WindowIconify)( GLFWwindow *, int iconified );
     typedef struct WindowFocus_(*WindowFocus)( GLFWwindow *, int focused );
     typedef struct WindowRefresh_(*WindowRefresh)( GLFWwindow * );
-    
+
     //This is emitted from the GLFWwindow object to report exceptions from connected signal handlers
     typedef struct exception_caught_(*exception_caught)( GLFWwindow * );
 }
@@ -1025,7 +1027,7 @@ class synapsifier<R(*)(GLFWwindow *,A...)>
     typedef void (*GLFWfun)( GLFWwindow *,A... );
 
     static GLFWfun prev_;
-    
+
     //This is the handler that GLFW calls. It emits the corresponding Synapse
     //signal and calls the previous GLFW handler for the same event, if any.
     static void handler( GLFWwindow * w, A... a )
@@ -1452,7 +1454,7 @@ NOTE: The `init` argument passed will contain parentheses, so when the macro is 
 
 Synapse is distributed under the http://www.boost.org/LICENSE_1_0.txt[Boost Software License, Version 1.0].
 
-The source code is available in https://github.com/zajo/boost-synapse[this GitHub repository].
+The source code is available in https://github.com/zajo/synapse[this GitHub repository].
 
 NOTE: Synapse is not part of Boost.
 
@@ -1470,7 +1472,7 @@ Synapse requires compiler support for the following {CPP}11 features:
 - `<thread>`
 - `<atomic>`
 
-See the link:https://travis-ci.org/zajo/boost-synapse[Synapse Travis CI Builds].
+See the link:https://travis-ci.org/zajo/synapse[Synapse Travis CI Builds].
 
 == Building and Installation
 
