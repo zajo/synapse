@@ -4,14 +4,14 @@
 :source-highlighter: coderay
 :stylesheet: zajo.css
 = Synapse
-Non-intrusive signal programming library for C++11
+Non-intrusive signal programming library for {CPP}11
 :toclevels: 3
 :toc: left
 :toc-title:
 
 [abstract]
 == Abstract
-Synapse is a non-intrusive {CPP} signal programming library. Features:
+Synapse is a non-intrusive {CPP} signal programming library for {CPP}11. Features:
 
 ====
 * Register connections and emit signals from any C or {CPP} object of any type whatsoever.
@@ -22,7 +22,7 @@ Synapse is a non-intrusive {CPP} signal programming library. Features:
 
 [grid=none, frame=none]
 |====
-| <<tutorial>> \| <<techniques>> \| <<synopsis>> \| <<reference>> >| https://github.com/zajo/synapse[GitHub]
+| https://github.com/zajo/synapse[GitHub] >| <<tutorial>> \| <<techniques>> \| <<synopsis>> \| <<reference>>
 |====
 
 [[tutorial]]
