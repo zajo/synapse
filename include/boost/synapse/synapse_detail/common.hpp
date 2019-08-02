@@ -7,7 +7,6 @@
 #define UUID_A098543F9C6D4BEC8CE41B576AA69BA6
 
 #include <boost/synapse/signal_traits.hpp>
-#include <boost/synapse/dep/thread_local.hpp>
 #include <boost/synapse/dep/smart_ptr.hpp>
 #include <boost/synapse/dep/assert.hpp>
 #include <atomic>
@@ -108,7 +107,7 @@ namespace boost { namespace synapse {
         template <class Signal>
         shared_ptr<connection_list_list> const & get_connection_list_list( shared_ptr<connection_list_list> (*create_connection_list_list)() )
         {
-            BOOST_SYNAPSE_STATIC_INIT(shared_ptr<connection_list_list>,obj,(create_connection_list_list()));
+            static shared_ptr<connection_list_list> obj(create_connection_list_list());
             return obj;
         }
 
@@ -153,9 +152,9 @@ namespace boost { namespace synapse {
         {
             static shared_ptr<thread_local_signal_data> const & get( bool allocate )
             {
-                BOOST_SYNAPSE_STATIC(std::atomic<int>,count);
-                BOOST_SYNAPSE_STATIC(std::atomic<interthread_interface *>,interthread);
-                BOOST_SYNAPSE_THREAD_LOCAL(shared_ptr<thread_local_signal_data>,obj);
+                static std::atomic<int> count;
+                static std::atomic<interthread_interface *> interthread;
+                static thread_local shared_ptr<thread_local_signal_data> obj;
                 if( !obj && (allocate || interthread.load()) )
                 {
                     obj=synapse::make_shared<thread_local_signal_data>(&get_connection_list_list<Signal>,count,interthread);
@@ -170,7 +169,7 @@ namespace boost { namespace synapse {
         {
             static shared_ptr<thread_local_signal_data> const & get( bool allocate )
             {
-                BOOST_SYNAPSE_THREAD_LOCAL(shared_ptr<thread_local_signal_data>,obj);
+                static thread_local shared_ptr<thread_local_signal_data> obj;
                 if( !obj && allocate )
                 {
                     obj=synapse::make_shared<thread_local_signal_data>();

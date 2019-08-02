@@ -550,7 +550,7 @@ namespace boost { namespace synapse {
 
         shared_ptr<void const> & meta_emitter()
         {
-            BOOST_SYNAPSE_STATIC_INIT(shared_ptr<void const>,me,(make_shared<int>(42)));
+            static shared_ptr<void const> me(make_shared<int>(42));
             return me;
         }
     }
