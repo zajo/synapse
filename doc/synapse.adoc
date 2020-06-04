@@ -1,13 +1,19 @@
 :last-update-label!:
 :icons: font
 :prewrap!:
-:source-highlighter: coderay
-:stylesheet: zajo.css
+:docinfo: shared
+:stylesheet: zajo-dark.css
+
 = Synapse
 Non-intrusive signal programming library for {CPP}11
-:toclevels: 3
+ifndef::backend-pdf[]
 :toc: left
-:toc-title:
+:toclevels: 3
+:toc-title: pass:[<div style="float:right"><input width="32" height="32" type="image" alt="Skin" src="./skin.png" onclick="this.blur();switch_style();return false;"/></div>]
+
+[.text-right]
+https://github.com/zajo/synapse[GitHub] | https://travis-ci.org/zajo/synapse[Travis] | https://ci.appveyor.com/project/zajo/synapse[AppVeyor] | link:./synapse.pdf[PDF]
+endif::[]
 
 [abstract]
 == Abstract
@@ -20,10 +26,12 @@ Synapse is a non-intrusive {CPP} signal programming library for {CPP}11. Feature
 * In a multi-thread environment signals can be emitted asynchronously and scheduled for synchronous execution when polled in other threads.
 ====
 
+ifndef::backend-pdf[]
 [grid=none, frame=none]
 |====
 | https://github.com/zajo/synapse[GitHub] >| <<tutorial>> \| <<techniques>> \| <<synopsis>> \| <<reference>>
 |====
+endif::[]
 
 [[tutorial]]
 == Tutorial
@@ -1426,4 +1434,8 @@ Special thanks to Peter Dimov for his valuable feedback on the Synapse design an
 
 ***
 
-[.small]#_(C) 2015-2018 Emil Dotchevski_#
+[.text-right]
+(C) 2015-2020 Emil Dotchevski
+
+[.text-right]
+Documentation rendered by https://asciidoctor.org/[Asciidoctor] with https://github.com/zajo/asciidoctor_skin[these customizations].

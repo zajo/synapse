@@ -54,12 +54,24 @@ matrix:
 
     - os: linux
       env: DOC=1
+      install:
+        - gem install asciidoctor
+        - gem install asciidoctor-pdf --pre
+        - cd ..
+        - git clone -b master --depth 1 https://github.com/boostorg/boost.git boost-root
+        - cd boost-root
+        - git submodule update --init tools/build
+        - git submodule update --init libs/config
+        - mkdir libs/synapse
+        - cp -r $TRAVIS_BUILD_DIR/* libs/synapse
+        - ./bootstrap.sh
+        - cd libs/synapse
       script:
         - |-
           echo "using asciidoctor ;" > ~/user-config.jam
-        - ./b2 libs/synapse/doc
+        - ../../b2 doc
       deploy:
-        local-dir: ../boost-root/libs/synapse/doc/html
+        local-dir: ../boost-root/libs/synapse/doc/out
         provider: pages
         skip-cleanup: true
         github-token: $GH_PAGES_TOKEN
@@ -239,9 +251,6 @@ matrix:
             - llvm-toolchain-trusty-6.0
 
 install:
-  - gem install asciidoctor
-  - gem install coderay
-#  - pip3 install meson
   - cd ..
   - git clone -b master --depth 1 https://github.com/boostorg/boost.git boost-root
   - cd boost-root

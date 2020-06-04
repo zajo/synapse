@@ -5,19 +5,14 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
-project doc/leaf ;
-
+project doc/synapse ;
 import asciidoctor ;
 
-html index.html : synapse.adoc ;
+html index.html : synapse.adoc : <asciidoctor-attribute>stylesheet=zajo-dark.css <asciidoctor-attribute>linkcss ;
+install html_ : index.html fig1.png fig2.png skin.png zajo-dark.css zajo-light.css : <location>out ;
 
-install html_ : index.html fig1.png fig2.png : <location>html ;
-
-pdf synapse.pdf : synapse.adoc ;
-explicit synapse.pdf ;
-
-install pdf_ : synapse.pdf : <location>pdf ;
-explicit pdf_ ;
+pdf synapse.pdf : synapse.adoc : <asciidoctor-doctype>book  <asciidoctor-attribute>pdf-themesdir=doc <asciidoctor-attribute>pdf-theme=synapse ;
+install pdf_ : synapse.pdf : <location>out ;
 
 alias boostdoc ;
 explicit boostdoc ;
