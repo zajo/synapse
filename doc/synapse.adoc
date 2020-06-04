@@ -28,9 +28,8 @@ Synapse is a non-intrusive {CPP} signal programming library for {CPP}11. Feature
 
 ifndef::backend-pdf[]
 [grid=none, frame=none]
-|====
-| https://github.com/zajo/synapse[GitHub] >| <<tutorial>> \| <<techniques>> \| <<synopsis>> \| <<reference>>
-|====
+[.text-right]
+<<tutorial>> | <<techniques>> | <<synopsis>> | <<reference>>
 endif::[]
 
 [[tutorial]]
