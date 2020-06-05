@@ -391,6 +391,7 @@ install:
   - ./bootstrap.sh
   - ./b2 headers
   - clang++ --version
+  - c++ --version
 
 script:
   - |-
