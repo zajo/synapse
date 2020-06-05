@@ -390,14 +390,13 @@ install:
   - python tools/boostdep/depinst/depinst.py synapse
   - ./bootstrap.sh
   - ./b2 headers
-  - clang++ --version
-  - c++ --version
+  - cd libs/synapse
 
+script:
 script:
   - |-
     echo "using $TOOLSET : : $COMPILER ;" > ~/user-config.jam
-  - ./b2 libs/synapse/build/test toolset=$TOOLSET cxxstd=$CXXSTD cxxflags=-w ${CXXFLAGS:+cxxflags="$CXXFLAGS"} variant=debug
-  - ./b2 libs/synapse/build/test toolset=$TOOLSET cxxstd=$CXXSTD cxxflags=-w ${CXXFLAGS:+cxxflags="$CXXFLAGS"} variant=release
+  - ../../b2 build/test toolset=$TOOLSET cxxstd=$CXXSTD variant=debug,release ${UBSAN:+cxxflags=-fsanitize=undefined cxxflags=-fno-sanitize-recover=undefined linkflags=-fsanitize=undefined debug-symbols=on} ${LINKFLAGS:+linkflags=$LINKFLAGS}
 
 notifications:
   email:
