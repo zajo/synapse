@@ -84,19 +84,6 @@ matrix:
         on:
           branch: master
 
-    - os: linux
-      dist: xenial
-      compiler: clang++-11
-      env: TOOLSET=clang COMPILER=clang++-9 CXXSTD=11,14,17,2a
-      addons:
-        apt:
-          packages:
-            - clang-11
-          sources:
-            - ubuntu-toolchain-r-test
-            - sourceline: 'deb https://apt.llvm.org/xenial/ llvm-toolchain-xenial-11 main'
-              key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
-
     - os: osx
       osx_image: xcode11.2
       compiler: clang++
@@ -403,6 +390,7 @@ install:
   - python tools/boostdep/depinst/depinst.py synapse
   - ./bootstrap.sh
   - ./b2 headers
+  - clang++ --version
 
 script:
   - |-
