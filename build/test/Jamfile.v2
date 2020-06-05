@@ -18,6 +18,8 @@ project
 
 # build-project ../example ;
 
+run args_translate_test.cpp ..//synapse ;
+
 compile compile_block_hpp.cpp ;
 compile compile_blocker_hpp.cpp ;
 compile compile_connect_hpp.cpp ;
@@ -27,7 +29,6 @@ compile compile_thread_local_queue_hpp.cpp : <threading>multi ;
 compile compile_translate_hpp.cpp ;
 
 run args_connect_test.cpp ..//synapse ;
-run args_translate_test.cpp ..//synapse ;
 run block_emit_test.cpp ..//synapse ;
 run block_test.cpp ..//block ;
 run connect_emit_test.cpp ..//synapse ;

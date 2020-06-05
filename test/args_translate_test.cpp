@@ -315,64 +315,112 @@ namespace
         int count=0;
         my_emitter_type e1;
         my_emitter_type e2;
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         shared_ptr<synapse::connection> mc_c0 = release( synapse::connect<synapse::meta::connected<signal0_a4> >(synapse::meta::emitter(),
             [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(mc_c0.unique());
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(connect_count==0);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         shared_ptr<synapse::connection> mc_c1 = release( synapse::connect<synapse::meta::connected<signal1_a4> >(synapse::meta::emitter(),
             [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(mc_c1.unique());
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(connect_count==0);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         shared_ptr<synapse::connection> mc_c2 = release( synapse::connect<synapse::meta::connected<signal2_a4> >(synapse::meta::emitter(),
             [&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } ) );
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(mc_c2.unique());
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(connect_count==0);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         short a4=42;
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         shared_ptr<synapse::connection> c0=synapse::translate<signal0_a4,signal1_a4>(&e1,&e1);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(connect_count==1);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         shared_ptr<synapse::connection> c1=synapse::translate<signal1_a4,signal2_a4>(&e1,&e2);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(connect_count==2);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         shared_ptr<synapse::connection> c2=synapse::connect<signal2_a4>(&e2,
             [&count,&a4]( int a1, float a2, std::string const & a3, short & a4_ )
             {
+std::cout << __File__ << '(' << __LINE__ << ")\n";
                 BOOST_TEST(a1==42);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
                 BOOST_TEST(a2=42.42f);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
                 BOOST_TEST(a3=="42");
+std::cout << __File__ << '(' << __LINE__ << ")\n";
                 BOOST_TEST(&a4==&a4_);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
                 ++count;
             } );
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(connect_count==3);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(synapse::emit<signal0_a4>(&e1,42,42.42f,"42",std::ref(a4))==1);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(count==1);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(synapse::emit<signal1_a4>(&e1,42,42.42f,"42",std::ref(a4))==1);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(count==2);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(synapse::emit<signal2_a4>(&e2,42,42.42f,"42",std::ref(a4))==1);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(count==3);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(synapse::emit<signal1_a4>(&e1,42,42.42f,"42",std::ref(a4))==1);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(count==4);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         c2.reset();
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(synapse::emit<signal0_a4>(&e1,42,42.42f,"42",std::ref(a4))==0);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(count==4);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(synapse::emit<signal1_a4>(&e1,42,42.42f,"42",std::ref(a4))==0);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(count==4);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(synapse::emit<signal2_a4>(&e2,42,42.42f,"42",std::ref(a4))==0);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(count==4);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(connect_count==2);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal2_a4>(false);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
             BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         }
         c1.reset();
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(connect_count==1);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal1_a4>(false);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
             BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         }
         c0.reset();
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(connect_count==0);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal0_a4>(false);
+std::cout << __File__ << '(' << __LINE__ << ")\n";
             BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+std::cout << __File__ << '(' << __LINE__ << ")\n";
         }
     }
 
@@ -381,10 +429,16 @@ namespace
 
 int main( int argc, char const * argv[] )
 {
+std::cout << __File__ << '(' << __LINE__ << ")\n";
     test_a0();
+std::cout << __File__ << '(' << __LINE__ << ")\n";
     test_a1();
+std::cout << __File__ << '(' << __LINE__ << ")\n";
     test_a2();
+std::cout << __File__ << '(' << __LINE__ << ")\n";
     test_a3();
+std::cout << __File__ << '(' << __LINE__ << ")\n";
     test_a4();
+std::cout << __File__ << '(' << __LINE__ << ")\n";
     return boost::report_errors();
 }
