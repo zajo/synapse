@@ -78,19 +78,19 @@ namespace
         BOOST_TEST(connect_count==2);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal2_a0>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
         c1.reset();
         BOOST_TEST(connect_count==1);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal1_a0>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
         c0.reset();
         BOOST_TEST(connect_count==0);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal0_a0>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
     }
 
@@ -147,19 +147,19 @@ namespace
         BOOST_TEST(connect_count==2);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal2_a1>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
         c1.reset();
         BOOST_TEST(connect_count==1);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal1_a1>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
         c0.reset();
         BOOST_TEST(connect_count==0);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal0_a1>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
     }
 
@@ -216,19 +216,19 @@ namespace
         BOOST_TEST(connect_count==2);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal2_a2>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
         c1.reset();
         BOOST_TEST(connect_count==1);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal1_a2>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
         c0.reset();
         BOOST_TEST(connect_count==0);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal0_a2>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
     }
 
@@ -289,19 +289,19 @@ std::cerr << __FILE__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(connect_count==2);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal2_a3>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
         c1.reset();
         BOOST_TEST(connect_count==1);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal1_a3>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
         c0.reset();
         BOOST_TEST(connect_count==0);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal0_a3>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
     }
 
@@ -362,19 +362,19 @@ std::cerr << __FILE__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(connect_count==2);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal2_a4>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
         c1.reset();
         BOOST_TEST(connect_count==1);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal1_a4>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
         c0.reset();
         BOOST_TEST(connect_count==0);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal0_a4>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
     }
 

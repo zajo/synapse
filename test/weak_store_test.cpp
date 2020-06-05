@@ -15,7 +15,7 @@ namespace
     struct test_type { test_type() { } };
     bool shared( shared_ptr<void const> const & a, shared_ptr<void const> const & b )
     {
-        return !(a<b) && !(b<a);
+        return !a.owner_before(b) && !b.owner_before(a);
     }
 }
 

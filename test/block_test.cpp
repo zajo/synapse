@@ -39,7 +39,7 @@ namespace
 
     bool does_not_own( shared_ptr<void const> const & e )
     {
-        return !(e<shared_ptr<void const>()) && !(shared_ptr<void const>()<e);
+        return !e.owner_before(shared_ptr<void const>()) && !shared_ptr<void const>().owner_before(e);
     }
 
     template <class Signal>
@@ -173,7 +173,7 @@ namespace
                 synapse::blocker * eb=eb3.get();
                 eb3.reset();
                 BOOST_TEST(synapse::synapse_detail::get_thread_local_signal_data<signal1>(false)->bl_.expired());
-                BOOST_TEST(!(weak_ptr<synapse::synapse_detail::thread_local_signal_data::blocked_emitters_list>()<synapse::synapse_detail::get_thread_local_signal_data<signal1>(false)->bl_) && !(synapse::synapse_detail::get_thread_local_signal_data<signal1>(false)->bl_<weak_ptr<synapse::synapse_detail::thread_local_signal_data::blocked_emitters_list>()));
+                BOOST_TEST(!weak_ptr<synapse::synapse_detail::thread_local_signal_data::blocked_emitters_list>().owner_before(synapse::synapse_detail::get_thread_local_signal_data<signal1>(false)->bl_) && !synapse::synapse_detail::get_thread_local_signal_data<signal1>(false)->bl_.owner_before(weak_ptr<synapse::synapse_detail::thread_local_signal_data::blocked_emitters_list>()));
                 BOOST_TEST(does_not_own(the_meta_data<signal1>().e));
                 BOOST_TEST(the_meta_data<signal1>().ep==&e2);
                 BOOST_TEST(the_meta_data<signal1>().eb==eb);
@@ -202,7 +202,7 @@ namespace
                 synapse::blocker * eb=eb4.get();
                 eb4.reset();
                 BOOST_TEST(synapse::synapse_detail::get_thread_local_signal_data<signal2>(false)->bl_.expired());
-                BOOST_TEST(!(weak_ptr<synapse::synapse_detail::thread_local_signal_data::blocked_emitters_list>()<synapse::synapse_detail::get_thread_local_signal_data<signal2>(false)->bl_) && !(synapse::synapse_detail::get_thread_local_signal_data<signal2>(false)->bl_<weak_ptr<synapse::synapse_detail::thread_local_signal_data::blocked_emitters_list>()));
+                BOOST_TEST(!weak_ptr<synapse::synapse_detail::thread_local_signal_data::blocked_emitters_list>().owner_before(synapse::synapse_detail::get_thread_local_signal_data<signal2>(false)->bl_) && !synapse::synapse_detail::get_thread_local_signal_data<signal2>(false)->bl_.owner_before(weak_ptr<synapse::synapse_detail::thread_local_signal_data::blocked_emitters_list>()));
                 BOOST_TEST(does_not_own(the_meta_data<signal2>().e));
                 BOOST_TEST(the_meta_data<signal2>().ep==&e2);
                 BOOST_TEST(the_meta_data<signal2>().eb==eb);
