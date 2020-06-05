@@ -256,6 +256,7 @@ std::cerr << __FILE__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(connect_count==0);
         shared_ptr<synapse::connection> mc_c2 = release( synapse::connect<synapse::meta::connected<signal2_a3> >(synapse::meta::emitter(),
             [&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } ) );
+std::cerr << __FILE__ << '(' << __LINE__ << ")\n";
         BOOST_TEST(mc_c2.unique());
         BOOST_TEST(connect_count==0);
         shared_ptr<synapse::connection> c0=synapse::translate<signal0_a3,signal1_a3>(&e1,&e1);
