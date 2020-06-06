@@ -382,6 +382,7 @@ install:
   - python tools/boostdep/depinst/depinst.py synapse
   - ./bootstrap.sh
   - ./b2 headers
+  - cd libs/synapse
 
 script:
   - |-
