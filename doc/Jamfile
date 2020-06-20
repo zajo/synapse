@@ -9,9 +9,9 @@ project doc/synapse ;
 import asciidoctor ;
 
 html index.html : synapse.adoc : <asciidoctor-attribute>stylesheet=zajo-dark.css <asciidoctor-attribute>linkcss ;
-install html_ : index.html fig1.png fig2.png skin.png zajo-dark.css zajo-light.css : <location>out ;
+install html_ : index.html fig1.png fig2.png skin.png zajo-dark.css zajo-light.css rouge-github.css : <location>out ;
 
-pdf synapse.pdf : synapse.adoc : <asciidoctor-doctype>book  <asciidoctor-attribute>pdf-themesdir=doc <asciidoctor-attribute>pdf-theme=synapse ;
+pdf synapse.pdf : synapse.adoc : <asciidoctor-doctype>book <asciidoctor-attribute>pdf-themesdir=doc <asciidoctor-attribute>pdf-theme=synapse ;
 install pdf_ : synapse.pdf : <location>out ;
 
 alias boostdoc ;
