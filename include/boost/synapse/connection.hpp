@@ -14,13 +14,18 @@ namespace boost { namespace synapse {
 
     class connection
     {
+
         virtual synapse_detail::weak_store const & emitter_() const=0;
         virtual synapse_detail::weak_store const & receiver_() const=0;
         shared_ptr<void> user_data_;
+
     protected:
+
         connection();
         ~connection();
+
     public:
+
         template <class T> void set_user_data( T const & );
         template <class T> T * get_user_data() const;
         template <class T> shared_ptr<T> emitter() const;
@@ -31,9 +36,12 @@ namespace boost { namespace synapse {
         protected connection
     {
     protected:
+
         pconnection();
         ~pconnection();
+
     public:
+
         using connection::set_user_data;
         using connection::get_user_data;
         using connection::emitter;
@@ -66,30 +74,30 @@ namespace boost { namespace synapse {
         template <class T>
         typename std::enable_if<std::is_assignable<T&,T const &>::value>::type set_user_data_( shared_ptr<void> & ud, T const & x )
         {
-        if( deleter_user_data<T> * d=get_deleter<deleter_user_data<T> >(ud) )
-            d->value = x;
-        else
-            ud.reset((void *)0,deleter_user_data<T>(x));
+            if( deleter_user_data<T> * d = get_deleter<deleter_user_data<T> >(ud) )
+                d->value = x;
+            else
+                ud.reset((void *)0, deleter_user_data<T>(x));
         }
 
         template <class T>
         typename std::enable_if<!std::is_assignable<T&,T const &>::value>::type set_user_data_( shared_ptr<void> & ud, T const & x )
         {
-            ud.reset((void *)0,deleter_user_data<T>(x));
+            ud.reset((void *)0, deleter_user_data<T>(x));
         }
-    } //namespace synapse_detail
+    }
 
     template <class T>
     void connection::set_user_data( T const & x )
     {
-        synapse_detail::set_user_data_(user_data_,x);
+        synapse_detail::set_user_data_(user_data_, x);
     }
 
     template <class T>
     T * connection::get_user_data() const
     {
-        synapse_detail::deleter_user_data<T> * d=get_deleter<synapse_detail::deleter_user_data<T> >(user_data_);
-        return d?&d->value:0;
+        synapse_detail::deleter_user_data<T> * d = get_deleter<synapse_detail::deleter_user_data<T> >(user_data_);
+        return d ? &d->value : 0;
     }
 
     template <class T>

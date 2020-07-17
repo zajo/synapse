@@ -13,12 +13,12 @@ namespace boost { namespace synapse {
 
     template <class Signal> struct signal_traits;
 
-    template <class R,class... A>
+    template <class R, class... A>
     struct signal_traits<R(*)(A...)>
     {
         typedef R(*signal_type)(A...);
         typedef void signature(A...);
-        static int const arity=sizeof...(A);
+        static int const arity = sizeof...(A);
         static bool const is_thread_local=false;
     };
 

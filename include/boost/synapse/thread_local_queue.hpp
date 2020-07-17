@@ -12,6 +12,7 @@
 namespace boost { namespace synapse {
 
     struct thread_local_queue;
+
     shared_ptr<thread_local_queue> create_thread_local_queue();
     int poll( thread_local_queue & );
     int wait( thread_local_queue & );

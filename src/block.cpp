@@ -183,7 +183,7 @@ namespace boost { namespace synapse {
                 return shared_ptr<blocker>();
         }
 
-    } //namespace synapse_detail
+    }
 
     blocker::blocker()
     {

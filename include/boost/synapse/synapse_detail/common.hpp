@@ -21,9 +21,8 @@ namespace boost { namespace synapse {
 
     namespace synapse_detail
     {
-
         class connection_list_list;
-        struct thread_local_signal_data;
+        class thread_local_signal_data;
         class args_binder_base;
 
         typedef int emit_fn( thread_local_signal_data const &, void const *, args_binder_base const * );
@@ -42,10 +41,8 @@ namespace boost { namespace synapse {
             virtual int emit( thread_local_signal_data const &, void const *, args_binder_base const * )=0;
         };
 
-        struct thread_local_signal_data
+        class thread_local_signal_data
         {
-        private:
-
             thread_local_signal_data( thread_local_signal_data const & );
             thread_local_signal_data & operator=( thread_local_signal_data const & );
             cleanup_fn * cleanup_;
@@ -102,7 +99,7 @@ namespace boost { namespace synapse {
             static inline void cleanup_stub( thread_local_signal_data const & )
             {
             }
-        }; //thread_local_signal_data
+        };
 
         template <class Signal>
         shared_ptr<connection_list_list> const & get_connection_list_list( shared_ptr<connection_list_list> (*create_connection_list_list)() )
@@ -144,11 +141,11 @@ namespace boost { namespace synapse {
             }
         };
 
-        template <class Signal,bool SignalIsThreadLocal=signal_traits<Signal>::is_thread_local>
+        template <class Signal, bool SignalIsThreadLocal = signal_traits<Signal>::is_thread_local>
         struct thread_local_signal_data_;
 
         template <class Signal>
-        struct thread_local_signal_data_<Signal,false>
+        struct thread_local_signal_data_<Signal, false>
         {
             static shared_ptr<thread_local_signal_data> const & get( bool allocate )
             {
@@ -165,7 +162,7 @@ namespace boost { namespace synapse {
         };
 
         template <class Signal>
-        struct thread_local_signal_data_<Signal,true>
+        struct thread_local_signal_data_<Signal, true>
         {
             static shared_ptr<thread_local_signal_data> const & get( bool allocate )
             {
@@ -185,7 +182,7 @@ namespace boost { namespace synapse {
             return thread_local_signal_data_<Signal>::get(allocate);
         }
 
-    } //namespace synapse_detail
+    }
 
 } }
 

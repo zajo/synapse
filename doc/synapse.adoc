@@ -358,18 +358,18 @@ namespace boost { namespace synapse {
 
     class connection;
 
-    template <class Signal,class Emitter,class F>
+    template <class Signal, class Emitter, class F>
     shared_ptr<connection> connect( Emitter * e, F f );
 
-    template <class Signal,class Emitter,class Receiver,class F>
+    template <class Signal, class Emitter, class Receiver, class F>
     shared_ptr<connection> connect( Emitter * e, Receiver * r, F f );
 
     class pconnection;
 
-    template <class Signal,class Emitter,class F>
+    template <class Signal, class Emitter, class F>
     weak_ptr<pconnection> connect( <<Emitter>> e, F f ); <1>
 
-    template <class Signal,class Emitter,class Receiver,class F>
+    template <class Signal, class Emitter, class Receiver, class F>
     weak_ptr<pconnection> connect( <<Emitter>> e, <<Receiver>> r, F f ); <2>
 
 } }
@@ -577,7 +577,7 @@ namespace boost { namespace synapse {
 
     class blocker;
 
-    template <class Signal,class Emitter>
+    template <class Signal, class Emitter>
     shared_ptr<blocker> block( <<Emitter>> e ); <1>
 
 } }
@@ -1034,7 +1034,7 @@ Next, in a different header we install `meta::connected` signal handlers for the
 template <class Signal>
 class synapsifier;
 
-template <class R,class... A>
+template <class R, class... A>
 class synapsifier<R(*)(GLFWwindow *,A...)>
 {
     typedef R(*Signal)(GLFWwindow *,A...);
@@ -1101,7 +1101,7 @@ class synapsifier<R(*)(GLFWwindow *,A...)>
     }
 };
 
-template <class R,class... A>
+template <class R, class... A>
 typename synapsifier<R(*)(GLFWwindow *,A...)>::GLFWfun synapsifier<R(*)(GLFWwindow *,A...)>::prev_;
 
 //Install all the synapse::meta::connected<....> handlers

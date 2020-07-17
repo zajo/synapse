@@ -131,7 +131,7 @@ namespace boost { namespace synapse {
             template <class T>
             shared_ptr<T> maybe_lock() const
             {
-                return access<T>::get(maybe_lock<void const>(),&type<T>,type_,ctype_);
+                return access<T>::get(maybe_lock<void const>(), &type<T>, type_,ctype_);
             }
         };
 
@@ -165,7 +165,7 @@ namespace boost { namespace synapse {
         template <>
         inline shared_ptr<void const> weak_store::maybe_lock<void const>() const
         {
-            return px_ ? shared_ptr<void const>(shared_ptr<void>(),px_) : w_.lock();
+            return px_ ? shared_ptr<void const>(shared_ptr<void>(), px_) : w_.lock();
         }
     }
 

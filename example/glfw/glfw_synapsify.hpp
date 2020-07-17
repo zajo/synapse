@@ -13,13 +13,13 @@
 template <class Signal>
 class synapsifier;
 
-template <class R,class... A>
+template <class R, class... A>
 class synapsifier<R(*)(GLFWwindow *,A...)>
 {
     typedef R(*Signal)(GLFWwindow *,A...);
     typedef void (*GLFWfun)( GLFWwindow *,A... );
     static GLFWfun prev_;
-    
+
     //This is the handler that GLFW calls. It emits the corresponding Synapse
     //signal and calls the previous GLFW handler for the same event, if any.
     static void handler( GLFWwindow * w, A... a )
@@ -78,7 +78,7 @@ class synapsifier<R(*)(GLFWwindow *,A...)>
     }
 };
 
-template <class R,class... A>
+template <class R, class... A>
 typename synapsifier<R(*)(GLFWwindow *,A...)>::GLFWfun synapsifier<R(*)(GLFWwindow *,A...)>::prev_;
 
 //Install all the synapse::meta::connected<....> handlers

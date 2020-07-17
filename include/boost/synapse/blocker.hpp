@@ -14,10 +14,14 @@ namespace boost { namespace synapse {
     class blocker
     {
         virtual synapse_detail::weak_store const & emitter_() const=0;
+
     protected:
+
         blocker();
         ~blocker();
+
     public:
+
         template <class T> shared_ptr<T> emitter() const;
     };
 
