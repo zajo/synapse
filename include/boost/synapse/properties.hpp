@@ -1,5 +1,10 @@
-#ifndef UUID_A4F73A40022511E8AF2945EB4EA1BEAD
-#define UUID_A4F73A40022511E8AF2945EB4EA1BEAD
+#ifndef BOOST_SYNAPSE_PROPERTIES_HPP_INCLUDED
+#define BOOST_SYNAPSE_PROPERTIES_HPP_INCLUDED
+
+//Copyright (c) 2015-2020 Emil Dotchevski and Reverge Studios, Inc.
+
+//Distributed under the Boost Software License, Version 1.0. (See accompanying
+//file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/synapse/connect.hpp>
 

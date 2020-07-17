@@ -8,7 +8,7 @@ Synapse is a non-intrusive C++ signal programming library. Features:
 
 * In a multi-thread environment signals can be emitted asynchronously and scheduled for synchronous execution when polled in other threads.
 
-Copyright (c) 2015-2018 Emil Dotchevski. Distributed under the [Boost Software License, Version 1.0](http://www.boost.org/LICENSE_1_0.txt).
+Copyright (c) 2015-2020 Emil Dotchevski and Reverge Studios, Inc. Distributed under the [Boost Software License, Version 1.0](http://www.boost.org/LICENSE_1_0.txt).
 
 Please post questions and feedback on the Boost Developers Mailing List (Synapse is not part of Boost).
 

@@ -1,10 +1,10 @@
-//Copyright (c) 2015-2018 Emil Dotchevski and Reverge Studios, Inc.
+#ifndef BOOST_SYNAPSE_BLOCKER_HPP_INCLUDED
+#define BOOST_SYNAPSE_BLOCKER_HPP_INCLUDED
+
+//Copyright (c) 2015-2020 Emil Dotchevski and Reverge Studios, Inc.
 
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-
-#ifndef UUID_B99C2B5F62144B96A76449BF1A5FFBBD
-#define UUID_B99C2B5F62144B96A76449BF1A5FFBBD
 
 #include <boost/synapse/synapse_detail/common.hpp>
 #include <boost/synapse/synapse_detail/weak_store.hpp>

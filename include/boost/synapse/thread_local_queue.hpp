@@ -1,10 +1,10 @@
-//Copyright (c) 2015-2018 Emil Dotchevski and Reverge Studios, Inc.
+#ifndef BOOST_SYNAPSE_THREAD_LOCAL_QUEUE_HPP_INCLUDED
+#define BOOST_SYNAPSE_THREAD_LOCAL_QUEUE_HPP_INCLUDED
+
+//Copyright (c) 2015-2020 Emil Dotchevski and Reverge Studios, Inc.
 
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-
-#ifndef UUID_D355B31075FB11E684FA1794B53EDEC4
-#define UUID_D355B31075FB11E684FA1794B53EDEC4
 
 #include <boost/synapse/dep/smart_ptr.hpp>
 #include <boost/synapse/dep/functional.hpp>

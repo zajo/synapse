@@ -1,10 +1,10 @@
-//Copyright (c) 2015-2018 Emil Dotchevski and Reverge Studios, Inc.
+#ifndef BOOST_SYNAPSE_CONNECT_HPP_INCLUDED
+#define BOOST_SYNAPSE_CONNECT_HPP_INCLUDED
+
+//Copyright (c) 2015-2020 Emil Dotchevski and Reverge Studios, Inc.
 
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-
-#ifndef UUID_2CCEDE28DF2411E4809EBF291D5D46B0
-#define UUID_2CCEDE28DF2411E4809EBF291D5D46B0
 
 #include <boost/synapse/emit.hpp>
 #include <boost/synapse/synapse_detail/weak_store.hpp>

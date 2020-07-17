@@ -1,0 +1,1 @@
+option('synapse_use_boost',type:'boolean',value:false,description:'Use boost:: instead of std:: shared/weak_ptr, function, tuple::apply')

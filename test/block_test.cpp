@@ -1,11 +1,11 @@
-//Copyright (c) 2015-2018 Emil Dotchevski and Reverge Studios, Inc.
+//Copyright (c) 2015-2020 Emil Dotchevski and Reverge Studios, Inc.
 
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/synapse/block.hpp>
 #include <boost/synapse/blocker.hpp>
-#include <boost/detail/lightweight_test.hpp>
+#include "boost/core/lightweight_test.hpp"
 
 namespace synapse=boost::synapse;
 using synapse::shared_ptr;
@@ -39,7 +39,7 @@ namespace
 
     bool does_not_own( shared_ptr<void const> const & e )
     {
-        return !(e<shared_ptr<void const>()) && !(shared_ptr<void const>()<e);
+        return !(e.owner_before(shared_ptr<void const>())) && !(shared_ptr<void const>().owner_before(e));
     }
 
     template <class Signal>
@@ -95,13 +95,13 @@ namespace
             {
                 shared_ptr<synapse::blocker> b1=synapse::block<signal1>(&e1);
                 shared_ptr<synapse::blocker> b2=synapse::block<signal1>(&e1);
-                BOOST_TEST(eb1==b1);
-                BOOST_TEST(eb1==b2);
+                BOOST_TEST_EQ(eb1, b1);
+                BOOST_TEST_EQ(eb1, b2);
             }
             BOOST_TEST(does_not_own(the_meta_data<signal1>().e));
-            BOOST_TEST(the_meta_data<signal1>().ep==&e1);
-            BOOST_TEST(the_meta_data<signal1>().eb==eb1.get());
-            BOOST_TEST(the_meta_data<signal1>().count==1);
+            BOOST_TEST_EQ(the_meta_data<signal1>().ep, &e1);
+            BOOST_TEST_EQ(the_meta_data<signal1>().eb, eb1.get());
+            BOOST_TEST_EQ(the_meta_data<signal1>().count, 1);
             the_meta_data<signal1>().reset();
             BOOST_TEST(emitter_blocked<signal1>(&e1));
             BOOST_TEST(!emitter_blocked<signal2>(&e1));
@@ -111,13 +111,13 @@ namespace
             {
                 shared_ptr<synapse::blocker> b1=synapse::block<signal2>(&e1);
                 shared_ptr<synapse::blocker> b2=synapse::block<signal2>(&e1);
-                BOOST_TEST(eb2==b1);
-                BOOST_TEST(eb2==b2);
+                BOOST_TEST_EQ(eb2, b1);
+                BOOST_TEST_EQ(eb2, b2);
             }
             BOOST_TEST(does_not_own(the_meta_data<signal2>().e));
-            BOOST_TEST(the_meta_data<signal2>().ep==&e1);
-            BOOST_TEST(the_meta_data<signal2>().eb==eb2.get());
-            BOOST_TEST(the_meta_data<signal2>().count==1);
+            BOOST_TEST_EQ(the_meta_data<signal2>().ep, &e1);
+            BOOST_TEST_EQ(the_meta_data<signal2>().eb, eb2.get());
+            BOOST_TEST_EQ(the_meta_data<signal2>().count, 1);
             the_meta_data<signal2>().reset();
             BOOST_TEST(emitter_blocked<signal1>(&e1));
             BOOST_TEST(emitter_blocked<signal2>(&e1));
@@ -127,13 +127,13 @@ namespace
             {
                 shared_ptr<synapse::blocker> b1=synapse::block<signal1>(&e2);
                 shared_ptr<synapse::blocker> b2=synapse::block<signal1>(&e2);
-                BOOST_TEST(eb3==b1);
-                BOOST_TEST(eb3==b2);
+                BOOST_TEST_EQ(eb3, b1);
+                BOOST_TEST_EQ(eb3, b2);
             }
             BOOST_TEST(does_not_own(the_meta_data<signal1>().e));
-            BOOST_TEST(the_meta_data<signal1>().ep==&e2);
-            BOOST_TEST(the_meta_data<signal1>().eb==eb3.get());
-            BOOST_TEST(the_meta_data<signal1>().count==2);
+            BOOST_TEST_EQ(the_meta_data<signal1>().ep, &e2);
+            BOOST_TEST_EQ(the_meta_data<signal1>().eb, eb3.get());
+            BOOST_TEST_EQ(the_meta_data<signal1>().count, 2);
             the_meta_data<signal1>().reset();
             BOOST_TEST(emitter_blocked<signal1>(&e1));
             BOOST_TEST(emitter_blocked<signal2>(&e1));
@@ -143,13 +143,13 @@ namespace
             {
                 shared_ptr<synapse::blocker> b1=synapse::block<signal2>(&e2);
                 shared_ptr<synapse::blocker> b2=synapse::block<signal2>(&e2);
-                BOOST_TEST(eb4==b1);
-                BOOST_TEST(eb4==b2);
+                BOOST_TEST_EQ(eb4, b1);
+                BOOST_TEST_EQ(eb4, b2);
             }
             BOOST_TEST(does_not_own(the_meta_data<signal2>().e));
-            BOOST_TEST(the_meta_data<signal2>().ep==&e2);
-            BOOST_TEST(the_meta_data<signal2>().eb==eb4.get());
-            BOOST_TEST(the_meta_data<signal2>().count==2);
+            BOOST_TEST_EQ(the_meta_data<signal2>().ep, &e2);
+            BOOST_TEST_EQ(the_meta_data<signal2>().eb, eb4.get());
+            BOOST_TEST_EQ(the_meta_data<signal2>().count, 2);
             the_meta_data<signal2>().reset();
             BOOST_TEST(emitter_blocked<signal1>(&e1));
             BOOST_TEST(emitter_blocked<signal2>(&e1));
@@ -160,10 +160,10 @@ namespace
                 eb1.reset();
                 BOOST_TEST(!synapse::synapse_detail::get_thread_local_signal_data<signal1>(false)->bl_.expired());
                 BOOST_TEST(does_not_own(the_meta_data<signal1>().e));
-                BOOST_TEST(the_meta_data<signal1>().ep==&e1);
-                BOOST_TEST(the_meta_data<signal1>().eb==eb);
+                BOOST_TEST_EQ(the_meta_data<signal1>().ep, &e1);
+                BOOST_TEST_EQ(the_meta_data<signal1>().eb, eb);
             }
-            BOOST_TEST(the_meta_data<signal1>().count==1);
+            BOOST_TEST_EQ(the_meta_data<signal1>().count, 1);
             the_meta_data<signal1>().reset();
             BOOST_TEST(!emitter_blocked<signal1>(&e1));
             BOOST_TEST(emitter_blocked<signal2>(&e1));
@@ -173,12 +173,14 @@ namespace
                 synapse::blocker * eb=eb3.get();
                 eb3.reset();
                 BOOST_TEST(synapse::synapse_detail::get_thread_local_signal_data<signal1>(false)->bl_.expired());
-                BOOST_TEST(!(weak_ptr<synapse::synapse_detail::thread_local_signal_data::blocked_emitters_list>()<synapse::synapse_detail::get_thread_local_signal_data<signal1>(false)->bl_) && !(synapse::synapse_detail::get_thread_local_signal_data<signal1>(false)->bl_<weak_ptr<synapse::synapse_detail::thread_local_signal_data::blocked_emitters_list>()));
+                BOOST_TEST(
+                    !(weak_ptr<synapse::synapse_detail::thread_local_signal_data::blocked_emitters_list>().owner_before(synapse::synapse_detail::get_thread_local_signal_data<signal1>(false)->bl_)) &&
+                    !(synapse::synapse_detail::get_thread_local_signal_data<signal1>(false)->bl_.owner_before(weak_ptr<synapse::synapse_detail::thread_local_signal_data::blocked_emitters_list>())) );
                 BOOST_TEST(does_not_own(the_meta_data<signal1>().e));
-                BOOST_TEST(the_meta_data<signal1>().ep==&e2);
-                BOOST_TEST(the_meta_data<signal1>().eb==eb);
+                BOOST_TEST_EQ(the_meta_data<signal1>().ep, &e2);
+                BOOST_TEST_EQ(the_meta_data<signal1>().eb, eb);
             }
-            BOOST_TEST(the_meta_data<signal1>().count==0);
+            BOOST_TEST_EQ(the_meta_data<signal1>().count, 0);
             the_meta_data<signal1>().reset();
             BOOST_TEST(!emitter_blocked<signal1>(&e1));
             BOOST_TEST(emitter_blocked<signal2>(&e1));
@@ -189,10 +191,10 @@ namespace
                 eb2.reset();
                 BOOST_TEST(!synapse::synapse_detail::get_thread_local_signal_data<signal2>(false)->bl_.expired());
                 BOOST_TEST(does_not_own(the_meta_data<signal2>().e));
-                BOOST_TEST(the_meta_data<signal2>().ep==&e1);
-                BOOST_TEST(the_meta_data<signal2>().eb==eb);
+                BOOST_TEST_EQ(the_meta_data<signal2>().ep, &e1);
+                BOOST_TEST_EQ(the_meta_data<signal2>().eb, eb);
             }
-            BOOST_TEST(the_meta_data<signal2>().count==1);
+            BOOST_TEST_EQ(the_meta_data<signal2>().count, 1);
             the_meta_data<signal2>().reset();
             BOOST_TEST(!emitter_blocked<signal1>(&e1));
             BOOST_TEST(!emitter_blocked<signal2>(&e1));
@@ -202,12 +204,14 @@ namespace
                 synapse::blocker * eb=eb4.get();
                 eb4.reset();
                 BOOST_TEST(synapse::synapse_detail::get_thread_local_signal_data<signal2>(false)->bl_.expired());
-                BOOST_TEST(!(weak_ptr<synapse::synapse_detail::thread_local_signal_data::blocked_emitters_list>()<synapse::synapse_detail::get_thread_local_signal_data<signal2>(false)->bl_) && !(synapse::synapse_detail::get_thread_local_signal_data<signal2>(false)->bl_<weak_ptr<synapse::synapse_detail::thread_local_signal_data::blocked_emitters_list>()));
+                BOOST_TEST(
+                    !(weak_ptr<synapse::synapse_detail::thread_local_signal_data::blocked_emitters_list>().owner_before(synapse::synapse_detail::get_thread_local_signal_data<signal2>(false)->bl_)) &&
+                    !(synapse::synapse_detail::get_thread_local_signal_data<signal2>(false)->bl_.owner_before(weak_ptr<synapse::synapse_detail::thread_local_signal_data::blocked_emitters_list>())) );
                 BOOST_TEST(does_not_own(the_meta_data<signal2>().e));
-                BOOST_TEST(the_meta_data<signal2>().ep==&e2);
-                BOOST_TEST(the_meta_data<signal2>().eb==eb);
+                BOOST_TEST_EQ(the_meta_data<signal2>().ep, &e2);
+                BOOST_TEST_EQ(the_meta_data<signal2>().eb, eb);
             }
-            BOOST_TEST(the_meta_data<signal2>().count==0);
+            BOOST_TEST_EQ(the_meta_data<signal2>().count, 0);
             the_meta_data<signal2>().reset();
             BOOST_TEST(!emitter_blocked<signal1>(&e1));
             BOOST_TEST(!emitter_blocked<signal2>(&e1));
@@ -223,27 +227,27 @@ namespace
             {
                 shared_ptr<synapse::blocker> b1=synapse::block<signal1>(e);
                 shared_ptr<synapse::blocker> b2=synapse::block<signal1>(e);
-                BOOST_TEST(eb==b1);
-                BOOST_TEST(eb==b2);
+                BOOST_TEST_EQ(eb, b1);
+                BOOST_TEST_EQ(eb, b2);
             }
-            BOOST_TEST(the_meta_data<signal1>().e==e);
-            BOOST_TEST(the_meta_data<signal1>().ep==e.get());
-            BOOST_TEST(the_meta_data<signal1>().eb==eb.get());
-            BOOST_TEST(the_meta_data<signal1>().count==1);
+            BOOST_TEST_EQ(the_meta_data<signal1>().e, e);
+            BOOST_TEST_EQ(the_meta_data<signal1>().ep, e.get());
+            BOOST_TEST_EQ(the_meta_data<signal1>().eb, eb.get());
+            BOOST_TEST_EQ(the_meta_data<signal1>().count, 1);
             BOOST_TEST(emitter_blocked<signal1>(e.get()));
             the_meta_data<signal1>().reset();
             e.reset();
-            BOOST_TEST(the_meta_data<signal1>().eb==0);
-            BOOST_TEST(the_meta_data<signal1>().count==1);
+            BOOST_TEST_EQ(the_meta_data<signal1>().eb, nullptr);
+            BOOST_TEST_EQ(the_meta_data<signal1>().count, 1);
             the_meta_data<signal1>().reset();
             {
                 synapse::blocker * p=eb.get();
                 eb.reset();
                 BOOST_TEST(!the_meta_data<signal1>().e);
                 BOOST_TEST(!the_meta_data<signal1>().ep);
-                BOOST_TEST(the_meta_data<signal1>().eb==p);
+                BOOST_TEST_EQ(the_meta_data<signal1>().eb, p);
             }
-            BOOST_TEST(the_meta_data<signal1>().count==0);
+            BOOST_TEST_EQ(the_meta_data<signal1>().count, 0);
             the_meta_data<signal1>().count=0;
             the_meta_data<signal1>().reset();
         }
@@ -251,32 +255,32 @@ namespace
         {
             shared_ptr<my_emitter_type> e(new my_emitter_type);
             BOOST_TEST(!emitter_blocked<signal1>(e.get()));
-            BOOST_TEST(the_meta_data<signal1>().count==0);
+            BOOST_TEST_EQ(the_meta_data<signal1>().count, 0);
             shared_ptr<synapse::blocker> eb=synapse::block<signal1>(weak_ptr<my_emitter_type>(e));
             {
                 shared_ptr<synapse::blocker> b1=synapse::block<signal1>(e);
                 shared_ptr<synapse::blocker> b2=synapse::block<signal1>(e);
-                BOOST_TEST(eb==b1);
-                BOOST_TEST(eb==b2);
+                BOOST_TEST_EQ(eb, b1);
+                BOOST_TEST_EQ(eb, b2);
             }
-            BOOST_TEST(the_meta_data<signal1>().e==e);
-            BOOST_TEST(the_meta_data<signal1>().ep==e.get());
-            BOOST_TEST(the_meta_data<signal1>().eb==eb.get());
-            BOOST_TEST(the_meta_data<signal1>().count==1);
+            BOOST_TEST_EQ(the_meta_data<signal1>().e, e);
+            BOOST_TEST_EQ(the_meta_data<signal1>().ep, e.get());
+            BOOST_TEST_EQ(the_meta_data<signal1>().eb, eb.get());
+            BOOST_TEST_EQ(the_meta_data<signal1>().count, 1);
             BOOST_TEST(emitter_blocked<signal1>(e.get()));
             the_meta_data<signal1>().reset();
             e.reset();
-            BOOST_TEST(the_meta_data<signal1>().eb==0);
-            BOOST_TEST(the_meta_data<signal1>().count==1);
+            BOOST_TEST_EQ(the_meta_data<signal1>().eb, nullptr);
+            BOOST_TEST_EQ(the_meta_data<signal1>().count, 1);
             the_meta_data<signal1>().reset();
             {
                 synapse::blocker * p=eb.get();
                 eb.reset();
                 BOOST_TEST(!the_meta_data<signal1>().e);
                 BOOST_TEST(!the_meta_data<signal1>().ep);
-                BOOST_TEST(the_meta_data<signal1>().eb==p);
+                BOOST_TEST_EQ(the_meta_data<signal1>().eb, p);
             }
-            BOOST_TEST(the_meta_data<signal1>().count==0);
+            BOOST_TEST_EQ(the_meta_data<signal1>().count, 0);
             the_meta_data<signal1>().count=0;
             the_meta_data<signal1>().reset();
         }
@@ -290,12 +294,12 @@ namespace
         shared_ptr<my_emitter_type> e1(&e2,null_deleter());
         shared_ptr<synapse::blocker> b1=synapse::block<signal1>(e1);
         BOOST_TEST(emitter_blocked<signal1>(&e2));
-        BOOST_TEST(b1.use_count()==1);
+        BOOST_TEST_EQ(b1.use_count(), 1);
         e1.reset();
         the_meta_data<signal1>().reset();
         shared_ptr<synapse::blocker> b2=synapse::block<signal1>(&e2);
         BOOST_TEST(emitter_blocked<signal1>(&e2));
-        BOOST_TEST(b2.use_count()==1);
+        BOOST_TEST_EQ(b2.use_count(), 1);
         the_meta_data<signal1>().reset();
         b1.reset();
         BOOST_TEST(emitter_blocked<signal1>(&e2));

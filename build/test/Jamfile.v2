@@ -10,7 +10,7 @@ project
     : source-location
         ../../test
     : requirements
-        <cxxstd>11
+        <cxxstd>17
         <link>static
         <toolset>gcc:<cxxflags>"-Wno-dangling-else -Wno-sign_compare -w"
         <toolset>clang:<cxxflags>"-Wno-delete-non-abstract-non-virtual-dtor -Wno-delete-non-virtual-dtor -Wno-dangling-else -w"

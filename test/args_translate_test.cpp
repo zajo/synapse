@@ -1,11 +1,11 @@
-//Copyright (c) 2015-2018 Emil Dotchevski and Reverge Studios, Inc.
+//Copyright (c) 2015-2020 Emil Dotchevski and Reverge Studios, Inc.
 
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/synapse/translate.hpp>
 #include <boost/synapse/connection.hpp>
-#include <boost/detail/lightweight_test.hpp>
+#include "boost/core/lightweight_test.hpp"
 
 namespace synapse=boost::synapse;
 using synapse::shared_ptr;
@@ -19,7 +19,7 @@ namespace
     {
         if( flags&synapse::meta::connect_flags::connecting )
         {
-            BOOST_TEST(e1==c.emitter<my_emitter_type>().get());
+            BOOST_TEST_EQ(e1, c.emitter<my_emitter_type>().get());
             ++count;
         }
         else
@@ -41,56 +41,56 @@ namespace
         shared_ptr<synapse::connection> mc_c0 = release( synapse::connect<synapse::meta::connected<signal0_a0> >(synapse::meta::emitter(),
             [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
         BOOST_TEST(mc_c0.unique());
-        BOOST_TEST(connect_count==0);
+        BOOST_TEST_EQ(connect_count, 0);
         shared_ptr<synapse::connection> mc_c1 = release( synapse::connect<synapse::meta::connected<signal1_a0> >(synapse::meta::emitter(),
             [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
         BOOST_TEST(mc_c1.unique());
-        BOOST_TEST(connect_count==0);
+        BOOST_TEST_EQ(connect_count, 0);
         shared_ptr<synapse::connection> mc_c2 = release( synapse::connect<synapse::meta::connected<signal2_a0> >(synapse::meta::emitter(),
             [&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } ) );
         BOOST_TEST(mc_c2.unique());
-        BOOST_TEST(connect_count==0);
+        BOOST_TEST_EQ(connect_count, 0);
         shared_ptr<synapse::connection> c0=synapse::translate<signal0_a0,signal1_a0>(&e1,&e1);
-        BOOST_TEST(connect_count==1);
+        BOOST_TEST_EQ(connect_count, 1);
         shared_ptr<synapse::connection> c1=synapse::translate<signal1_a0,signal2_a0>(&e1,&e2);
-        BOOST_TEST(connect_count==2);
+        BOOST_TEST_EQ(connect_count, 2);
         shared_ptr<synapse::connection> c2=synapse::connect<signal2_a0>(&e2,
             [&count]()
             {
                 ++count;
             } );
-        BOOST_TEST(connect_count==3);
-        BOOST_TEST(synapse::emit<signal0_a0>(&e1)==1);
-        BOOST_TEST(count==1);
-        BOOST_TEST(synapse::emit<signal1_a0>(&e1)==1);
-        BOOST_TEST(count==2);
-        BOOST_TEST(synapse::emit<signal2_a0>(&e2)==1);
-        BOOST_TEST(count==3);
-        BOOST_TEST(synapse::emit<signal1_a0>(&e1)==1);
-        BOOST_TEST(count==4);
+        BOOST_TEST_EQ(connect_count, 3);
+        BOOST_TEST_EQ(synapse::emit<signal0_a0>(&e1), 1);
+        BOOST_TEST_EQ(count, 1);
+        BOOST_TEST_EQ(synapse::emit<signal1_a0>(&e1), 1);
+        BOOST_TEST_EQ(count, 2);
+        BOOST_TEST_EQ(synapse::emit<signal2_a0>(&e2), 1);
+        BOOST_TEST_EQ(count, 3);
+        BOOST_TEST_EQ(synapse::emit<signal1_a0>(&e1), 1);
+        BOOST_TEST_EQ(count, 4);
         c2.reset();
-        BOOST_TEST(synapse::emit<signal0_a0>(&e1)==0);
-        BOOST_TEST(count==4);
-        BOOST_TEST(synapse::emit<signal1_a0>(&e1)==0);
-        BOOST_TEST(count==4);
-        BOOST_TEST(synapse::emit<signal2_a0>(&e2)==0);
-        BOOST_TEST(count==4);
-        BOOST_TEST(connect_count==2);
+        BOOST_TEST_EQ(synapse::emit<signal0_a0>(&e1), 0);
+        BOOST_TEST_EQ(count, 4);
+        BOOST_TEST_EQ(synapse::emit<signal1_a0>(&e1), 0);
+        BOOST_TEST_EQ(count, 4);
+        BOOST_TEST_EQ(synapse::emit<signal2_a0>(&e2), 0);
+        BOOST_TEST_EQ(count, 4);
+        BOOST_TEST_EQ(connect_count, 2);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal2_a0>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
         c1.reset();
-        BOOST_TEST(connect_count==1);
+        BOOST_TEST_EQ(connect_count, 1);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal1_a0>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
         c0.reset();
-        BOOST_TEST(connect_count==0);
+        BOOST_TEST_EQ(connect_count, 0);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal0_a0>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
     }
 
@@ -109,57 +109,57 @@ namespace
         shared_ptr<synapse::connection> mc_c0 = release( synapse::connect<synapse::meta::connected<signal0_a1> >(synapse::meta::emitter(),
             [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
         BOOST_TEST(mc_c0.unique());
-        BOOST_TEST(connect_count==0);
+        BOOST_TEST_EQ(connect_count, 0);
         shared_ptr<synapse::connection> mc_c1 = release( synapse::connect<synapse::meta::connected<signal1_a1> >(synapse::meta::emitter(),
             [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
         BOOST_TEST(mc_c1.unique());
-        BOOST_TEST(connect_count==0);
+        BOOST_TEST_EQ(connect_count, 0);
         shared_ptr<synapse::connection> mc_c2 = release( synapse::connect<synapse::meta::connected<signal2_a1> >(synapse::meta::emitter(),
             [&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } ) );
         BOOST_TEST(mc_c2.unique());
-        BOOST_TEST(connect_count==0);
+        BOOST_TEST_EQ(connect_count, 0);
         shared_ptr<synapse::connection> c0=synapse::translate<signal0_a1,signal1_a1>(&e1,&e1);
-        BOOST_TEST(connect_count==1);
+        BOOST_TEST_EQ(connect_count, 1);
         shared_ptr<synapse::connection> c1=synapse::translate<signal1_a1,signal2_a1>(&e1,&e2);
-        BOOST_TEST(connect_count==2);
+        BOOST_TEST_EQ(connect_count, 2);
         shared_ptr<synapse::connection> c2=synapse::connect<signal2_a1>(&e2,
             [&count]( int a1 )
             {
-                BOOST_TEST(a1==42);
+                BOOST_TEST_EQ(a1, 42);
                 ++count;
             } );
-        BOOST_TEST(connect_count==3);
-        BOOST_TEST(synapse::emit<signal0_a1>(&e1,42)==1);
-        BOOST_TEST(count==1);
-        BOOST_TEST(synapse::emit<signal1_a1>(&e1,42)==1);
-        BOOST_TEST(count==2);
-        BOOST_TEST(synapse::emit<signal2_a1>(&e2,42)==1);
-        BOOST_TEST(count==3);
-        BOOST_TEST(synapse::emit<signal1_a1>(&e1,42)==1);
-        BOOST_TEST(count==4);
+        BOOST_TEST_EQ(connect_count, 3);
+        BOOST_TEST_EQ(synapse::emit<signal0_a1>(&e1,42), 1);
+        BOOST_TEST_EQ(count, 1);
+        BOOST_TEST_EQ(synapse::emit<signal1_a1>(&e1,42), 1);
+        BOOST_TEST_EQ(count, 2);
+        BOOST_TEST_EQ(synapse::emit<signal2_a1>(&e2,42), 1);
+        BOOST_TEST_EQ(count, 3);
+        BOOST_TEST_EQ(synapse::emit<signal1_a1>(&e1,42), 1);
+        BOOST_TEST_EQ(count, 4);
         c2.reset();
-        BOOST_TEST(synapse::emit<signal0_a1>(&e1,42)==0);
-        BOOST_TEST(count==4);
-        BOOST_TEST(synapse::emit<signal1_a1>(&e1,42)==0);
-        BOOST_TEST(count==4);
-        BOOST_TEST(synapse::emit<signal2_a1>(&e2,42)==0);
-        BOOST_TEST(count==4);
-        BOOST_TEST(connect_count==2);
+        BOOST_TEST_EQ(synapse::emit<signal0_a1>(&e1,42), 0);
+        BOOST_TEST_EQ(count, 4);
+        BOOST_TEST_EQ(synapse::emit<signal1_a1>(&e1,42), 0);
+        BOOST_TEST_EQ(count, 4);
+        BOOST_TEST_EQ(synapse::emit<signal2_a1>(&e2,42), 0);
+        BOOST_TEST_EQ(count, 4);
+        BOOST_TEST_EQ(connect_count, 2);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal2_a1>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
         c1.reset();
-        BOOST_TEST(connect_count==1);
+        BOOST_TEST_EQ(connect_count, 1);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal1_a1>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
         c0.reset();
-        BOOST_TEST(connect_count==0);
+        BOOST_TEST_EQ(connect_count, 0);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal0_a1>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
     }
 
@@ -177,58 +177,58 @@ namespace
         shared_ptr<synapse::connection> mc_c0 = release( synapse::connect<synapse::meta::connected<signal0_a2> >(synapse::meta::emitter(),
             [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
         BOOST_TEST(mc_c0.unique());
-        BOOST_TEST(connect_count==0);
+        BOOST_TEST_EQ(connect_count, 0);
         shared_ptr<synapse::connection> mc_c1 = release( synapse::connect<synapse::meta::connected<signal1_a2> >(synapse::meta::emitter(),
             [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
         BOOST_TEST(mc_c1.unique());
-        BOOST_TEST(connect_count==0);
+        BOOST_TEST_EQ(connect_count, 0);
         shared_ptr<synapse::connection> mc_c2 = release( synapse::connect<synapse::meta::connected<signal2_a2> >(synapse::meta::emitter(),
             [&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } ) );
         BOOST_TEST(mc_c2.unique());
-        BOOST_TEST(connect_count==0);
+        BOOST_TEST_EQ(connect_count, 0);
         shared_ptr<synapse::connection> c0=synapse::translate<signal0_a2,signal1_a2>(&e1,&e1);
-        BOOST_TEST(connect_count==1);
+        BOOST_TEST_EQ(connect_count, 1);
         shared_ptr<synapse::connection> c1=synapse::translate<signal1_a2,signal2_a2>(&e1,&e2);
-        BOOST_TEST(connect_count==2);
+        BOOST_TEST_EQ(connect_count, 2);
         shared_ptr<synapse::connection> c2=synapse::connect<signal2_a2>(&e2,
             [&count]( int a1, float a2 )
             {
-                BOOST_TEST(a1==42);
-                BOOST_TEST(a2==42.42f);
+                BOOST_TEST_EQ(a1, 42);
+                BOOST_TEST_EQ(a2, 42.42f);
                 ++count;
             } );
-        BOOST_TEST(connect_count==3);
-        BOOST_TEST(synapse::emit<signal0_a2>(&e1,42,42.42)==1);
-        BOOST_TEST(count==1);
-        BOOST_TEST(synapse::emit<signal1_a2>(&e1,42,42.42f)==1);
-        BOOST_TEST(count==2);
-        BOOST_TEST(synapse::emit<signal2_a2>(&e2,42,42.42f)==1);
-        BOOST_TEST(count==3);
-        BOOST_TEST(synapse::emit<signal1_a2>(&e1,42,42.42f)==1);
-        BOOST_TEST(count==4);
+        BOOST_TEST_EQ(connect_count, 3);
+        BOOST_TEST_EQ(synapse::emit<signal0_a2>(&e1,42,42.42), 1);
+        BOOST_TEST_EQ(count, 1);
+        BOOST_TEST_EQ(synapse::emit<signal1_a2>(&e1,42,42.42f), 1);
+        BOOST_TEST_EQ(count, 2);
+        BOOST_TEST_EQ(synapse::emit<signal2_a2>(&e2,42,42.42f), 1);
+        BOOST_TEST_EQ(count, 3);
+        BOOST_TEST_EQ(synapse::emit<signal1_a2>(&e1,42,42.42f), 1);
+        BOOST_TEST_EQ(count, 4);
         c2.reset();
-        BOOST_TEST(synapse::emit<signal0_a2>(&e1,42,42.42)==0);
-        BOOST_TEST(count==4);
-        BOOST_TEST(synapse::emit<signal1_a2>(&e1,42,42.42f)==0);
-        BOOST_TEST(count==4);
-        BOOST_TEST(synapse::emit<signal2_a2>(&e2,42,42.42f)==0);
-        BOOST_TEST(count==4);
-        BOOST_TEST(connect_count==2);
+        BOOST_TEST_EQ(synapse::emit<signal0_a2>(&e1,42,42.42), 0);
+        BOOST_TEST_EQ(count, 4);
+        BOOST_TEST_EQ(synapse::emit<signal1_a2>(&e1,42,42.42f), 0);
+        BOOST_TEST_EQ(count, 4);
+        BOOST_TEST_EQ(synapse::emit<signal2_a2>(&e2,42,42.42f), 0);
+        BOOST_TEST_EQ(count, 4);
+        BOOST_TEST_EQ(connect_count, 2);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal2_a2>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
         c1.reset();
-        BOOST_TEST(connect_count==1);
+        BOOST_TEST_EQ(connect_count, 1);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal1_a2>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
         c0.reset();
-        BOOST_TEST(connect_count==0);
+        BOOST_TEST_EQ(connect_count, 0);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal0_a2>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
     }
 
@@ -247,59 +247,59 @@ namespace
         shared_ptr<synapse::connection> mc_c0 = release( synapse::connect<synapse::meta::connected<signal0_a3> >(synapse::meta::emitter(),
             [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
         BOOST_TEST(mc_c0.unique());
-        BOOST_TEST(connect_count==0);
+        BOOST_TEST_EQ(connect_count, 0);
         shared_ptr<synapse::connection> mc_c1 = release( synapse::connect<synapse::meta::connected<signal1_a3> >(synapse::meta::emitter(),
             [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
         BOOST_TEST(mc_c1.unique());
-        BOOST_TEST(connect_count==0);
+        BOOST_TEST_EQ(connect_count, 0);
         shared_ptr<synapse::connection> mc_c2 = release( synapse::connect<synapse::meta::connected<signal2_a3> >(synapse::meta::emitter(),
             [&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } ) );
         BOOST_TEST(mc_c2.unique());
-        BOOST_TEST(connect_count==0);
+        BOOST_TEST_EQ(connect_count, 0);
         shared_ptr<synapse::connection> c0=synapse::translate<signal0_a3,signal1_a3>(&e1,&e1);
-        BOOST_TEST(connect_count==1);
+        BOOST_TEST_EQ(connect_count, 1);
         shared_ptr<synapse::connection> c1=synapse::translate<signal1_a3,signal2_a3>(&e1,&e2);
-        BOOST_TEST(connect_count==2);
+        BOOST_TEST_EQ(connect_count, 2);
         shared_ptr<synapse::connection> c2=synapse::connect<signal2_a3>(&e2,
             [&count]( int a1, float a2, std::string const & a3 )
             {
-                BOOST_TEST(a1==42);
-                BOOST_TEST(a2==42.42f);
-                BOOST_TEST(a3=="42");
+                BOOST_TEST_EQ(a1, 42);
+                BOOST_TEST_EQ(a2, 42.42f);
+                BOOST_TEST_EQ(a3, "42");
                 ++count;
             } );
-        BOOST_TEST(connect_count==3);
-        BOOST_TEST(synapse::emit<signal0_a3>(&e1,42,42.42f,"42")==1);
-        BOOST_TEST(count==1);
-        BOOST_TEST(synapse::emit<signal1_a3>(&e1,42,42.42f,"42")==1);
-        BOOST_TEST(count==2);
-        BOOST_TEST(synapse::emit<signal2_a3>(&e2,42,42.42f,"42")==1);
-        BOOST_TEST(count==3);
-        BOOST_TEST(synapse::emit<signal1_a3>(&e1,42,42.42f,"42")==1);
-        BOOST_TEST(count==4);
+        BOOST_TEST_EQ(connect_count, 3);
+        BOOST_TEST_EQ(synapse::emit<signal0_a3>(&e1,42,42.42f,"42"), 1);
+        BOOST_TEST_EQ(count, 1);
+        BOOST_TEST_EQ(synapse::emit<signal1_a3>(&e1,42,42.42f,"42"), 1);
+        BOOST_TEST_EQ(count, 2);
+        BOOST_TEST_EQ(synapse::emit<signal2_a3>(&e2,42,42.42f,"42"), 1);
+        BOOST_TEST_EQ(count, 3);
+        BOOST_TEST_EQ(synapse::emit<signal1_a3>(&e1,42,42.42f,"42"), 1);
+        BOOST_TEST_EQ(count, 4);
         c2.reset();
-        BOOST_TEST(synapse::emit<signal0_a3>(&e1,42,42.42f,"42")==0);
-        BOOST_TEST(count==4);
-        BOOST_TEST(synapse::emit<signal1_a3>(&e1,42,42.42f,"42")==0);
-        BOOST_TEST(count==4);
-        BOOST_TEST(synapse::emit<signal2_a3>(&e2,42,42.42f,"42")==0);
-        BOOST_TEST(count==4);
-        BOOST_TEST(connect_count==2);
+        BOOST_TEST_EQ(synapse::emit<signal0_a3>(&e1,42,42.42f,"42"), 0);
+        BOOST_TEST_EQ(count, 4);
+        BOOST_TEST_EQ(synapse::emit<signal1_a3>(&e1,42,42.42f,"42"), 0);
+        BOOST_TEST_EQ(count, 4);
+        BOOST_TEST_EQ(synapse::emit<signal2_a3>(&e2,42,42.42f,"42"), 0);
+        BOOST_TEST_EQ(count, 4);
+        BOOST_TEST_EQ(connect_count, 2);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal2_a3>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
         c1.reset();
-        BOOST_TEST(connect_count==1);
+        BOOST_TEST_EQ(connect_count, 1);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal1_a3>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
         c0.reset();
-        BOOST_TEST(connect_count==0);
+        BOOST_TEST_EQ(connect_count, 0);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal0_a3>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
     }
 
@@ -318,61 +318,61 @@ namespace
         shared_ptr<synapse::connection> mc_c0 = release( synapse::connect<synapse::meta::connected<signal0_a4> >(synapse::meta::emitter(),
             [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
         BOOST_TEST(mc_c0.unique());
-        BOOST_TEST(connect_count==0);
+        BOOST_TEST_EQ(connect_count, 0);
         shared_ptr<synapse::connection> mc_c1 = release( synapse::connect<synapse::meta::connected<signal1_a4> >(synapse::meta::emitter(),
             [&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
         BOOST_TEST(mc_c1.unique());
-        BOOST_TEST(connect_count==0);
+        BOOST_TEST_EQ(connect_count, 0);
         shared_ptr<synapse::connection> mc_c2 = release( synapse::connect<synapse::meta::connected<signal2_a4> >(synapse::meta::emitter(),
             [&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } ) );
         BOOST_TEST(mc_c2.unique());
-        BOOST_TEST(connect_count==0);
+        BOOST_TEST_EQ(connect_count, 0);
         short a4=42;
         shared_ptr<synapse::connection> c0=synapse::translate<signal0_a4,signal1_a4>(&e1,&e1);
-        BOOST_TEST(connect_count==1);
+        BOOST_TEST_EQ(connect_count, 1);
         shared_ptr<synapse::connection> c1=synapse::translate<signal1_a4,signal2_a4>(&e1,&e2);
-        BOOST_TEST(connect_count==2);
+        BOOST_TEST_EQ(connect_count, 2);
         shared_ptr<synapse::connection> c2=synapse::connect<signal2_a4>(&e2,
             [&count,&a4]( int a1, float a2, std::string const & a3, short & a4_ )
             {
-                BOOST_TEST(a1==42);
+                BOOST_TEST_EQ(a1, 42);
                 BOOST_TEST(a2=42.42f);
-                BOOST_TEST(a3=="42");
-                BOOST_TEST(&a4==&a4_);
+                BOOST_TEST_EQ(a3, "42");
+                BOOST_TEST_EQ(&a4, &a4_);
                 ++count;
             } );
-        BOOST_TEST(connect_count==3);
-        BOOST_TEST(synapse::emit<signal0_a4>(&e1,42,42.42f,"42",std::ref(a4))==1);
-        BOOST_TEST(count==1);
-        BOOST_TEST(synapse::emit<signal1_a4>(&e1,42,42.42f,"42",std::ref(a4))==1);
-        BOOST_TEST(count==2);
-        BOOST_TEST(synapse::emit<signal2_a4>(&e2,42,42.42f,"42",std::ref(a4))==1);
-        BOOST_TEST(count==3);
-        BOOST_TEST(synapse::emit<signal1_a4>(&e1,42,42.42f,"42",std::ref(a4))==1);
-        BOOST_TEST(count==4);
+        BOOST_TEST_EQ(connect_count, 3);
+        BOOST_TEST_EQ(synapse::emit<signal0_a4>(&e1,42,42.42f,"42",std::ref(a4)), 1);
+        BOOST_TEST_EQ(count, 1);
+        BOOST_TEST_EQ(synapse::emit<signal1_a4>(&e1,42,42.42f,"42",std::ref(a4)), 1);
+        BOOST_TEST_EQ(count, 2);
+        BOOST_TEST_EQ(synapse::emit<signal2_a4>(&e2,42,42.42f,"42",std::ref(a4)), 1);
+        BOOST_TEST_EQ(count, 3);
+        BOOST_TEST_EQ(synapse::emit<signal1_a4>(&e1,42,42.42f,"42",std::ref(a4)), 1);
+        BOOST_TEST_EQ(count, 4);
         c2.reset();
-        BOOST_TEST(synapse::emit<signal0_a4>(&e1,42,42.42f,"42",std::ref(a4))==0);
-        BOOST_TEST(count==4);
-        BOOST_TEST(synapse::emit<signal1_a4>(&e1,42,42.42f,"42",std::ref(a4))==0);
-        BOOST_TEST(count==4);
-        BOOST_TEST(synapse::emit<signal2_a4>(&e2,42,42.42f,"42",std::ref(a4))==0);
-        BOOST_TEST(count==4);
-        BOOST_TEST(connect_count==2);
+        BOOST_TEST_EQ(synapse::emit<signal0_a4>(&e1,42,42.42f,"42",std::ref(a4)), 0);
+        BOOST_TEST_EQ(count, 4);
+        BOOST_TEST_EQ(synapse::emit<signal1_a4>(&e1,42,42.42f,"42",std::ref(a4)), 0);
+        BOOST_TEST_EQ(count, 4);
+        BOOST_TEST_EQ(synapse::emit<signal2_a4>(&e2,42,42.42f,"42",std::ref(a4)), 0);
+        BOOST_TEST_EQ(count, 4);
+        BOOST_TEST_EQ(connect_count, 2);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal2_a4>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
         c1.reset();
-        BOOST_TEST(connect_count==1);
+        BOOST_TEST_EQ(connect_count, 1);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal1_a4>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
         c0.reset();
-        BOOST_TEST(connect_count==0);
+        BOOST_TEST_EQ(connect_count, 0);
         {
             shared_ptr<synapse::synapse_detail::thread_local_signal_data> const & tlsd=synapse::synapse_detail::get_thread_local_signal_data<signal0_a4>(false);
-            BOOST_TEST(!(weak_ptr<void>()<tlsd->cl_) && !(tlsd->cl_<weak_ptr<void>()));
+            BOOST_TEST(!weak_ptr<void>().owner_before(tlsd->cl_) && !tlsd->cl_.owner_before(weak_ptr<void>()));
         }
     }
 

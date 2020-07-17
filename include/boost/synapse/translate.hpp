@@ -1,10 +1,10 @@
-//Copyright (c) 2015-2018 Emil Dotchevski and Reverge Studios, Inc.
+#ifndef BOOST_SYNAPSE_TRANSLATE_HPP_INCLUDED
+#define BOOST_SYNAPSE_TRANSLATE_HPP_INCLUDED
+
+//Copyright (c) 2015-2020 Emil Dotchevski and Reverge Studios, Inc.
 
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-
-#ifndef UUID_D4AA6341754C44AE9659D0E451945AAD
-#define UUID_D4AA6341754C44AE9659D0E451945AAD
 
 #include <boost/synapse/connect.hpp>
 
@@ -47,11 +47,11 @@ namespace boost { namespace synapse {
     {
         template <class T> struct wr { static T & ap( T & x ) { return x; } };
         template <class T> struct wr<T &> { static std::reference_wrapper<T> ap( T & x ) { return std::reference_wrapper<T>(x); } };
-    
+
         template <class OriginalSignal,class TranslatedSignal> struct translate_binder;
-    
+
         template <class OrgR,class... OrgA,class TrR,class... TrA>
-    
+
         struct translate_binder<OrgR(*)(OrgA...),TrR(*)(TrA...)>
         {
             typedef function<int(OrgA...)> function_type;

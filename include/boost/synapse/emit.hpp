@@ -1,14 +1,16 @@
-//Copyright (c) 2015-2018 Emil Dotchevski and Reverge Studios, Inc.
+#ifndef BOOST_SYNAPSE_EMIT_HPP_INCLUDED
+#define BOOST_SYNAPSE_EMIT_HPP_INCLUDED
+
+//Copyright (c) 2015-2020 Emil Dotchevski and Reverge Studios, Inc.
 
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef UUID_77496C8C9BED485F9C9FCA2DC3027E28
-#define UUID_77496C8C9BED485F9C9FCA2DC3027E28
-
 #include <boost/synapse/synapse_detail/common.hpp>
 #include <boost/synapse/dep/functional.hpp>
-#include <boost/mp11/tuple.hpp>
+#ifdef BOOST_SYNAPSE_USE_BOOST
+#   include <boost/mp11/tuple.hpp>
+#endif
 #include <tuple>
 
 namespace boost { namespace synapse {
@@ -43,8 +45,13 @@ namespace boost { namespace synapse {
         {
             std::tuple<A...> a_;
             shared_ptr<args_binder_base> clone() const { return synapse::make_shared<args_binder>(*this); }
+#ifdef BOOST_SYNAPSE_USE_BOOST
             void call( void const * f ) const { mp11::tuple_apply(*static_cast<function<void(SigA...)> const *>(f),a_); }
             int call_translated( void const * f ) const { return mp11::tuple_apply(*static_cast<function<int(SigA...)> const *>(f),a_); }
+#else
+            void call( void const * f ) const { std::apply(*static_cast<function<void(SigA...)> const *>(f),a_); }
+            int call_translated( void const * f ) const { return std::apply(*static_cast<function<int(SigA...)> const *>(f),a_); }
+#endif
         public:
             args_binder( A... a ):
                 a_(a...)
