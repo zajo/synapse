@@ -1,17 +1,14 @@
 #ifndef BOOST_SYNAPSE_EMIT_HPP_INCLUDED
 #define BOOST_SYNAPSE_EMIT_HPP_INCLUDED
 
-//Copyright (c) 2015-2020 Emil Dotchevski and Reverge Studios, Inc.
+// Copyright (c) 2015-2020 Emil Dotchevski and Reverge Studios, Inc.
 
-//Distributed under the Boost Software License, Version 1.0. (See accompanying
-//file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/synapse/synapse_detail/common.hpp>
+#include <boost/synapse/synapse_detail/mp11.hpp>
 #include <boost/synapse/dep/functional.hpp>
-#ifdef BOOST_SYNAPSE_USE_BOOST
-#   include <boost/mp11/tuple.hpp>
-#endif
-#include <tuple>
 
 namespace boost { namespace synapse {
 
@@ -20,7 +17,7 @@ namespace boost { namespace synapse {
 
 } }
 
-//Implementation details below.
+// Implementation details below.
 
 namespace boost { namespace synapse {
 
@@ -33,26 +30,35 @@ namespace boost { namespace synapse {
         {
         public:
 
-            virtual shared_ptr<args_binder_base> clone() const=0;
-            virtual void call( void const * ) const=0;
-            virtual int call_translated( void const * ) const=0;
+            virtual shared_ptr<args_binder_base> clone() const = 0;
+            virtual void call( void const * ) const = 0;
+            virtual int call_translated( void const * ) const = 0;
         };
 
-        template <class Signal, class CallSignature> class args_binder;
+        template <class Signal, class CallSignature>
+        class args_binder;
 
         template<class SigR, class... SigA, class... A>
         class args_binder<SigR(*)(SigA...), void(*)(A...)>:
             public args_binder_base
         {
             std::tuple<A...> a_;
-            shared_ptr<args_binder_base> clone() const { return synapse::make_shared<args_binder>(*this); }
-#ifdef BOOST_SYNAPSE_USE_BOOST
-            void call( void const * f ) const { mp11::tuple_apply(*static_cast<function<void(SigA...)> const *>(f), a_); }
-            int call_translated( void const * f ) const { return mp11::tuple_apply(*static_cast<function<int(SigA...)> const *>(f), a_); }
-#else
-            void call( void const * f ) const { std::apply(*static_cast<function<void(SigA...)> const *>(f), a_); }
-            int call_translated( void const * f ) const { return std::apply(*static_cast<function<int(SigA...)> const *>(f), a_); }
-#endif
+
+            shared_ptr<args_binder_base> clone() const final override
+            {
+                return synapse::make_shared<args_binder>(*this);
+            }
+
+            void call( void const * f ) const final override
+            {
+                synapse_detail_mp11::tuple_apply(*static_cast<function<void(SigA...)> const *>(f), a_);
+            }
+
+            int call_translated( void const * f ) const final override
+            {
+                return synapse_detail_mp11::tuple_apply(*static_cast<function<int(SigA...)> const *>(f), a_);
+            }
+
         public:
 
             args_binder( A... a ):
