@@ -7,6 +7,9 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+// This header contains code copied from Boost MP11, implementing tuple_apply.
+// This is the only part Synapse needs from mp11, in order to not require C++17.
+
 #if defined(__has_builtin)
 # if __has_builtin(__make_integer_seq)
 #  define BOOST_SYNAPSE_MP11_HAS_MAKE_INTEGER_SEQ
