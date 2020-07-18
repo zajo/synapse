@@ -5,6 +5,7 @@
 
 #include <boost/synapse/properties.hpp>
 #include "boost/core/lightweight_test.hpp"
+#include <string>
 
 namespace synapse=boost::synapse;
 using synapse::shared_ptr;
