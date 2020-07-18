@@ -51,6 +51,3 @@ run shutdown_test7.cpp ..//synapse ;
 run shutdown_test8.cpp ..//synapse ;
 run shutdown_test9.cpp ..//synapse ;
 run weak_store_test.cpp ;
-
-#exe ct_tlq_lifetime_test : ct_tlq_lifetime_test.cpp ..//synapse : <threading>multi ;
-#install ct_tlq_lifetime_test_install : ct_tlq_lifetime_test : <location>. ;
