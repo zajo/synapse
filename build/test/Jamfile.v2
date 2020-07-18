@@ -18,13 +18,13 @@ project
 
 # build-project ../example ;
 
-compile compile_block_hpp.cpp ;
-compile compile_blocker_hpp.cpp ;
-compile compile_connect_hpp.cpp ;
-compile compile_connection_hpp.cpp ;
-compile compile_emit_hpp.cpp ;
-compile compile_thread_local_queue_hpp.cpp : <threading>multi ;
-compile compile_translate_hpp.cpp ;
+compile _hpp_compile_block_test.cpp ;
+compile _hpp_compile_blocker_test.cpp ;
+compile _hpp_compile_connect_test.cpp ;
+compile _hpp_compile_connection_test.cpp ;
+compile _hpp_compile_emit_test.cpp ;
+compile _hpp_compile_thread_local_queue_test.cpp : <threading>multi ;
+compile _hpp_compile_translate_test.cpp ;
 
 run args_connect_test.cpp ..//synapse ;
 run args_translate_test.cpp ..//synapse ;

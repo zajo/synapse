@@ -6,9 +6,19 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+#ifndef BOOST_SYNAPSE_ENABLE_WARNINGS
+#	if defined(__clang__)
+#		pragma clang system_header
+#	elif (__GNUC__*100+__GNUC_MINOR__>301)
+#		pragma GCC system_header
+#	elif defined(_MSC_VER)
+#		pragma warning(push,1)
+#	endif
+#endif
+
+#include <boost/synapse/config.hpp>
 #include <boost/synapse/signal_traits.hpp>
 #include <boost/synapse/dep/smart_ptr.hpp>
-#include <boost/synapse/dep/assert.hpp>
 #include <atomic>
 
 namespace boost { namespace synapse {
@@ -36,7 +46,13 @@ namespace boost { namespace synapse {
 
         class interthread_interface
         {
+        protected:
+
+            constexpr interthread_interface() noexcept { }
+            ~interthread_interface() { }
+
         public:
+
             virtual void notify_connection_list_created( shared_ptr<thread_local_signal_data> const & )=0;
             virtual int emit( thread_local_signal_data const &, void const *, args_binder_base const * )=0;
         };

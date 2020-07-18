@@ -15,15 +15,13 @@ namespace boost { namespace synapse {
     {
         namespace
         {
-            struct blocker_impl:
-                blocker
+            class blocker_impl: public blocker
             {
-            private:
                 blocker_impl( blocker_impl const & );
                 blocker_impl & operator=( blocker_impl const & );
                 shared_ptr<thread_local_signal_data::blocked_emitters_list> const bl_;
 
-                weak_store const &  emitter_() const
+                weak_store const &  emitter_() const final override
                 {
                     return e_;
                 }

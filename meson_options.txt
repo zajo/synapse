@@ -1,1 +1,2 @@
 option('synapse_use_boost',type:'boolean',value:false,description:'Use boost:: instead of std:: shared/weak_ptr, function, tuple::apply')
+option('synapse_suppress_warnings',type:'boolean',value:true,description:'Suppress compiler warnings (#pragma system_header)')

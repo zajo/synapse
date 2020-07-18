@@ -387,7 +387,9 @@ namespace boost { namespace synapse {
             void cleanup()
             {
                 check_invariants();
+#ifndef BOOST_SYNAPSE_NO_EXCEPTIONS
                 try
+#endif
                 {
                     std::deque<shared_ptr<pconnection> > purged;
                     for( int const * i=&first_rec_; *i!=-1; )
@@ -399,9 +401,11 @@ namespace boost { namespace synapse {
                         i=&cr.next();
                     }
                 }
+#ifndef BOOST_SYNAPSE_NO_EXCEPTIONS
                 catch(...)
                 {
                 }
+#endif
             }
         };
 
@@ -431,22 +435,19 @@ namespace boost { namespace synapse {
             }
 
             template <class Base>
-            struct connection_impl:
-                Base
+            class connection_impl: public Base
             {
-            private:
-
                 connection_impl( connection_impl const & );
                 connection_impl & operator=( connection_impl const & );
                 shared_ptr<thread_local_signal_data::connection_list> const cl_;
                 int position_;
 
-                weak_store const & emitter_() const
+                weak_store const & emitter_() const final override
                 {
                     return cl_->emitter(position_);
                 }
 
-                weak_store const & receiver_() const
+                weak_store const & receiver_() const final override
                 {
                     return cl_->receiver(position_);
                 }
@@ -475,13 +476,17 @@ namespace boost { namespace synapse {
                     unsigned flags=0;
                     if( cl_->emitter_connection_count(emitter_().template maybe_lock<void const>().get())==1 )
                         flags |= meta::connect_flags::last_for_this_emitter;
+#ifndef BOOST_SYNAPSE_NO_EXCEPTIONS
                     try
+#endif
                     {
                         cl_->emit_meta_connected_(*this,flags);
                     }
+#ifndef BOOST_SYNAPSE_NO_EXCEPTIONS
                     catch(...)
                     {
                     }
+#endif
                     cl_->remove(position_);
                 }
 

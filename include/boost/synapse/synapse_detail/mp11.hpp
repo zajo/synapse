@@ -10,6 +10,16 @@
 // This header contains code copied from Boost MP11, implementing tuple_apply.
 // This is the only part Synapse needs from mp11, in order to not require C++17.
 
+#ifndef BOOST_SYNAPSE_ENABLE_WARNINGS
+#	if defined(__clang__)
+#		pragma clang system_header
+#	elif (__GNUC__*100+__GNUC_MINOR__>301)
+#		pragma GCC system_header
+#	elif defined(_MSC_VER)
+#		pragma warning(push,1)
+#	endif
+#endif
+
 #if defined(__has_builtin)
 # if __has_builtin(__make_integer_seq)
 #  define BOOST_SYNAPSE_MP11_HAS_MAKE_INTEGER_SEQ

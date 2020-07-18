@@ -5,11 +5,32 @@
 
 project('synapse', 'cpp', default_options : ['cpp_std=c++17', 'b_pch=false'], license : 'boost')
 
+compiler = meson.get_compiler('cpp')
+compiler_id = compiler.get_id()
+if not meson.is_subproject()
+	if compiler_id=='clang'
+		add_global_arguments(
+			'-Wno-delete-non-abstract-non-virtual-dtor',
+			'-Wno-non-virtual-dtor',
+			'-Wno-dangling-else',
+			language:'cpp' )
+	elif compiler_id=='gcc'
+		add_global_arguments(
+			'-Wno-non-virtual-dtor',
+			'-Wno-dangling-else',
+			'-Wno-sign-compare',
+			language:'cpp' )
+	endif
+endif
+
 defines = [ ]
 dep_boost = [ ]
 if get_option('synapse_use_boost') # Requires that LEAF resides under boost_root/libs/leaf.
 	dep_boost = declare_dependency(include_directories: '../..')
 	defines = [ '-DBOOST_SYNAPSE_USE_BOOST' ]
+endif
+if not get_option('synapse_suppress_warnings')
+	defines = [ '-DBOOST_SYNAPSE_ENABLE_WARNINGS' ]
 endif
 
 includes = include_directories('include')
@@ -47,39 +68,39 @@ leaf = declare_dependency( include_directories: includes, compile_args: defines 
 #################################
 
 tests = [
-	compile_block_hpp,
-	compile_blocker_hpp,
-	compile_connect_hpp,
-	compile_connection_hpp,
-	compile_emit_hpp,
-	compile_thread_local_queue_hpp,
-	compile_translate_hpp,
-	args_connect_test,
-	args_translate_test,
-	block_emit_test,
-	block_test,
-	connect_emit_test,
-	connection_lifetime_test,
-	connection_user_data_test,
-	ct_basic_test,
-	ct_lambda_test,
-	ct_tlq_lifetime_test,
-	ct_wait_test,
-	emit_stub_test,
-	emit_test,
-	property_test,
-	release_test,
-	shutdown_test1,
-	shutdown_test2,
-	shutdown_test3,
-	shutdown_test4,
-	shutdown_test5,
-	shutdown_test6,
-	shutdown_test7,
-	shutdown_test8,
-	shutdown_test9,
-	weak_store_test
+	[ '_hpp_compile_block_test', [ emit ] ],
+	[ '_hpp_compile_blocker_test', [ emit ] ],
+	[ '_hpp_compile_connect_test', [ emit ] ],
+	[ '_hpp_compile_connection_test', [ emit ] ],
+	[ '_hpp_compile_emit_test', [ emit ] ],
+	[ '_hpp_compile_thread_local_queue_test', [ emit ] ],
+	[ '_hpp_compile_translate_test', [ emit ] ],
+	[ 'args_connect_test', [ connect ] ],
+	[ 'args_translate_test', [ connect ] ],
+	[ 'block_emit_test', [ connect, block ] ],
+	[ 'block_test', [ connect, block ] ],
+	[ 'connect_emit_test', [ connect ] ],
+	[ 'connection_lifetime_test', [ connect ] ],
+	[ 'connection_user_data_test', [ connect ] ],
+	[ 'ct_basic_test', [ connect ] ],
+	[ 'ct_lambda_test', [ connect ] ],
+	[ 'ct_tlq_lifetime_test', [ connect ] ],
+	[ 'ct_wait_test', [ connect ] ],
+	[ 'emit_stub_test', [ emit ] ],
+	[ 'emit_test', [ connect ] ],
+	[ 'property_test', [ connect ] ],
+	[ 'release_test', [ connect ] ],
+	[ 'shutdown_test1', [ connect ] ],
+	[ 'shutdown_test2', [ connect ] ],
+	[ 'shutdown_test3', [ connect ] ],
+	[ 'shutdown_test4', [ connect ] ],
+	[ 'shutdown_test5', [ connect ] ],
+	[ 'shutdown_test6', [ connect ] ],
+	[ 'shutdown_test7', [ connect ] ],
+	[ 'shutdown_test8', [ connect ] ],
+	[ 'shutdown_test9', [ connect ] ],
+	[ 'weak_store_test', [ connect ] ]
 ]
 foreach t : tests
-	test(t, executable(t, 'test/'+t+'.cpp', dependencies: [all, dep_boost]) )
+	test(t[0], executable(t[0], 'test/'+t[0]+'.cpp', dependencies: t[1]) )
 endforeach

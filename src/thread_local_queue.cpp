@@ -3,9 +3,9 @@
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+#include <boost/synapse/config.hpp>
 #include <boost/synapse/thread_local_queue.hpp>
 #include <boost/synapse/connect.hpp>
-#include <boost/synapse/dep/assert.hpp>
 #include <thread>
 #include <mutex>
 #include <vector>
@@ -234,9 +234,9 @@ namespace boost { namespace synapse {
                 {
                     BOOST_SYNAPSE_ASSERT(has_tlq_);
                     std::for_each( same_thread_different_signals_.begin(), same_thread_different_signals_.end(),
-                        [this]( cl_rec const & r )
+                        []( cl_rec const & r )
                         {
-                            if( shared_ptr<thread_local_signal_data> sp=r.lock() )
+                            if( shared_ptr<thread_local_signal_data> sp = r.lock() )
                             {
                                 shared_ptr<thread_local_signal_data::posted_signals> ps;
                                 {
@@ -300,13 +300,13 @@ namespace boost { namespace synapse {
             class interthread_impl:
                 public interthread_interface
             {
-                void notify_connection_list_created( shared_ptr<thread_local_signal_data> const & tlsd )
+                void notify_connection_list_created( shared_ptr<thread_local_signal_data> const & tlsd ) final override
                 {
                     tlsd->get_cll_(&create_connection_list_list)->notify_connection_list_created(tlsd);
                     get_thread_local_connection_list_list()->notify_connection_list_created(tlsd);
                 }
 
-                int emit( thread_local_signal_data const & tlsd, void const * e, args_binder_base const * args )
+                int emit( thread_local_signal_data const & tlsd, void const * e, args_binder_base const * args ) final override
                 {
                     return tlsd.get_cll_(&create_connection_list_list)->interthread_emit(e,args);
                 }
