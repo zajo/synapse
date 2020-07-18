@@ -1,14 +1,24 @@
-//Copyright (c) 2015-2018 Emil Dotchevski and Reverge Studios, Inc.
+#ifndef BOOST_SYNAPSE_DETAIL_COMMON_HPP_INCLUDED
+#define BOOST_SYNAPSE_DETAIL_COMMON_HPP_INCLUDED
 
-//Distributed under the Boost Software License, Version 1.0. (See accompanying
-//file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Copyright (c) 2015-2020 Emil Dotchevski and Reverge Studios, Inc.
 
-#ifndef UUID_A098543F9C6D4BEC8CE41B576AA69BA6
-#define UUID_A098543F9C6D4BEC8CE41B576AA69BA6
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+#ifndef BOOST_SYNAPSE_ENABLE_WARNINGS
+#	if defined(__clang__)
+#		pragma clang system_header
+#	elif (__GNUC__*100+__GNUC_MINOR__>301)
+#		pragma GCC system_header
+#	elif defined(_MSC_VER)
+#		pragma warning(push,1)
+#	endif
+#endif
+
+#include <boost/synapse/config.hpp>
 #include <boost/synapse/signal_traits.hpp>
 #include <boost/synapse/dep/smart_ptr.hpp>
-#include <boost/synapse/dep/assert.hpp>
 #include <atomic>
 
 namespace boost { namespace synapse {
@@ -21,9 +31,8 @@ namespace boost { namespace synapse {
 
     namespace synapse_detail
     {
-
         class connection_list_list;
-        struct thread_local_signal_data;
+        class thread_local_signal_data;
         class args_binder_base;
 
         typedef int emit_fn( thread_local_signal_data const &, void const *, args_binder_base const * );
@@ -37,15 +46,19 @@ namespace boost { namespace synapse {
 
         class interthread_interface
         {
+        protected:
+
+            constexpr interthread_interface() noexcept { }
+            ~interthread_interface() { }
+
         public:
+
             virtual void notify_connection_list_created( shared_ptr<thread_local_signal_data> const & )=0;
             virtual int emit( thread_local_signal_data const &, void const *, args_binder_base const * )=0;
         };
 
-        struct thread_local_signal_data
+        class thread_local_signal_data
         {
-        private:
-
             thread_local_signal_data( thread_local_signal_data const & );
             thread_local_signal_data & operator=( thread_local_signal_data const & );
             cleanup_fn * cleanup_;
@@ -102,7 +115,7 @@ namespace boost { namespace synapse {
             static inline void cleanup_stub( thread_local_signal_data const & )
             {
             }
-        }; //thread_local_signal_data
+        };
 
         template <class Signal>
         shared_ptr<connection_list_list> const & get_connection_list_list( shared_ptr<connection_list_list> (*create_connection_list_list)() )
@@ -144,11 +157,11 @@ namespace boost { namespace synapse {
             }
         };
 
-        template <class Signal,bool SignalIsThreadLocal=signal_traits<Signal>::is_thread_local>
+        template <class Signal, bool SignalIsThreadLocal = signal_traits<Signal>::is_thread_local>
         struct thread_local_signal_data_;
 
         template <class Signal>
-        struct thread_local_signal_data_<Signal,false>
+        struct thread_local_signal_data_<Signal, false>
         {
             static shared_ptr<thread_local_signal_data> const & get( bool allocate )
             {
@@ -165,7 +178,7 @@ namespace boost { namespace synapse {
         };
 
         template <class Signal>
-        struct thread_local_signal_data_<Signal,true>
+        struct thread_local_signal_data_<Signal, true>
         {
             static shared_ptr<thread_local_signal_data> const & get( bool allocate )
             {
@@ -185,7 +198,7 @@ namespace boost { namespace synapse {
             return thread_local_signal_data_<Signal>::get(allocate);
         }
 
-    } //namespace synapse_detail
+    }
 
 } }
 

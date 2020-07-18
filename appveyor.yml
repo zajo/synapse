@@ -1,7 +1,8 @@
-# Copyright 2016, 2017 Peter Dimov
-# Copyright 2018-2019 Emil Dotchevski
-# Distributed under the Boost Software License, Version 1.0.
-# (See accompanying file LICENSE_1_0.txt or copy at http://boost.org/LICENSE_1_0.txt)
+# Copyright (c) 2015-2020 Emil Dotchevski and Reverge Studios, Inc.
+# Copyright (c) 2016 Peter Dimov
+
+# Distributed under the Boost Software License, Version 1.0. (See accompanying
+# file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 version: 1.0.{build}-{branch}
 
@@ -18,7 +19,7 @@ environment:
       TOOLSET: msvc-14.1
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       TOOLSET: msvc-14.1
-      CXXSTD: 17
+      CXXSTD: 11,17
 
 install:
   - set BOOST_BRANCH=develop
@@ -40,5 +41,4 @@ build: off
 
 test_script:
   - if not "%CXXSTD%" == "" set CXXSTD=cxxstd=%CXXSTD%
-  - b2 -j3 libs/synapse/build/test toolset=%TOOLSET% %CXXSTD% variant=debug
-  - b2 -j3 libs/synapse/build/test toolset=%TOOLSET% %CXXSTD% variant=release
+  - b2 -j3 libs/synapse/build/test toolset=%TOOLSET% %CXXSTD% variant=debug,release exception-handling=on,off

@@ -1,4 +1,4 @@
-//Copyright (c) 2015-2018 Emil Dotchevski and Reverge Studios, Inc.
+//Copyright (c) 2015-2020 Emil Dotchevski and Reverge Studios, Inc.
 
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -15,15 +15,13 @@ namespace boost { namespace synapse {
     {
         namespace
         {
-            struct blocker_impl:
-                blocker
+            class blocker_impl: public blocker
             {
-            private:
                 blocker_impl( blocker_impl const & );
                 blocker_impl & operator=( blocker_impl const & );
                 shared_ptr<thread_local_signal_data::blocked_emitters_list> const bl_;
 
-                weak_store const &  emitter_() const
+                weak_store const &  emitter_() const final override
                 {
                     return e_;
                 }
@@ -183,7 +181,7 @@ namespace boost { namespace synapse {
                 return shared_ptr<blocker>();
         }
 
-    } //namespace synapse_detail
+    }
 
     blocker::blocker()
     {

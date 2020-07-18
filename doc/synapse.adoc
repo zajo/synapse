@@ -26,9 +26,8 @@ endif::[]
 Synapse is a non-intrusive {CPP} signal programming library for {CPP}11. Features:
 
 ====
-* Register connections and emit signals from any C or {CPP} object of any type whatsoever.
-* If two contexts share access to a C or {CPP} object, they can use that object as a rendezvous point, and communicate with each other through Synapse signals.
-* A system of meta signals provides interoperability with other signal programming libraries and callback APIs.
+* Any C or {CPP} object of any type whatsoever can be used as a signal emitter.
+* A system of meta signals provides interoperability with other signal programming libraries and callback APIs. Lambda captures can be easily installed as C API callbacks!
 * In a multi-thread environment signals can be emitted asynchronously and scheduled for synchronous execution when polled in other threads.
 ====
 
@@ -358,18 +357,18 @@ namespace boost { namespace synapse {
 
     class connection;
 
-    template <class Signal,class Emitter,class F>
+    template <class Signal, class Emitter, class F>
     shared_ptr<connection> connect( Emitter * e, F f );
 
-    template <class Signal,class Emitter,class Receiver,class F>
+    template <class Signal, class Emitter, class Receiver, class F>
     shared_ptr<connection> connect( Emitter * e, Receiver * r, F f );
 
     class pconnection;
 
-    template <class Signal,class Emitter,class F>
+    template <class Signal, class Emitter, class F>
     weak_ptr<pconnection> connect( <<Emitter>> e, F f ); <1>
 
-    template <class Signal,class Emitter,class Receiver,class F>
+    template <class Signal, class Emitter, class Receiver, class F>
     weak_ptr<pconnection> connect( <<Emitter>> e, <<Receiver>> r, F f ); <2>
 
 } }
@@ -577,7 +576,7 @@ namespace boost { namespace synapse {
 
     class blocker;
 
-    template <class Signal,class Emitter>
+    template <class Signal, class Emitter>
     shared_ptr<blocker> block( <<Emitter>> e ); <1>
 
 } }
@@ -730,7 +729,7 @@ NOTE: While <<poll,`poll`>> (or <<wait,`wait`>>) must be called from the thread 
 [[techniques]]
 == Programming Techniques
 
-=== Monitoring Dynamic Systems
+=== Monitoring of Dynamic Systems
 
 It is often needed to monitor the operations of a complex dynamic system beyond the facilities available in its public API. One possible option to accomplish this is to use a logging library. Synapse provides another.
 
@@ -1034,7 +1033,7 @@ Next, in a different header we install `meta::connected` signal handlers for the
 template <class Signal>
 class synapsifier;
 
-template <class R,class... A>
+template <class R, class... A>
 class synapsifier<R(*)(GLFWwindow *,A...)>
 {
     typedef R(*Signal)(GLFWwindow *,A...);
@@ -1101,7 +1100,7 @@ class synapsifier<R(*)(GLFWwindow *,A...)>
     }
 };
 
-template <class R,class... A>
+template <class R, class... A>
 typename synapsifier<R(*)(GLFWwindow *,A...)>::GLFWfun synapsifier<R(*)(GLFWwindow *,A...)>::prev_;
 
 //Install all the synapse::meta::connected<....> handlers
@@ -1361,67 +1360,73 @@ Because Synapse is formatted for Boost review, people often ask what are the dif
 
 == Macros and Configuration
 
-----
-BOOST_SYNAPSE_ASSERT
-----
-All assertions in Synapse use this macro; if not `#defined`, Synapse header files `#define` it as link:http://www.boost.org/doc/libs/release/libs/assert/assert.html[`BOOST_ASSERT`].
+=== `BOOST_SYNAPSE_USE_BOOST`
 
-***
+If this macro is defined, Synapse will use `boost::shared_ptr`, `boost::weak_ptr` and `boost::function`. By default, it will use `std::shared_ptr`, `std::weak_ptr` and `std::function`.
 
-----
-BOOST_SYNAPSE_USE_STD_FUNCTION
-----
-By default, Synapse uses `boost::function`. If this macro is `#defined`, it will use `std::function` instead.
+=== `BOOST_SYNAPSE_ASSERT`
 
-***
-
-----
-BOOST_SYNAPSE_USE_STD_SMART_PTR
-----
-By default, Synapse uses the following Boost smart pointer components:
-
-- `boost::shared_ptr`
-- `boost::weak_ptr`
-- `boost::make_shared`
-- `boost::get_deleter`
-
-If `BOOST_SYNAPSE_USE_STD_SMART_PTR` is `#defined`, the corresponding standard components will be used.
+All assertions in Synapse use this macro. If it is not defined, Synapse header files `#define` it either as `BOOST_ASSERT` or `assert`, depending on whether `BOOST_SYNAPSE_USE_BOOST` is defined.
 
 == Distribution
 
 Synapse is distributed under the http://www.boost.org/LICENSE_1_0.txt[Boost Software License, Version 1.0].
 
-The source code is available in https://github.com/zajo/synapse[this GitHub repository].
+The source code is available on https://github.com/zajo/synapse[GitHub].
 
 NOTE: Synapse is not part of Boost.
 
-== Feedback / Support
+== Support
 
-Please use the link:https://lists.boost.org/mailman/listinfo.cgi/boost[Boost Developers mailing list].
+The following support options are available:
+
+* https://Cpplang.slack.com[cpplang on Slack] (use the `#boost` channel)
+* https://lists.boost.org/mailman/listinfo.cgi/boost-users[Boost Users Mailing List]
+* https://lists.boost.org/mailman/listinfo.cgi/boost[Boost Developers Mailing List]
 
 == Portability
 
-Synapse requires compiler support for the following {CPP}11 features:
+Synapse requires a {CPP} compiler that supports at least {CPP}11.
 
-- thread-safe dynamic initialization of local static objects;
-- `thread_local` objects;
-- lambda functions
-- `<thread>`
-- `<atomic>`
+== Building
 
-See the link:https://travis-ci.org/zajo/synapse[Synapse Travis CI Builds].
+There are two build scripts provided, one for https://mesonbuild.com/[Meson Build], the other for Boost Build.
 
-== Building and Installation
+To build the source code:
 
-Synapse has been formatted to be submitted for a Boost review, so its directory structure follows the common directory structure for Boost libraries—and it's built with Boost Build.
+* Using Meson Build, from the Synapse root directory, execute e.g.:
++
+[source,sh]
+----
+meson bld/debug
+cd bld/debug
+ninja
+----
+* Using Boost Build, make sure Synapse is cloned under the `<boost-root>/libs` directory. From the Synapse root directory, execute:
++
+[source,sh]
+----
+../../b2 build
+----
 
-Alternatively, just put `connect.cpp` and either `thread_local_queue.cpp` or `interthread_stub.cpp` into your favorite build system, depending on whether or not your program calls `create_thread_local_queue`. If your program calls the `block` function, you also need to compile and link `block.cpp`.
+To run the unit tests:
 
-However, note that if your program only emits signals (that is, it calls `emit` but it never creates any connections), there is no need to link any `.cpp` files; that is, `boost/synapse/emit.hpp` by itself is an independent header-only library. This way low level libraries that emit signals do not require the user to link Synapse, unless he cares to connect them.
+* Using Meson Build, from the Synapse root directory, execute e.g.:
++
+[source,sh]
+----
+meson bld/debug
+cd bld/debug
+meson test
+----
+* Using Boost Build, make sure Synapse is cloned under the `<boost-root>/libs` directory. From the Synapse root directory, execute:
++
+[source,sh]
+----
+../../b2 build/test
+----
 
-== Building the Unit tests and the Examples
-
-The unit tests and the examples can be built within the Boost framework: clone Synapse under the `libs` subdirectory in your boost installation, then `cd` into `synapse/build/test` and execute `b2` as usual.
+TIP: `boost/synapse/emit.hpp` is a header-only component: if a program only emits signals, but does not connect signals, it needs not link with Synapse. This enables libraries to emit signals without forcing a link dependency on Synapse on programs that do not use it.
 
 == Q&A
 
@@ -1430,8 +1435,6 @@ Is there a way to stop the emit loop before all connected functions have been ca
     No, except by throwing an exception.
 I am concerned about code size, does Synapse use a lot of templates?::
     Yes, there are templates instantiated for each signal type. This is done so that the dispatch by signal type occurs at compile-time, leaving only emitter dispatch at run-time. However, static types are erased as soon as possible, so template bloat is kept to a minimum.
-I do not need thread-safety, is there a way to configure Synapse to eliminate thread safety overhead?::
-    Most data structures in Synapse are not thread-safe, instead they are thread-local. The overhead of using the library across multiple threads is contained only in `thread_local_queue.cpp`, which is an optional component.
 
 == Acknowledgements
 

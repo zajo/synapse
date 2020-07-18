@@ -1,10 +1,20 @@
-//Copyright (c) 2015-2018 Emil Dotchevski and Reverge Studios, Inc.
+#ifndef BOOST_SYNAPSE_THREAD_LOCAL_QUEUE_HPP_INCLUDED
+#define BOOST_SYNAPSE_THREAD_LOCAL_QUEUE_HPP_INCLUDED
 
-//Distributed under the Boost Software License, Version 1.0. (See accompanying
-//file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Copyright (c) 2015-2020 Emil Dotchevski and Reverge Studios, Inc.
 
-#ifndef UUID_D355B31075FB11E684FA1794B53EDEC4
-#define UUID_D355B31075FB11E684FA1794B53EDEC4
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
+#ifndef BOOST_SYNAPSE_ENABLE_WARNINGS
+#	if defined(__clang__)
+#		pragma clang system_header
+#	elif (__GNUC__*100+__GNUC_MINOR__>301)
+#		pragma GCC system_header
+#	elif defined(_MSC_VER)
+#		pragma warning(push,1)
+#	endif
+#endif
 
 #include <boost/synapse/dep/smart_ptr.hpp>
 #include <boost/synapse/dep/functional.hpp>
@@ -12,6 +22,7 @@
 namespace boost { namespace synapse {
 
     struct thread_local_queue;
+
     shared_ptr<thread_local_queue> create_thread_local_queue();
     int poll( thread_local_queue & );
     int wait( thread_local_queue & );

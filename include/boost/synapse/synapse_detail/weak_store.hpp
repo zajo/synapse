@@ -1,13 +1,23 @@
-//Copyright (c) 2015-2018 Emil Dotchevski and Reverge Studios, Inc.
+#ifndef BOOST_SYNAPSE_DETAIL_WEAK_STORE_HPP_INCLUDED
+#define BOOST_SYNAPSE_DETAIL_WEAK_STORE_HPP_INCLUDED
 
-//Distributed under the Boost Software License, Version 1.0. (See accompanying
-//file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Copyright (c) 2015-2020 Emil Dotchevski and Reverge Studios, Inc.
 
-#ifndef UUID_0D8C8B64070111E5BC3187D81D5D46B0
-#define UUID_0D8C8B64070111E5BC3187D81D5D46B0
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+#ifndef BOOST_SYNAPSE_ENABLE_WARNINGS
+#	if defined(__clang__)
+#		pragma clang system_header
+#	elif (__GNUC__*100+__GNUC_MINOR__>301)
+#		pragma GCC system_header
+#	elif defined(_MSC_VER)
+#		pragma warning(push,1)
+#	endif
+#endif
+
+#include <boost/synapse/config.hpp>
 #include <boost/synapse/dep/smart_ptr.hpp>
-#include <boost/synapse/dep/assert.hpp>
 
 namespace boost { namespace synapse {
 
@@ -131,7 +141,7 @@ namespace boost { namespace synapse {
             template <class T>
             shared_ptr<T> maybe_lock() const
             {
-                return access<T>::get(maybe_lock<void const>(),&type<T>,type_,ctype_);
+                return access<T>::get(maybe_lock<void const>(), &type<T>, type_,ctype_);
             }
         };
 
@@ -165,7 +175,7 @@ namespace boost { namespace synapse {
         template <>
         inline shared_ptr<void const> weak_store::maybe_lock<void const>() const
         {
-            return px_ ? shared_ptr<void const>(shared_ptr<void>(),px_) : w_.lock();
+            return px_ ? shared_ptr<void const>(shared_ptr<void>(), px_) : w_.lock();
         }
     }
 

@@ -1,4 +1,4 @@
-//Copyright (c) 2015-2018 Emil Dotchevski and Reverge Studios, Inc.
+//Copyright (c) 2015-2020 Emil Dotchevski and Reverge Studios, Inc.
 
 //Distributed under the Boost Software License, Version 1.0. (See accompanying
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -6,8 +6,10 @@
 #include <boost/synapse/thread_local_queue.hpp>
 #include <boost/synapse/connect.hpp>
 #include <boost/synapse/connection.hpp>
-#include <boost/thread.hpp>
-#include <boost/detail/lightweight_test.hpp>
+#include "barrier.hpp"
+#include <thread>
+#include <vector>
+#include "boost/core/lightweight_test.hpp"
 
 namespace synapse=boost::synapse;
 using synapse::shared_ptr;
@@ -26,23 +28,29 @@ namespace
     {
         thread_connection_counter( thread_connection_counter const & );
         thread_connection_counter & operator=( thread_connection_counter const & );
+
     public:
+
         thread_connection_counter()
         {
             ++connection_count;
         }
+
         ~thread_connection_counter()
         {
             --connection_count;
         }
     };
 
-    void emitting_thread( boost::barrier & b, weak_ptr<void> const & terminate )
+    void emitting_thread( barrier & b, weak_ptr<void> const & terminate )
     {
         shared_ptr<synapse::thread_local_queue> tlq=synapse::create_thread_local_queue();
         bool keep_going=true;
-        synapse::connect<terminate_thread>(terminate,[&keep_going]() { keep_going=false; }).lock()->
-            set_user_data(make_shared<thread_connection_counter>());
+        synapse::connect<terminate_thread>( terminate,
+            [&keep_going]
+            {
+                keep_going=false;
+            }).lock()->set_user_data(make_shared<thread_connection_counter>());
         b.wait();
         while( keep_going )
         {
@@ -58,14 +66,19 @@ namespace
         assert(per_thread_emit_count>0);
         assert(series_count>0);
         std::cout << "*** " << emitting_thread_count << '/' << per_thread_emit_count << '/' << series_count << " ***" << std::endl;
-        boost::thread_group tgr;
-        boost::barrier b(emitting_thread_count+1);
+        barrier b( emitting_thread_count + 1 );
         shared_ptr<int> terminate(make_shared<int>(42));
+        std::vector<std::thread> tgr;
+        tgr.reserve(emitting_thread_count);
         for( int i=0; i!=emitting_thread_count; ++i )
-            tgr.create_thread( [&b,&terminate]() { emitting_thread(b,terminate); } );
+            tgr.emplace_back(
+                [&b, &terminate]
+                {
+                    emitting_thread(b,terminate);
+                } );
         b.wait();
         BOOST_TEST(terminate.unique());
-        BOOST_TEST(connection_count==emitting_thread_count);
+        BOOST_TEST_EQ(connection_count, emitting_thread_count);
         shared_ptr<synapse::connection> c1=synapse::connect<signal1>(&emitter,[](){});
         shared_ptr<synapse::connection> c2=synapse::connect<signal2>(&emitter,[](){});
         for( int i=0; i!=series_count; ++i )
@@ -79,11 +92,12 @@ namespace
         }
         std::cout << "Requesting terminate..." << std::endl;
         int n=synapse::emit<terminate_thread>(terminate.get());
-        BOOST_TEST(n==emitting_thread_count);
+        BOOST_TEST_EQ(n, emitting_thread_count);
         std::cout << "Joining..." << std::endl;
-        tgr.join_all();
+        for( auto & t : tgr )
+            t.join();
         std::cout << "Joined." << std::endl;
-        BOOST_TEST(connection_count==0);
+        BOOST_TEST_EQ(connection_count, 0);
     }
 }
 

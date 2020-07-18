@@ -1,5 +1,6 @@
 .DS_Store
 .Trashes
+bld/**
 *.suo
 *.user
 *.log
@@ -7,3 +8,4 @@
 *.opensdf
 *.db
 *.opendb
+.vscode/c_cpp_properties.json

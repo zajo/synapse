@@ -3,7 +3,7 @@
 ----
 namespace boost { namespace synapse {
 
-    template <class Signal,class... A>
+    template <class Signal, class... A>
     int emit( void const *, A... );
 
 } }

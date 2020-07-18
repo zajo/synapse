@@ -18,13 +18,13 @@ project
 
 # build-project ../example ;
 
-compile compile_block_hpp.cpp ;
-compile compile_blocker_hpp.cpp ;
-compile compile_connect_hpp.cpp ;
-compile compile_connection_hpp.cpp ;
-compile compile_emit_hpp.cpp ;
-compile compile_thread_local_queue_hpp.cpp : <threading>multi ;
-compile compile_translate_hpp.cpp ;
+compile _hpp_compile_block_test.cpp ;
+compile _hpp_compile_blocker_test.cpp ;
+compile _hpp_compile_connect_test.cpp ;
+compile _hpp_compile_connection_test.cpp ;
+compile _hpp_compile_emit_test.cpp ;
+compile _hpp_compile_thread_local_queue_test.cpp : <threading>multi ;
+compile _hpp_compile_translate_test.cpp ;
 
 run args_connect_test.cpp ..//synapse ;
 run args_translate_test.cpp ..//synapse ;
@@ -33,10 +33,10 @@ run block_test.cpp ..//block ;
 run connect_emit_test.cpp ..//synapse ;
 run connection_lifetime_test.cpp ..//synapse ;
 run connection_user_data_test.cpp ..//synapse ;
-run ct_basic_test.cpp /boost//thread ..//synapse : : : <threading>multi ;
-run ct_lambda_test.cpp /boost//thread ..//synapse : : : <threading>multi ;
-run ct_tlq_lifetime_test.cpp /boost//thread ..//synapse : : : <threading>multi ;
-run ct_wait_test.cpp /boost//thread ..//synapse : : : <threading>multi ;
+run ct_basic_test.cpp ..//synapse : : : <threading>multi ;
+run ct_lambda_test.cpp ..//synapse : : : <threading>multi ;
+run ct_tlq_lifetime_test.cpp ..//synapse : : : <threading>multi ;
+run ct_wait_test.cpp ..//synapse : : : <threading>multi ;
 run emit_stub_test.cpp ..//emit ;
 run emit_test.cpp ..//synapse ;
 run property_test.cpp ..//synapse ;
@@ -51,6 +51,3 @@ run shutdown_test7.cpp ..//synapse ;
 run shutdown_test8.cpp ..//synapse ;
 run shutdown_test9.cpp ..//synapse ;
 run weak_store_test.cpp ;
-
-#exe ct_tlq_lifetime_test : ct_tlq_lifetime_test.cpp /boost//thread ..//synapse : <threading>multi ;
-#install ct_tlq_lifetime_test_install : ct_tlq_lifetime_test : <location>. ;
