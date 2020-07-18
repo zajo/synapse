@@ -25,7 +25,7 @@ endif
 
 defines = [ ]
 dep_boost = [ ]
-if get_option('synapse_use_boost') # Requires that LEAF resides under boost_root/libs/leaf.
+if get_option('synapse_use_boost') # Requires that Synapse resides under boost_root/libs/synapse.
 	dep_boost = declare_dependency(include_directories: '../..')
 	defines = [ '-DBOOST_SYNAPSE_USE_BOOST' ]
 endif
@@ -62,8 +62,6 @@ all = declare_dependency( include_directories: includes, compile_args: defines,
 
 
 includes = [ include_directories('include') ]
-
-leaf = declare_dependency( include_directories: includes, compile_args: defines )
 
 #################################
 

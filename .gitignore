@@ -8,3 +8,4 @@ bld/**
 *.opensdf
 *.db
 *.opendb
+.vscode/c_cpp_properties.json
