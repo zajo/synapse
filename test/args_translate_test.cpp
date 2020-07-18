@@ -6,6 +6,7 @@
 #include <boost/synapse/translate.hpp>
 #include <boost/synapse/connection.hpp>
 #include "boost/core/lightweight_test.hpp"
+#include <string>
 
 namespace synapse=boost::synapse;
 using synapse::shared_ptr;
