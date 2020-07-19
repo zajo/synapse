@@ -16,17 +16,17 @@
 #	endif
 #endif
 
-#include <boost/synapse/dep/smart_ptr.hpp>
-#include <boost/synapse/dep/functional.hpp>
+#include <boost/synapse/detail/smart_ptr.hpp>
+#include <boost/synapse/detail/functional.hpp>
 
 namespace boost { namespace synapse {
 
-    struct thread_local_queue;
+	struct thread_local_queue;
 
-    shared_ptr<thread_local_queue> create_thread_local_queue();
-    int poll( thread_local_queue & );
-    int wait( thread_local_queue & );
-    void post( thread_local_queue &, function<void()> const & );
+	shared_ptr<thread_local_queue> create_thread_local_queue();
+	int poll( thread_local_queue & );
+	int wait( thread_local_queue & );
+	void post( thread_local_queue &, function<void()> const & );
 
 } }
 

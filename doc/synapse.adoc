@@ -27,8 +27,9 @@ Synapse is a non-intrusive {CPP} signal programming library for {CPP}11. Feature
 
 ====
 * Any C or {CPP} object of any type whatsoever can be used as a signal emitter.
-* A system of meta signals provides interoperability with other signal programming libraries and callback APIs. Lambda captures can be easily installed as C API callbacks!
+* A system of meta signals for interoperability with other signal programming libraries and callback APIs. Lambda captures can be easily installed as C API callbacks!
 * In a multi-thread environment signals can be emitted asynchronously and scheduled for synchronous execution when polled in other threads.
+* No dependencies.
 ====
 
 ifndef::backend-pdf[]
@@ -73,11 +74,11 @@ typedef struct clicked_(*clicked)();
 
 class button {
 
-    public:
+	public:
 
-    void click() {
-        synapse::emit<clicked>(this);
-    }
+	void click() {
+		synapse::emit<clicked>(this);
+	}
 };
 ----
 [.text-right]
@@ -91,9 +92,9 @@ Next, let's connect the signal `clicked` to the `accept` member function of a di
 ----
 class dialog {
 
-    public:
+	public:
 
-    void accept();
+	void accept();
 
 };
 
@@ -110,9 +111,9 @@ Or we could use a lambda instead:
 [source,c++]
 ----
 synapse::connect<clicked>(emitter, receiver,
-    [ ](dialog * d) {
-        d->accept();
-    } );
+	[ ](dialog * d) {
+		d->accept();
+	} );
 ----
 [.text-right]
 <<connect>>
@@ -133,12 +134,12 @@ typedef struct report_progress_(*report_progress)(int progress);
 
 void process_file( FILE * f ) {
 
-    for( int progress=0; !feof(f); ) {
-        ....
-        progress += fread(buf,1,nread,f);
-        ....
-        synapse::emit<report_progress>(f,progress);
-    }
+	for( int progress=0; !feof(f); ) {
+		....
+		progress += fread(buf,1,nread,f);
+		....
+		synapse::emit<report_progress>(f,progress);
+	}
 
 }
 ----
@@ -150,10 +151,10 @@ Outside of `process_file` the `report_progress` signal can be connected to some 
 [source,c++]
 ----
 if( FILE * f=fopen("file.dat","rb") ) {
-    QProgressBar pb(....);
-    auto c=synapse::connect<report_progress>(f, &pb, &QProgressBar::setValue);
-    process_file(f);
-    fclose(f);
+	QProgressBar pb(....);
+	auto c=synapse::connect<report_progress>(f, &pb, &QProgressBar::setValue);
+	process_file(f);
+	fclose(f);
 }
 ----
 [.text-right]
@@ -192,20 +193,20 @@ typedef struct print_(*print)(std::string const & s);
 
 int main() {
 
-    int emitter;
+	int emitter;
 
-    auto c = synapse::connect<print>(&emitter,
-        [ ](std::string const & s) {
-            std::cout << s;
-        } );
+	auto c = synapse::connect<print>(&emitter,
+		[ ](std::string const & s) {
+			std::cout << s;
+		} );
 
-    synapse::emit<print>(&emitter,"Hello World"); # <1>
+	synapse::emit<print>(&emitter,"Hello World"); # <1>
 
-    shared_ptr<synapse::blocker> b = synapse::block<print>(&emitter); # <2>
-    synapse::emit<print>(&emitter,"no-op");
+	shared_ptr<synapse::blocker> b = synapse::block<print>(&emitter); # <2>
+	synapse::emit<print>(&emitter,"no-op");
 
-    b.reset();
-    synapse::emit<print>(&emitter,"Hello World"); # <3>
+	b.reset();
+	synapse::emit<print>(&emitter,"Hello World"); # <3>
 }
 ----
 [.text-right]
@@ -252,7 +253,7 @@ Special care must be taken to ensure that any objects referred to by arguments p
 typedef struct my_signal_(*my_signal)( int * );
 
 void emit_my_signal( void * emitter, int x ) {
-    emit<my_signal>(emitter,&x); //Undefined behavior in the presence of thread_local_queues!
+	emit<my_signal>(emitter,&x); //Undefined behavior in the presence of thread_local_queues!
 }
 ----
 [.text-right]
@@ -355,21 +356,21 @@ By default `emit` will only call functions connected from the calling thread. In
 ----
 namespace boost { namespace synapse {
 
-    class connection;
+	class connection;
 
-    template <class Signal, class Emitter, class F>
-    shared_ptr<connection> connect( Emitter * e, F f );
+	template <class Signal, class Emitter, class F>
+	shared_ptr<connection> connect( Emitter * e, F f );
 
-    template <class Signal, class Emitter, class Receiver, class F>
-    shared_ptr<connection> connect( Emitter * e, Receiver * r, F f );
+	template <class Signal, class Emitter, class Receiver, class F>
+	shared_ptr<connection> connect( Emitter * e, Receiver * r, F f );
 
-    class pconnection;
+	class pconnection;
 
-    template <class Signal, class Emitter, class F>
-    weak_ptr<pconnection> connect( <<Emitter>> e, F f ); <1>
+	template <class Signal, class Emitter, class F>
+	weak_ptr<pconnection> connect( <<Emitter>> e, F f ); <1>
 
-    template <class Signal, class Emitter, class Receiver, class F>
-    weak_ptr<pconnection> connect( <<Emitter>> e, <<Receiver>> r, F f ); <2>
+	template <class Signal, class Emitter, class Receiver, class F>
+	weak_ptr<pconnection> connect( <<Emitter>> e, <<Receiver>> r, F f ); <2>
 
 } }
 ----
@@ -398,22 +399,22 @@ IMPORTANT: If either the emitter or the receiver, if passed as raw pointers, exp
 ----
 namespace boost { namespace synapse {
 
-    namespace meta {
+	namespace meta {
 
-        weak_ptr<void const> emitter();
+		weak_ptr<void const> emitter();
 
-        template <class Signal>
-        struct connected {
-            //unspecified
-        };
+		template <class Signal>
+		struct connected {
+			//unspecified
+		};
 
-        namespace connect_flags {
-            unsigned const connecting=1;
-            unsigned const first_for_this_emitter=2;
-            unsigned const last_for_this_emitter=4;
-        }
+		namespace connect_flags {
+			unsigned const connecting=1;
+			unsigned const first_for_this_emitter=2;
+			unsigned const last_for_this_emitter=4;
+		}
 
-    }
+	}
 
 } }
 ----
@@ -445,11 +446,11 @@ Please see <<emit,`emit`>> and <<thread_local_queue,`thread_local_queue`>>.
 ----
 namespace boost { namespace synapse {
 
-    class connection;
-    class pconnection;
+	class connection;
+	class pconnection;
 
-    shared_ptr<connection const> release( weak_ptr<pconnection const> const & c );
-    shared_ptr<connection> release( weak_ptr<pconnection> const & c );
+	shared_ptr<connection const> release( weak_ptr<pconnection const> const & c );
+	shared_ptr<connection> release( weak_ptr<pconnection> const & c );
 
 } }
 ----
@@ -574,10 +575,10 @@ Notes: ::
 ----
 namespace boost { namespace synapse {
 
-    class blocker;
+	class blocker;
 
-    template <class Signal, class Emitter>
-    shared_ptr<blocker> block( <<Emitter>> e ); <1>
+	template <class Signal, class Emitter>
+	shared_ptr<blocker> block( <<Emitter>> e ); <1>
 
 } }
 ----
@@ -591,10 +592,10 @@ Effects: ::
 ----
 namespace boost { namespace synapse { namespace meta {
 
-    template <class Signal>
-    struct blocked {
-        //unspecified
-    };
+	template <class Signal>
+	struct blocked {
+		//unspecified
+	};
 
 } } }
 ----
@@ -653,8 +654,8 @@ Notes: ::
 ----
 namespace boost { namespace synapse {
 
-    struct thread_local_queue;
-    shared_ptr<thread_local_queue> create_thread_local_queue();
+	struct thread_local_queue;
+	shared_ptr<thread_local_queue> create_thread_local_queue();
 
 } }
 ----
@@ -674,7 +675,7 @@ IMPORTANT: While any number of threads can use this function to create their own
 ----
 namespace boost { namespace synapse {
 
-    int poll( thread_local_queue & q );
+	int poll( thread_local_queue & q );
 
 } }
 ----
@@ -695,7 +696,7 @@ The total number of signals emitted.
 ----
 namespace boost { namespace synapse {
 
-    int wait( thread_local_queue & q );
+	int wait( thread_local_queue & q );
 
 } }
 ----
@@ -716,7 +717,7 @@ The total number of signals emitted (always greater than 0).
 ----
 namespace boost { namespace synapse {
 
-    void post( thread_local_queue & q, function<void()> const & f );
+	void post( thread_local_queue & q, function<void()> const & f );
 
 } }
 ----
@@ -750,10 +751,10 @@ As part of the implementation of the `object_cache` class, we call <<emit,`emit`
 [source,c++]
 ----
 void object_cache::load_object( char const * type, char const * name ) {
-    ....
-    //load the object
-    ....
-    synapse::emit<object_loaded>(this,type,name);
+	....
+	//load the object
+	....
+	synapse::emit<object_loaded>(this,type,name);
 }
 ----
 
@@ -772,7 +773,7 @@ It is common for C APIs to use function pointers to implement callback systems. 
 [source,c]
 ----
 void SSL_set_info_callback(SSL *ssl,
-        void (*cb) (const SSL *ssl, int type, int val));
+		void (*cb) (const SSL *ssl, int type, int val));
 ----
 
 Once the user calls `SSL_set_info_callback`, the C function pointed to by `cb` will be called with state information for `ssl` during connection setup and use.
@@ -796,28 +797,28 @@ void emit_fwd( SSL const * ssl, int type, int val );
 
 int main( int argc, char const * argv[ ] ) {
 
-    connect<meta::connected<SSL_info_callback> >( meta::emitter(),
-        [ ]( connection & c, unsigned flags ) { <1>
+	connect<meta::connected<SSL_info_callback> >( meta::emitter(),
+		[ ]( connection & c, unsigned flags ) { <1>
 
-            if( flags & meta::connect_flags::connecting ) { <2>
+			if( flags & meta::connect_flags::connecting ) { <2>
 
-                if( flags & meta::connect_flags::first_for_this_emitter ) <3>
-                    SSL_set_info_callback(c.emitter<SSL>().get(),&emit_fwd); <4>
+				if( flags & meta::connect_flags::first_for_this_emitter ) <3>
+					SSL_set_info_callback(c.emitter<SSL>().get(),&emit_fwd); <4>
 
-            } else { <5>
+			} else { <5>
 
-                if( flags & meta::connect_flags::last_for_this_emitter ) <6>
-                    if( auto ssl = c.emitter<SSL>() ) <7>
-                        SSL_set_info_callback(ssl.get(),0); <8>
+				if( flags & meta::connect_flags::last_for_this_emitter ) <6>
+					if( auto ssl = c.emitter<SSL>() ) <7>
+						SSL_set_info_callback(ssl.get(),0); <8>
 
-            }
+			}
 
-        } );
+		} );
 
 }
 
 void emit_fwd( SSL const * ssl, int type, int val ) {
-    emit<SSL_info_callback>(ssl,ssl,type,val);
+	emit<SSL_info_callback>(ssl,ssl,type,val);
 }
 ----
 [.text-right]
@@ -839,9 +840,9 @@ Once the above handler for the `meta::connected<SSL_info_callback>` signal is in
 shared_ptr<SSL> ssl(SSL_new(ctx),&SSL_free);
 
 connect<SSL_info_callback>( ssl,
-    [ ]( const SSL *ssl, int type, int val ) noexcept {
+	[ ]( const SSL *ssl, int type, int val ) noexcept {
 
-    } );
+	} );
 ----
 
 [.text-right]
@@ -866,18 +867,18 @@ If we take a handler of the `SSL_info_callback` (see above) as an example, we co
 shared_ptr<SSL> ssl(SSL_new(ctx),&SSL_free);
 
 connect<SSL_info_callback>( ssl,
-    [ ]( const SSL *ssl, int type, int val ) noexcept {
-        try {
+	[ ]( const SSL *ssl, int type, int val ) noexcept {
+		try {
 
-            //code which may throw
+			//code which may throw
 
-        } catch(...) {
+		} catch(...) {
 
-            int n=synapse::emit<exception_caught>(ssl); <1>
-            assert(n>0); <2>
+			int n=synapse::emit<exception_caught>(ssl); <1>
+			assert(n>0); <2>
 
-        }
-    } );
+		}
+	} );
 ----
 [.text-right]
 <<connect>> | <<emit>>
@@ -903,59 +904,59 @@ namespace synapse=boost::synapse;
 class Window : public QWidget
 {
 public:
-    explicit Window(QWidget *parent = 0);
-    signals: //Not needed with Synapse but okay
-    typedef struct counterReached_(*counterReached)(); <1>
+	explicit Window(QWidget *parent = 0);
+	signals: //Not needed with Synapse but okay
+	typedef struct counterReached_(*counterReached)(); <1>
 private slots: //<-- Not needed with Synapse but okay
-    void slotButtonClicked(bool checked);
+	void slotButtonClicked(bool checked);
 private:
-    int m_counter;
-    QPushButton *m_button;
-    shared_ptr<synapse::connection> c_; <2>
+	int m_counter;
+	QPushButton *m_button;
+	shared_ptr<synapse::connection> c_; <2>
 };
 
 Window::Window(QWidget *parent) :
-    QWidget(parent)
+	QWidget(parent)
 {
-     // Set size of the window
-     setFixedSize(100, 50);
+	 // Set size of the window
+	 setFixedSize(100, 50);
 
-    // Create and position the button
-    m_button = new QPushButton("Hello World", this);
-    m_button->setGeometry(10, 10, 80, 30);
-    m_button->setCheckable(true);
+	// Create and position the button
+	m_button = new QPushButton("Hello World", this);
+	m_button->setGeometry(10, 10, 80, 30);
+	m_button->setCheckable(true);
 
-    // Set the counter to 0
-    m_counter = 0;
+	// Set the counter to 0
+	m_counter = 0;
 
-    connect(m_button,&QPushButton::clicked,
-        [this]( bool checked )
-        {
-            slotButtonClicked(checked);
-        } ); <3>
+	connect(m_button,&QPushButton::clicked,
+		[this]( bool checked )
+		{
+			slotButtonClicked(checked);
+		} ); <3>
 
-    c_=synapse::connect<counterReached>(this,&QApplication::quit); <4>
+	c_=synapse::connect<counterReached>(this,&QApplication::quit); <4>
 }
 
 void Window::slotButtonClicked(bool checked)
 {
-    if (checked)
-        m_button->setText("Checked");
-    else
-        m_button->setText("Hello World");
-    m_counter ++;
-    if (m_counter == 10)
-        synapse::emit<counterReached>(this); <5>
+	if (checked)
+		m_button->setText("Checked");
+	else
+		m_button->setText("Hello World");
+	m_counter ++;
+	if (m_counter == 10)
+		synapse::emit<counterReached>(this); <5>
 }
 
 int main(int argc, char **argv)
 {
-    QApplication app (argc, argv);
+	QApplication app (argc, argv);
 
-    Window window;
-    window.show();
+	Window window;
+	window.show();
 
-    return app.exec();
+	return app.exec();
 }
 ----
 [.text-right]
@@ -996,27 +997,27 @@ extern "C" { typedef struct GLFWwindow GLFWwindow; }
 
 namespace glfw_signals
 {
-    //User input callbacks
-    typedef struct Key_(*Key)( GLFWwindow *, int key, int scancode, int action, int mods );
-    typedef struct Char_(*Char)( GLFWwindow *, unsigned int codepoint );
-    typedef struct CharMods_(*CharMods)( GLFWwindow *, unsigned int codepoint, int mods );
-    typedef struct CursorPos_ (*CursorPos)( GLFWwindow *, double xpos, double ypos );
-    typedef struct CursorEnter_(*CursorEnter)( GLFWwindow *, int entered );
-    typedef struct MouseButton_(*MouseButton)( GLFWwindow *, int button, int action, int mods );
-    typedef struct Scroll_(*Scroll)( GLFWwindow *, double xoffset, double yoffset );
-    typedef struct Drop_(*Drop)( GLFWwindow *, int count, char const * * paths );
+	//User input callbacks
+	typedef struct Key_(*Key)( GLFWwindow *, int key, int scancode, int action, int mods );
+	typedef struct Char_(*Char)( GLFWwindow *, unsigned int codepoint );
+	typedef struct CharMods_(*CharMods)( GLFWwindow *, unsigned int codepoint, int mods );
+	typedef struct CursorPos_ (*CursorPos)( GLFWwindow *, double xpos, double ypos );
+	typedef struct CursorEnter_(*CursorEnter)( GLFWwindow *, int entered );
+	typedef struct MouseButton_(*MouseButton)( GLFWwindow *, int button, int action, int mods );
+	typedef struct Scroll_(*Scroll)( GLFWwindow *, double xoffset, double yoffset );
+	typedef struct Drop_(*Drop)( GLFWwindow *, int count, char const * * paths );
 
-    //Window state callbacks
-    typedef struct WindowClose_(*WindowClose)( GLFWwindow * );
-    typedef struct WindowSize_(*WindowSize)( GLFWwindow *, int width, int height );
-    typedef struct FramebufferSize_(*FramebufferSize)( GLFWwindow *, int width, int height );
-    typedef struct WindowPos_(*WindowPos)( GLFWwindow *, int xpos, int ypos );
-    typedef struct WindowIconify_(*WindowIconify)( GLFWwindow *, int iconified );
-    typedef struct WindowFocus_(*WindowFocus)( GLFWwindow *, int focused );
-    typedef struct WindowRefresh_(*WindowRefresh)( GLFWwindow * );
+	//Window state callbacks
+	typedef struct WindowClose_(*WindowClose)( GLFWwindow * );
+	typedef struct WindowSize_(*WindowSize)( GLFWwindow *, int width, int height );
+	typedef struct FramebufferSize_(*FramebufferSize)( GLFWwindow *, int width, int height );
+	typedef struct WindowPos_(*WindowPos)( GLFWwindow *, int xpos, int ypos );
+	typedef struct WindowIconify_(*WindowIconify)( GLFWwindow *, int iconified );
+	typedef struct WindowFocus_(*WindowFocus)( GLFWwindow *, int focused );
+	typedef struct WindowRefresh_(*WindowRefresh)( GLFWwindow * );
 
-    //This is emitted from the GLFWwindow object to report exceptions from connected signal handlers
-    typedef struct exception_caught_(*exception_caught)( GLFWwindow * );
+	//This is emitted from the GLFWwindow object to report exceptions from connected signal handlers
+	typedef struct exception_caught_(*exception_caught)( GLFWwindow * );
 }
 ----
 
@@ -1036,68 +1037,68 @@ class synapsifier;
 template <class R, class... A>
 class synapsifier<R(*)(GLFWwindow *,A...)>
 {
-    typedef R(*Signal)(GLFWwindow *,A...);
-    typedef void (*GLFWfun)( GLFWwindow *,A... );
+	typedef R(*Signal)(GLFWwindow *,A...);
+	typedef void (*GLFWfun)( GLFWwindow *,A... );
 
-    static GLFWfun prev_;
+	static GLFWfun prev_;
 
-    //This is the handler that GLFW calls. It emits the corresponding Synapse
-    //signal and calls the previous GLFW handler for the same event, if any.
-    static void handler( GLFWwindow * w, A... a )
-    {
-        using namespace boost::synapse;
-        try
-        {
-            (void) emit<Signal>(w,w,a...);
-        }
-        catch(...)
-        {
-            //We can't let exceptions propagate up into C code, so the window
-            //emits the exception_caught signal, which (if exceptions are
-            //expected) should be connected to capture and handle the current
-            //exception.
-            bool handled = emit<glfw_signals::exception_caught>(w,w)>0;
-            assert(handled);
-        }
-        if( prev_ )
-            prev_(w,a...);
-    }
+	//This is the handler that GLFW calls. It emits the corresponding Synapse
+	//signal and calls the previous GLFW handler for the same event, if any.
+	static void handler( GLFWwindow * w, A... a )
+	{
+		using namespace boost::synapse;
+		try
+		{
+			(void) emit<Signal>(w,w,a...);
+		}
+		catch(...)
+		{
+			//We can't let exceptions propagate up into C code, so the window
+			//emits the exception_caught signal, which (if exceptions are
+			//expected) should be connected to capture and handle the current
+			//exception.
+			bool handled = emit<glfw_signals::exception_caught>(w,w)>0;
+			assert(handled);
+		}
+		if( prev_ )
+			prev_(w,a...);
+	}
 
-    public:
+	public:
 
-    explicit synapsifier( GLFWfun (*setter)(GLFWwindow *,GLFWfun) )
-    {
-        using namespace boost::synapse;
+	explicit synapsifier( GLFWfun (*setter)(GLFWwindow *,GLFWfun) )
+	{
+		using namespace boost::synapse;
 
-        //Here we connect the Synapse meta::connected<Signal> signal. This
-        //signal is emitted by the meta::emitter() when the Signal is being
-        //connected (the user calls synapse::connect<Signal>) or disconnected
-        //(when the connection expires). The emitter pointer passed to connect
-        //(which in this case is of type GLFWwindow) is stored in the
-        //synapse::connection object passed to the lambda below, and can be
-        //accessed by the connection::emitter member function template.
-        connect<meta::connected<Signal> >( meta::emitter(),
-            [setter]( connection & c, unsigned flags )
-            {
-                if( flags&meta::connect_flags::connecting )
-                {
-                    //When the Signal is being connected for the first time,
-                    //use the GLFW API to install our handler.
-                    if( flags&meta::connect_flags::first_for_this_emitter )
-                        prev_=setter(c.emitter<GLFWwindow>().get(),&handler);
-                }
-                else
-                {
-                    //When the last Signal connection expires, use the GLFW API
-                    //to uninstall our handler and restore the previous handler.
-                    if( flags&meta::connect_flags::last_for_this_emitter )
-                    {
-                        GLFWfun p=setter(c.emitter<GLFWwindow>().get(),prev_);
-                        assert(p==&handler);
-                    }
-                }
-            } );
-    }
+		//Here we connect the Synapse meta::connected<Signal> signal. This
+		//signal is emitted by the meta::emitter() when the Signal is being
+		//connected (the user calls synapse::connect<Signal>) or disconnected
+		//(when the connection expires). The emitter pointer passed to connect
+		//(which in this case is of type GLFWwindow) is stored in the
+		//synapse::connection object passed to the lambda below, and can be
+		//accessed by the connection::emitter member function template.
+		connect<meta::connected<Signal> >( meta::emitter(),
+			[setter]( connection & c, unsigned flags )
+			{
+				if( flags&meta::connect_flags::connecting )
+				{
+					//When the Signal is being connected for the first time,
+					//use the GLFW API to install our handler.
+					if( flags&meta::connect_flags::first_for_this_emitter )
+						prev_=setter(c.emitter<GLFWwindow>().get(),&handler);
+				}
+				else
+				{
+					//When the last Signal connection expires, use the GLFW API
+					//to uninstall our handler and restore the previous handler.
+					if( flags&meta::connect_flags::last_for_this_emitter )
+					{
+						GLFWfun p=setter(c.emitter<GLFWwindow>().get(),prev_);
+						assert(p==&handler);
+					}
+				}
+			} );
+	}
 };
 
 template <class R, class... A>
@@ -1131,10 +1132,10 @@ With this, we simply use <<connect,`connect`>> to hook up any `GLFWwindow` event
 [source,c++]
 ----
 auto c = synapse::connect<glfw_signals::key>(w,
-    [ ]( GLFWwindow * w, int key, int scancode, int action, int mods )
-    {
-        ....
-    }
+	[ ]( GLFWwindow * w, int key, int scancode, int action, int mods )
+	{
+		....
+	}
 ----
 
 [.text-right]
@@ -1182,13 +1183,13 @@ namespace synapse = boost::synapse;
 
 static const struct
 {
-    float x, y;
-    float r, g, b;
+	float x, y;
+	float r, g, b;
 } vertices[3] =
 {
-    { -0.6f, -0.4f, 1.f, 0.f, 0.f },
-    {  0.6f, -0.4f, 0.f, 1.f, 0.f },
-    {   0.f,  0.6f, 0.f, 0.f, 1.f }
+	{ -0.6f, -0.4f, 1.f, 0.f, 0.f },
+	{  0.6f, -0.4f, 0.f, 1.f, 0.f },
+	{   0.f,  0.6f, 0.f, 0.f, 1.f }
 };
 
 static const char* vertex_shader_text =
@@ -1213,110 +1214,110 @@ static const char* fragment_shader_text =
 
 static void error_callback(int error, const char* description)
 {
-    fprintf(stderr, "Error: %s\n", description);
+	fprintf(stderr, "Error: %s\n", description);
 }
 
 /* <2>
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 */
 
 int main(void)
 {
-    GLFWwindow* window;
-    GLuint vertex_buffer, vertex_shader, fragment_shader, program;
-    GLint mvp_location, vpos_location, vcol_location;
+	GLFWwindow* window;
+	GLuint vertex_buffer, vertex_shader, fragment_shader, program;
+	GLint mvp_location, vpos_location, vcol_location;
 
-    glfwSetErrorCallback(error_callback);
+	glfwSetErrorCallback(error_callback);
 
-    if (!glfwInit())
-        exit(EXIT_FAILURE);
+	if (!glfwInit())
+		exit(EXIT_FAILURE);
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
-    window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
-    if (!window)
-    {
-        glfwTerminate();
-        exit(EXIT_FAILURE);
-    }
+	window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
+	if (!window)
+	{
+		glfwTerminate();
+		exit(EXIT_FAILURE);
+	}
 
-    //glfwSetKeyCallback(window, key_callback); <2>
+	//glfwSetKeyCallback(window, key_callback); <2>
 
-    auto connected = synapse::connect<glfw_signals::Key>(window, <3>
-        [ ]( GLFWwindow * window, int key, int /*scancode*/, int action, int /*mods*/ )
-        {
-            if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-                glfwSetWindowShouldClose(window, GLFW_TRUE);
-        } );
+	auto connected = synapse::connect<glfw_signals::Key>(window, <3>
+		[ ]( GLFWwindow * window, int key, int /*scancode*/, int action, int /*mods*/ )
+		{
+			if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+				glfwSetWindowShouldClose(window, GLFW_TRUE);
+		} );
 
-    glfwMakeContextCurrent(window);
-    gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
-    glfwSwapInterval(1);
+	glfwMakeContextCurrent(window);
+	gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+	glfwSwapInterval(1);
 
-    // NOTE: OpenGL error checks have been omitted for brevity
+	// NOTE: OpenGL error checks have been omitted for brevity
 
-    glGenBuffers(1, &vertex_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glGenBuffers(1, &vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
-    glCompileShader(vertex_shader);
+	vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
+	glCompileShader(vertex_shader);
 
-    fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment_shader, 1, &fragment_shader_text, NULL);
-    glCompileShader(fragment_shader);
+	fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragment_shader, 1, &fragment_shader_text, NULL);
+	glCompileShader(fragment_shader);
 
-    program = glCreateProgram();
-    glAttachShader(program, vertex_shader);
-    glAttachShader(program, fragment_shader);
-    glLinkProgram(program);
+	program = glCreateProgram();
+	glAttachShader(program, vertex_shader);
+	glAttachShader(program, fragment_shader);
+	glLinkProgram(program);
 
-    mvp_location = glGetUniformLocation(program, "MVP");
-    vpos_location = glGetAttribLocation(program, "vPos");
-    vcol_location = glGetAttribLocation(program, "vCol");
+	mvp_location = glGetUniformLocation(program, "MVP");
+	vpos_location = glGetAttribLocation(program, "vPos");
+	vcol_location = glGetAttribLocation(program, "vCol");
 
-    glEnableVertexAttribArray(vpos_location);
-    glVertexAttribPointer(vpos_location, 2, GL_FLOAT, GL_FALSE,
-                          sizeof(vertices[0]), (void*) 0);
-    glEnableVertexAttribArray(vcol_location);
-    glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE,
-                          sizeof(vertices[0]), (void*) (sizeof(float) * 2));
+	glEnableVertexAttribArray(vpos_location);
+	glVertexAttribPointer(vpos_location, 2, GL_FLOAT, GL_FALSE,
+						  sizeof(vertices[0]), (void*) 0);
+	glEnableVertexAttribArray(vcol_location);
+	glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE,
+						  sizeof(vertices[0]), (void*) (sizeof(float) * 2));
 
-    while (!glfwWindowShouldClose(window))
-    {
-        float ratio;
-        int width, height;
-        mat4x4 m, p, mvp;
+	while (!glfwWindowShouldClose(window))
+	{
+		float ratio;
+		int width, height;
+		mat4x4 m, p, mvp;
 
-        glfwGetFramebufferSize(window, &width, &height);
-        ratio = width / (float) height;
+		glfwGetFramebufferSize(window, &width, &height);
+		ratio = width / (float) height;
 
-        glViewport(0, 0, width, height);
-        glClear(GL_COLOR_BUFFER_BIT);
+		glViewport(0, 0, width, height);
+		glClear(GL_COLOR_BUFFER_BIT);
 
-        mat4x4_identity(m);
-        mat4x4_rotate_Z(m, m, (float) glfwGetTime());
-        mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
-        mat4x4_mul(mvp, p, m);
+		mat4x4_identity(m);
+		mat4x4_rotate_Z(m, m, (float) glfwGetTime());
+		mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+		mat4x4_mul(mvp, p, m);
 
-        glUseProgram(program);
-        glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*) mvp);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+		glUseProgram(program);
+		glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*) mvp);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
 
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
 
-    glfwDestroyWindow(window);
+	glfwDestroyWindow(window);
 
-    glfwTerminate();
-    exit(EXIT_SUCCESS);
+	glfwTerminate();
+	exit(EXIT_SUCCESS);
 }
 
 ----
@@ -1432,9 +1433,9 @@ TIP: `boost/synapse/emit.hpp` is a header-only component: if a program only emit
 
 [qanda]
 Is there a way to stop the emit loop before all connected functions have been called?::
-    No, except by throwing an exception.
+	No, except by throwing an exception.
 I am concerned about code size, does Synapse use a lot of templates?::
-    Yes, there are templates instantiated for each signal type. This is done so that the dispatch by signal type occurs at compile-time, leaving only emitter dispatch at run-time. However, static types are erased as soon as possible, so template bloat is kept to a minimum.
+	Yes, there are templates instantiated for each signal type. This is done so that the dispatch by signal type occurs at compile-time, leaving only emitter dispatch at run-time. However, static types are erased as soon as possible, so template bloat is kept to a minimum.
 
 == Acknowledgements
 

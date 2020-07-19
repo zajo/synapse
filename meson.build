@@ -20,6 +20,9 @@ if not meson.is_subproject()
 			'-Wno-dangling-else',
 			'-Wno-sign-compare',
 			language:'cpp' )
+	elif compiler_id=='msvc'
+		add_global_arguments(
+			language:'cpp' )
 	endif
 endif
 
@@ -39,18 +42,15 @@ emit = declare_dependency( include_directories: includes, compile_args: defines 
 
 thread_local_queue = declare_dependency( include_directories: includes, compile_args: defines, sources:
 	'src/thread_local_queue.cpp',
-	dependencies: [
-		dep_boost ] )
+	dependencies: [ dep_boost ] )
 
 connect = declare_dependency( include_directories: includes, compile_args: defines, sources:
 	'src/connect.cpp',
-	dependencies: [
-		thread_local_queue ] )
+	dependencies: [ dep_boost, thread_local_queue ] )
 
 block = declare_dependency( include_directories: includes, compile_args: defines, sources:
 	'src/block.cpp',
-	dependencies: [
-		dep_boost ] )
+	dependencies: [ dep_boost ] )
 
 all = declare_dependency( include_directories: includes, compile_args: defines,
 	link_with: static_library(
@@ -66,13 +66,14 @@ includes = [ include_directories('include') ]
 #################################
 
 tests = [
-	[ '_hpp_compile_block_test', [ emit ] ],
-	[ '_hpp_compile_blocker_test', [ emit ] ],
-	[ '_hpp_compile_connect_test', [ emit ] ],
-	[ '_hpp_compile_connection_test', [ emit ] ],
-	[ '_hpp_compile_emit_test', [ emit ] ],
-	[ '_hpp_compile_thread_local_queue_test', [ emit ] ],
-	[ '_hpp_compile_translate_test', [ emit ] ],
+	[ '_hpp_compile_block_test', [ emit, dep_boost ] ],
+	[ '_hpp_compile_blocker_test', [ emit, dep_boost ] ],
+	[ '_hpp_compile_config_test', [ emit ] ],
+	[ '_hpp_compile_connect_test', [ emit, dep_boost ] ],
+	[ '_hpp_compile_connection_test', [ emit, dep_boost ] ],
+	[ '_hpp_compile_emit_test', [ emit, dep_boost ] ],
+	[ '_hpp_compile_thread_local_queue_test', [ emit, dep_boost ] ],
+	[ '_hpp_compile_translate_test', [ emit, dep_boost ] ],
 	[ 'args_connect_test', [ connect ] ],
 	[ 'args_translate_test', [ connect ] ],
 	[ 'block_emit_test', [ connect, block ] ],
@@ -84,7 +85,7 @@ tests = [
 	[ 'ct_lambda_test', [ connect ] ],
 	[ 'ct_tlq_lifetime_test', [ connect ] ],
 	[ 'ct_wait_test', [ connect ] ],
-	[ 'emit_stub_test', [ emit ] ],
+	[ 'emit_stub_test', [ emit, dep_boost ] ],
 	[ 'emit_test', [ connect ] ],
 	[ 'property_test', [ connect ] ],
 	[ 'release_test', [ connect ] ],

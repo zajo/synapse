@@ -3,43 +3,43 @@
 ----
 namespace boost { namespace synapse {
 
-    class connection { //abstract base
+	class connection { //abstract base
 
-    protected:
+	protected:
 
-        connection();
-        ~connection();
+		connection();
+		~connection();
 
-    public:
-        
-        template <class T>
-        void set_user_data( T const & );
+	public:
+		
+		template <class T>
+		void set_user_data( T const & );
 
-        template <class T>
-        T * get_user_data() const;
+		template <class T>
+		T * get_user_data() const;
 
-        template <class T>
-        shared_ptr<T> emitter() const;
+		template <class T>
+		shared_ptr<T> emitter() const;
 
-        template <class T>
-        shared_ptr<T> receiver() const;
-    };
+		template <class T>
+		shared_ptr<T> receiver() const;
+	};
 
-    class pconnection: protected connection { //abstract base
+	class pconnection: protected connection { //abstract base
 
-    protected:
+	protected:
 
-        pconnection();
-        ~pconnection();
+		pconnection();
+		~pconnection();
 
-    public:
-        
-        using connection::set_user_data;
-        using connection::get_user_data;
-        using connection::emitter;
-        using connection::receiver;
+	public:
+		
+		using connection::set_user_data;
+		using connection::get_user_data;
+		using connection::emitter;
+		using connection::receiver;
 
-    };
+	};
 
 } }
 ----

@@ -1,15 +1,23 @@
-Synapse is a non-intrusive C++ signal programming library. Features:
+Synapse is a non-intrusive C++ signal programming library for C++11.
 
-* Register connections and emit signals from any C or C++ object of any type whatsoever.
+Official documentation: https://zajo.github.io/synapse/
 
-* If two contexts share access to a C or C++ object, they can use that object as a rendezvous point, and communicate with each other through Synapse signals.
+Features:
 
-* A system of meta signals provides interoperability with other signal programming libraries and callback APIs.
+* Any C or {CPP} object of any type whatsoever can be used as a signal emitter.
+
+* A system of meta signals for interoperability with other signal programming libraries and callback APIs. Lambda captures can be easily installed as C API callbacks!
 
 * In a multi-thread environment signals can be emitted asynchronously and scheduled for synchronous execution when polled in other threads.
 
-Copyright (c) 2015-2020 Emil Dotchevski and Reverge Studios, Inc. Distributed under the [Boost Software License, Version 1.0](http://www.boost.org/LICENSE_1_0.txt).
+* No dependencies.
 
-Please post questions and feedback on the Boost Developers Mailing List (Synapse is not part of Boost).
+Support is available via:
 
-Official documentation: https://zajo.github.io/synapse/
+* [cpplang on Slack](https://Cpplang.slack.com) (use the `#boost` channel)
+* [Boost Users Mailing List](https://lists.boost.org/mailman/listinfo.cgi/boost-users)
+* [Boost Developers Mailing List](https://lists.boost.org/mailman/listinfo.cgi/boost)
+
+Copyright (c) 2018-2020 Emil Dotchevski and Reverge Studios, Inc.
+
+Distributed under the [Boost Software License, Version 1.0](http://www.boost.org/LICENSE_1_0.txt).

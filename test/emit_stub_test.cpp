@@ -12,7 +12,7 @@ typedef struct test_signal_(*test_signal)(int);
 
 int main( int argc, char const * argv[] )
 {
-    int e;
-    BOOST_TEST_EQ(synapse::emit<test_signal>(&e, 42), 0);
-    return boost::report_errors();
+	int e;
+	BOOST_TEST_EQ(synapse::emit<test_signal>(&e, 42), 0);
+	return boost::report_errors();
 }

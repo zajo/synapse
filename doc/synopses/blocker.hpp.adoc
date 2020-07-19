@@ -3,18 +3,18 @@
 ----
 namespace boost { namespace synapse {
 
-    class blocker { //abstract base
+	class blocker { //abstract base
 
-    protected:
+	protected:
 
-        blocker();
-        ~blocker();
+		blocker();
+		~blocker();
 
-    public:
+	public:
 
-        template <class T>
-        shared_ptr<T> emitter() const;
-    };
+		template <class T>
+		shared_ptr<T> emitter() const;
+	};
 
 } }
 ----

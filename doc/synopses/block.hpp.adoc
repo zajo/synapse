@@ -3,19 +3,19 @@
 ----
 namespace boost { namespace synapse {
 
-    class blocker;
+	class blocker;
 
-    template <class Signal, class Emitter>
-    shared_ptr<blocker> block( <<Emitter>> e ); <1>
+	template <class Signal, class Emitter>
+	shared_ptr<blocker> block( <<Emitter>> e ); <1>
 
-    namespace meta {
+	namespace meta {
 
-        template <class Signal>
-        struct blocked {
-            typedef blocked<Signal>(*type)( blocker &, bool is_blocked );
-        };
+		template <class Signal>
+		struct blocked {
+			typedef blocked<Signal>(*type)( blocker &, bool is_blocked );
+		};
 
-    }
+	}
 
 } }
 ----

@@ -24,10 +24,10 @@
 
 namespace boost { namespace synapse {
 
-    using boost::shared_ptr;
-    using boost::weak_ptr;
-    using boost::make_shared;
-    using boost::get_deleter;
+	using boost::shared_ptr;
+	using boost::weak_ptr;
+	using boost::make_shared;
+	using boost::get_deleter;
 
 } }
 
@@ -37,10 +37,10 @@ namespace boost { namespace synapse {
 
 namespace boost { namespace synapse {
 
-    using std::shared_ptr;
-    using std::weak_ptr;
-    using std::make_shared;
-    using std::get_deleter;
+	using std::shared_ptr;
+	using std::weak_ptr;
+	using std::make_shared;
+	using std::get_deleter;
 
 } }
 
