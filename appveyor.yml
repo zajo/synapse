@@ -10,16 +10,16 @@ shallow_clone: true
 
 branches:
   only:
-	- master
-	- develop
+  - master
+  - develop
 
 environment:
   matrix:
-	- APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-	  TOOLSET: msvc-14.1
-	- APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-	  TOOLSET: msvc-14.1
-	  CXXSTD: 11,17
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    TOOLSET: msvc-14.1
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    TOOLSET: msvc-14.1
+    CXXSTD: 11,17
 
 install:
   - set BOOST_BRANCH=develop
