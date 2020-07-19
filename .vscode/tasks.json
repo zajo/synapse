@@ -22,69 +22,6 @@
 			}
 		},
 		{
-			"label": "_hpp_compile_block_test",
-			"type": "shell",
-			"command": "cd ${workspaceRoot}/bld/debug && meson test _hpp_compile_block_test",
-			"problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] },
-			"windows": {
-				"command": "${workspaceRoot}/.vscode/msvc.bat && cd ${workspaceRoot}/bld/debug && meson test _hpp_compile_block_test"
-			}
-		},
-		{
-			"label": "_hpp_compile_blocker_test",
-			"type": "shell",
-			"command": "cd ${workspaceRoot}/bld/debug && meson test _hpp_compile_blocker_test",
-			"problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] },
-			"windows": {
-				"command": "${workspaceRoot}/.vscode/msvc.bat && cd ${workspaceRoot}/bld/debug && meson test _hpp_compile_blocker_test"
-			}
-		},
-		{
-			"label": "_hpp_compile_connect_test",
-			"type": "shell",
-			"command": "cd ${workspaceRoot}/bld/debug && meson test _hpp_compile_connect_test",
-			"problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] },
-			"windows": {
-				"command": "${workspaceRoot}/.vscode/msvc.bat && cd ${workspaceRoot}/bld/debug && meson test _hpp_compile_connect_test"
-			}
-		},
-		{
-			"label": "_hpp_compile_connection_test",
-			"type": "shell",
-			"command": "cd ${workspaceRoot}/bld/debug && meson test _hpp_compile_connection_test",
-			"problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] },
-			"windows": {
-				"command": "${workspaceRoot}/.vscode/msvc.bat && cd ${workspaceRoot}/bld/debug && meson test _hpp_compile_connection_test"
-			}
-		},
-		{
-			"label": "_hpp_compile_emit_test",
-			"type": "shell",
-			"command": "cd ${workspaceRoot}/bld/debug && meson test _hpp_compile_emit_test",
-			"problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] },
-			"windows": {
-				"command": "${workspaceRoot}/.vscode/msvc.bat && cd ${workspaceRoot}/bld/debug && meson test _hpp_compile_emit_test"
-			}
-		},
-		{
-			"label": "_hpp_compile_thread_local_queue_test",
-			"type": "shell",
-			"command": "cd ${workspaceRoot}/bld/debug && meson test _hpp_compile_thread_local_queue_test",
-			"problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] },
-			"windows": {
-				"command": "${workspaceRoot}/.vscode/msvc.bat && cd ${workspaceRoot}/bld/debug && meson test _hpp_compile_thread_local_queue_test"
-			}
-		},
-		{
-			"label": "_hpp_compile_translate_test",
-			"type": "shell",
-			"command": "cd ${workspaceRoot}/bld/debug && meson test _hpp_compile_translate_test",
-			"problemMatcher": { "base": "$gcc", "fileLocation": ["relative","${workspaceRoot}/bld/debug"] },
-			"windows": {
-				"command": "${workspaceRoot}/.vscode/msvc.bat && cd ${workspaceRoot}/bld/debug && meson test _hpp_compile_translate_test"
-			}
-		},
-		{
 			"label": "args_connect_test",
 			"type": "shell",
 			"command": "cd ${workspaceRoot}/bld/debug && meson test args_connect_test",

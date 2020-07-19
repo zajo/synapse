@@ -43,66 +43,66 @@ namespace detail
 
 class test_result {
 public:
-    test_result()
-        : report_(false)
-        , errors_(0) {
+	test_result()
+		: report_(false)
+		, errors_(0) {
 #if defined(_MSC_VER) && (_MSC_VER > 1310)
-        ::_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+		::_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 #endif
-    }
+	}
 
-    ~test_result() {
-        if (!report_) {
-            BOOST_LIGHTWEIGHT_TEST_OSTREAM << "main() should return report_errors()" << std::endl;
-            std::abort();
-        }
-    }
+	~test_result() {
+		if (!report_) {
+			BOOST_LIGHTWEIGHT_TEST_OSTREAM << "main() should return report_errors()" << std::endl;
+			std::abort();
+		}
+	}
 
-    int& errors() {
-        return errors_;
-    }
+	int& errors() {
+		return errors_;
+	}
 
-    void done() {
-        report_ = true;
-    }
+	void done() {
+		report_ = true;
+	}
 
 private:
-    bool report_;
-    int errors_;
+	bool report_;
+	int errors_;
 };
 
 inline test_result& test_results()
 {
-    static test_result instance;
-    return instance;
+	static test_result instance;
+	return instance;
 }
 
 inline int& test_errors()
 {
-    return test_results().errors();
+	return test_results().errors();
 }
 
 inline void test_failed_impl(char const * expr, char const * file, int line, char const * function)
 {
-    BOOST_LIGHTWEIGHT_TEST_OSTREAM
-      << file << "(" << line << "): test '" << expr << "' failed in function '"
-      << function << "'" << std::endl;
-    ++test_results().errors();
+	BOOST_LIGHTWEIGHT_TEST_OSTREAM
+	  << file << "(" << line << "): test '" << expr << "' failed in function '"
+	  << function << "'" << std::endl;
+	++test_results().errors();
 }
 
 inline void error_impl(char const * msg, char const * file, int line, char const * function)
 {
-    BOOST_LIGHTWEIGHT_TEST_OSTREAM
-      << file << "(" << line << "): " << msg << " in function '"
-      << function << "'" << std::endl;
-    ++test_results().errors();
+	BOOST_LIGHTWEIGHT_TEST_OSTREAM
+	  << file << "(" << line << "): " << msg << " in function '"
+	  << function << "'" << std::endl;
+	++test_results().errors();
 }
 
 inline void throw_failed_impl(char const * excep, char const * file, int line, char const * function)
 {
    BOOST_LIGHTWEIGHT_TEST_OSTREAM
-    << file << "(" << line << "): Exception '" << excep << "' not thrown in function '"
-    << function << "'" << std::endl;
+	<< file << "(" << line << "): Exception '" << excep << "' not thrown in function '"
+	<< function << "'" << std::endl;
    ++test_results().errors();
 }
 
@@ -137,227 +137,227 @@ inline const void* test_output_impl(std::nullptr_t) { return nullptr; }
 #endif
 
 struct lw_test_eq {
-    template <typename T, typename U>
-    bool operator()(const T& t, const U& u) const { return t == u; }
-    static const char* op() { return "=="; }
+	template <typename T, typename U>
+	bool operator()(const T& t, const U& u) const { return t == u; }
+	static const char* op() { return "=="; }
 };
 
 struct lw_test_ne {
-    template <typename T, typename U>
-    bool operator()(const T& t, const U& u) const { return t != u; }
-    static const char* op() { return "!="; }
+	template <typename T, typename U>
+	bool operator()(const T& t, const U& u) const { return t != u; }
+	static const char* op() { return "!="; }
 };
 
 struct lw_test_lt {
-    template <typename T, typename U>
-    bool operator()(const T& t, const U& u) const { return t < u; }
-    static const char* op() { return "<"; }
+	template <typename T, typename U>
+	bool operator()(const T& t, const U& u) const { return t < u; }
+	static const char* op() { return "<"; }
 };
 
 struct lw_test_le {
-    template <typename T, typename U>
-    bool operator()(const T& t, const U& u) const { return t <= u; }
-    static const char* op() { return "<="; }
+	template <typename T, typename U>
+	bool operator()(const T& t, const U& u) const { return t <= u; }
+	static const char* op() { return "<="; }
 };
 
 struct lw_test_gt {
-    template <typename T, typename U>
-    bool operator()(const T& t, const U& u) const { return t > u; }
-    static const char* op() { return ">"; }
+	template <typename T, typename U>
+	bool operator()(const T& t, const U& u) const { return t > u; }
+	static const char* op() { return ">"; }
 };
 
 struct lw_test_ge {
-    template <typename T, typename U>
-    bool operator()(const T& t, const U& u) const { return t >= u; }
-    static const char* op() { return ">="; }
+	template <typename T, typename U>
+	bool operator()(const T& t, const U& u) const { return t >= u; }
+	static const char* op() { return ">="; }
 };
 
 template<class BinaryPredicate, class T, class U>
 inline void test_with_impl(BinaryPredicate pred, char const * expr1, char const * expr2,
-                           char const * file, int line, char const * function,
-                           T const & t, U const & u)
+						   char const * file, int line, char const * function,
+						   T const & t, U const & u)
 {
-    if( pred(t, u) )
-    {
-        test_results();
-    }
-    else
-    {
-        BOOST_LIGHTWEIGHT_TEST_OSTREAM
-            << file << "(" << line << "): test '" << expr1 << " " << pred.op() << " " << expr2
-            << "' ('" << test_output_impl(t) << "' " << pred.op() << " '" << test_output_impl(u)
-            << "') failed in function '" << function << "'" << std::endl;
-        ++test_results().errors();
-    }
+	if( pred(t, u) )
+	{
+		test_results();
+	}
+	else
+	{
+		BOOST_LIGHTWEIGHT_TEST_OSTREAM
+			<< file << "(" << line << "): test '" << expr1 << " " << pred.op() << " " << expr2
+			<< "' ('" << test_output_impl(t) << "' " << pred.op() << " '" << test_output_impl(u)
+			<< "') failed in function '" << function << "'" << std::endl;
+		++test_results().errors();
+	}
 }
 
 inline void test_cstr_eq_impl( char const * expr1, char const * expr2,
   char const * file, int line, char const * function, char const * const t, char const * const u )
 {
-    if( std::strcmp(t, u) == 0 )
-    {
-        test_results();
-    }
-    else
-    {
-        BOOST_LIGHTWEIGHT_TEST_OSTREAM
-            << file << "(" << line << "): test '" << expr1 << " == " << expr2 << "' ('" << t
-            << "' == '" << u << "') failed in function '" << function << "'" << std::endl;
-        ++test_results().errors();
-    }
+	if( std::strcmp(t, u) == 0 )
+	{
+		test_results();
+	}
+	else
+	{
+		BOOST_LIGHTWEIGHT_TEST_OSTREAM
+			<< file << "(" << line << "): test '" << expr1 << " == " << expr2 << "' ('" << t
+			<< "' == '" << u << "') failed in function '" << function << "'" << std::endl;
+		++test_results().errors();
+	}
 }
 
 inline void test_cstr_ne_impl( char const * expr1, char const * expr2,
   char const * file, int line, char const * function, char const * const t, char const * const u )
 {
-    if( std::strcmp(t, u) != 0 )
-    {
-        test_results();
-    }
-    else
-    {
-        BOOST_LIGHTWEIGHT_TEST_OSTREAM
-            << file << "(" << line << "): test '" << expr1 << " != " << expr2 << "' ('" << t
-            << "' != '" << u << "') failed in function '" << function << "'" << std::endl;
-        ++test_results().errors();
-    }
+	if( std::strcmp(t, u) != 0 )
+	{
+		test_results();
+	}
+	else
+	{
+		BOOST_LIGHTWEIGHT_TEST_OSTREAM
+			<< file << "(" << line << "): test '" << expr1 << " != " << expr2 << "' ('" << t
+			<< "' != '" << u << "') failed in function '" << function << "'" << std::endl;
+		++test_results().errors();
+	}
 }
 
 template<class FormattedOutputFunction, class InputIterator1, class InputIterator2>
 void test_all_eq_impl(FormattedOutputFunction& output,
-                      char const * file, int line, char const * function,
-                      InputIterator1 first_begin, InputIterator1 first_end,
-                      InputIterator2 second_begin, InputIterator2 second_end)
+					  char const * file, int line, char const * function,
+					  InputIterator1 first_begin, InputIterator1 first_end,
+					  InputIterator2 second_begin, InputIterator2 second_end)
 {
-    InputIterator1 first_it = first_begin;
-    InputIterator2 second_it = second_begin;
-    typename std::iterator_traits<InputIterator1>::difference_type first_index = 0;
-    typename std::iterator_traits<InputIterator2>::difference_type second_index = 0;
-    std::size_t error_count = 0;
-    const std::size_t max_count = 8;
-    do
-    {
-        while ((first_it != first_end) && (second_it != second_end) && (*first_it == *second_it))
-        {
-            ++first_it;
-            ++second_it;
-            ++first_index;
-            ++second_index;
-        }
-        if ((first_it == first_end) || (second_it == second_end))
-        {
-            break; // do-while
-        }
-        if (error_count == 0)
-        {
-            output << file << "(" << line << "): Container contents differ in function '" << function << "':";
-        }
-        else if (error_count >= max_count)
-        {
-            output << " ...";
-            break;
-        }
-        output << " [" << first_index << "] '" << test_output_impl(*first_it) << "' != '" << test_output_impl(*second_it) << "'";
-        ++first_it;
-        ++second_it;
-        ++first_index;
-        ++second_index;
-        ++error_count;
-    } while (first_it != first_end);
+	InputIterator1 first_it = first_begin;
+	InputIterator2 second_it = second_begin;
+	typename std::iterator_traits<InputIterator1>::difference_type first_index = 0;
+	typename std::iterator_traits<InputIterator2>::difference_type second_index = 0;
+	std::size_t error_count = 0;
+	const std::size_t max_count = 8;
+	do
+	{
+		while ((first_it != first_end) && (second_it != second_end) && (*first_it == *second_it))
+		{
+			++first_it;
+			++second_it;
+			++first_index;
+			++second_index;
+		}
+		if ((first_it == first_end) || (second_it == second_end))
+		{
+			break; // do-while
+		}
+		if (error_count == 0)
+		{
+			output << file << "(" << line << "): Container contents differ in function '" << function << "':";
+		}
+		else if (error_count >= max_count)
+		{
+			output << " ...";
+			break;
+		}
+		output << " [" << first_index << "] '" << test_output_impl(*first_it) << "' != '" << test_output_impl(*second_it) << "'";
+		++first_it;
+		++second_it;
+		++first_index;
+		++second_index;
+		++error_count;
+	} while (first_it != first_end);
 
-    first_index += std::distance(first_it, first_end);
-    second_index += std::distance(second_it, second_end);
-    if (first_index != second_index)
-    {
-        if (error_count == 0)
-        {
-            output << file << "(" << line << "): Container sizes differ in function '" << function << "': size(" << first_index << ") != size(" << second_index << ")";
-        }
-        else
-        {
-            output << " [*] size(" << first_index << ") != size(" << second_index << ")";
-        }
-        ++error_count;
-    }
+	first_index += std::distance(first_it, first_end);
+	second_index += std::distance(second_it, second_end);
+	if (first_index != second_index)
+	{
+		if (error_count == 0)
+		{
+			output << file << "(" << line << "): Container sizes differ in function '" << function << "': size(" << first_index << ") != size(" << second_index << ")";
+		}
+		else
+		{
+			output << " [*] size(" << first_index << ") != size(" << second_index << ")";
+		}
+		++error_count;
+	}
 
-    if (error_count == 0)
-    {
-        test_results();
-    }
-    else
-    {
-        output << std::endl;
-        ++test_results().errors();
-    }
+	if (error_count == 0)
+	{
+		test_results();
+	}
+	else
+	{
+		output << std::endl;
+		++test_results().errors();
+	}
 }
 
 template<class FormattedOutputFunction, class InputIterator1, class InputIterator2, typename BinaryPredicate>
 void test_all_with_impl(FormattedOutputFunction& output,
-                        char const * file, int line, char const * function,
-                        InputIterator1 first_begin, InputIterator1 first_end,
-                        InputIterator2 second_begin, InputIterator2 second_end,
-                        BinaryPredicate predicate)
+						char const * file, int line, char const * function,
+						InputIterator1 first_begin, InputIterator1 first_end,
+						InputIterator2 second_begin, InputIterator2 second_end,
+						BinaryPredicate predicate)
 {
-    InputIterator1 first_it = first_begin;
-    InputIterator2 second_it = second_begin;
-    typename std::iterator_traits<InputIterator1>::difference_type first_index = 0;
-    typename std::iterator_traits<InputIterator2>::difference_type second_index = 0;
-    std::size_t error_count = 0;
-    const std::size_t max_count = 8;
-    do
-    {
-        while ((first_it != first_end) && (second_it != second_end) && predicate(*first_it, *second_it))
-        {
-            ++first_it;
-            ++second_it;
-            ++first_index;
-            ++second_index;
-        }
-        if ((first_it == first_end) || (second_it == second_end))
-        {
-            break; // do-while
-        }
-        if (error_count == 0)
-        {
-            output << file << "(" << line << "): Container contents differ in function '" << function << "':";
-        }
-        else if (error_count >= max_count)
-        {
-            output << " ...";
-            break;
-        }
-        output << " [" << first_index << "]";
-        ++first_it;
-        ++second_it;
-        ++first_index;
-        ++second_index;
-        ++error_count;
-    } while (first_it != first_end);
+	InputIterator1 first_it = first_begin;
+	InputIterator2 second_it = second_begin;
+	typename std::iterator_traits<InputIterator1>::difference_type first_index = 0;
+	typename std::iterator_traits<InputIterator2>::difference_type second_index = 0;
+	std::size_t error_count = 0;
+	const std::size_t max_count = 8;
+	do
+	{
+		while ((first_it != first_end) && (second_it != second_end) && predicate(*first_it, *second_it))
+		{
+			++first_it;
+			++second_it;
+			++first_index;
+			++second_index;
+		}
+		if ((first_it == first_end) || (second_it == second_end))
+		{
+			break; // do-while
+		}
+		if (error_count == 0)
+		{
+			output << file << "(" << line << "): Container contents differ in function '" << function << "':";
+		}
+		else if (error_count >= max_count)
+		{
+			output << " ...";
+			break;
+		}
+		output << " [" << first_index << "]";
+		++first_it;
+		++second_it;
+		++first_index;
+		++second_index;
+		++error_count;
+	} while (first_it != first_end);
 
-    first_index += std::distance(first_it, first_end);
-    second_index += std::distance(second_it, second_end);
-    if (first_index != second_index)
-    {
-        if (error_count == 0)
-        {
-            output << file << "(" << line << "): Container sizes differ in function '" << function << "': size(" << first_index << ") != size(" << second_index << ")";
-        }
-        else
-        {
-            output << " [*] size(" << first_index << ") != size(" << second_index << ")";
-        }
-        ++error_count;
-    }
+	first_index += std::distance(first_it, first_end);
+	second_index += std::distance(second_it, second_end);
+	if (first_index != second_index)
+	{
+		if (error_count == 0)
+		{
+			output << file << "(" << line << "): Container sizes differ in function '" << function << "': size(" << first_index << ") != size(" << second_index << ")";
+		}
+		else
+		{
+			output << " [*] size(" << first_index << ") != size(" << second_index << ")";
+		}
+		++error_count;
+	}
 
-    if (error_count == 0)
-    {
-        test_results();
-    }
-    else
-    {
-        output << std::endl;
-        ++test_results().errors();
-    }
+	if (error_count == 0)
+	{
+		test_results();
+	}
+	else
+	{
+		output << std::endl;
+		++test_results().errors();
+	}
 }
 
 #if defined(_MSC_VER)
@@ -374,22 +374,22 @@ void test_all_with_impl(FormattedOutputFunction& output,
 
 inline int report_errors()
 {
-    boost::detail::test_result& result = boost::detail::test_results();
-    result.done();
+	boost::detail::test_result& result = boost::detail::test_results();
+	result.done();
 
-    int errors = result.errors();
-    if( errors == 0 )
-    {
-        BOOST_LIGHTWEIGHT_TEST_OSTREAM
-          << "No errors detected." << std::endl;
-        return 0;
-    }
-    else
-    {
-        BOOST_LIGHTWEIGHT_TEST_OSTREAM
-          << errors << " error" << (errors == 1? "": "s") << " detected." << std::endl;
-        return 1;
-    }
+	int errors = result.errors();
+	if( errors == 0 )
+	{
+		BOOST_LIGHTWEIGHT_TEST_OSTREAM
+		  << "No errors detected." << std::endl;
+		return 0;
+	}
+	else
+	{
+		BOOST_LIGHTWEIGHT_TEST_OSTREAM
+		  << errors << " error" << (errors == 1? "": "s") << " detected." << std::endl;
+		return 1;
+	}
 }
 
 } // namespace boost
@@ -415,18 +415,18 @@ inline int report_errors()
 
 #ifndef BOOST_NO_EXCEPTIONS
    #define BOOST_TEST_THROWS( EXPR, EXCEP )                    \
-      try {                                                    \
-         EXPR;                                                 \
-         ::boost::detail::throw_failed_impl                    \
-         (#EXCEP, __FILE__, __LINE__, BOOST_CURRENT_FUNCTION); \
-      }                                                        \
-      catch(EXCEP const&) {                                    \
-         ::boost::detail::test_results();                      \
-      }                                                        \
-      catch(...) {                                             \
-         ::boost::detail::throw_failed_impl                    \
-         (#EXCEP, __FILE__, __LINE__, BOOST_CURRENT_FUNCTION); \
-      }                                                        \
+	  try {                                                    \
+		 EXPR;                                                 \
+		 ::boost::detail::throw_failed_impl                    \
+		 (#EXCEP, __FILE__, __LINE__, BOOST_CURRENT_FUNCTION); \
+	  }                                                        \
+	  catch(EXCEP const&) {                                    \
+		 ::boost::detail::test_results();                      \
+	  }                                                        \
+	  catch(...) {                                             \
+		 ::boost::detail::throw_failed_impl                    \
+		 (#EXCEP, __FILE__, __LINE__, BOOST_CURRENT_FUNCTION); \
+	  }                                                        \
    //
 #else
    #define BOOST_TEST_THROWS( EXPR, EXCEP )

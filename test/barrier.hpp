@@ -15,35 +15,35 @@ class barrier
 	barrier( barrier const & ) = delete;
 	barrier & operator=( barrier const & ) = delete;
 
-    std::mutex mut_;
-    std::condition_variable cond_;
-    int const threshold_;
-    int count_;
-    int generation_;
+	std::mutex mut_;
+	std::condition_variable cond_;
+	int const threshold_;
+	int count_;
+	int generation_;
 
 public:
 
-    explicit barrier( int count ):
-      threshold_(count),
-      count_(count),
-      generation_(0)
+	explicit barrier( int count ):
+	  threshold_(count),
+	  count_(count),
+	  generation_(0)
 	{
 		assert(count_ > 0);
-    }
+	}
 
-    void wait()
+	void wait()
 	{
-        std::unique_lock<std::mutex> lk{mut_};
-        auto g = generation_;
-        if( --count_ )
-            cond_.wait(lk, [this, g] { return g != generation_; });
+		std::unique_lock<std::mutex> lk{mut_};
+		auto g = generation_;
+		if( --count_ )
+			cond_.wait(lk, [this, g] { return g != generation_; });
 		else
 		{
-            ++generation_;
-            count_ = threshold_;
-            cond_.notify_all();
-        }
-    }
+			++generation_;
+			count_ = threshold_;
+			cond_.notify_all();
+		}
+	}
 };
 
 #endif

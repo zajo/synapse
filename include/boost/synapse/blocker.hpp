@@ -16,24 +16,24 @@
 #	endif
 #endif
 
-#include <boost/synapse/synapse_detail/common.hpp>
-#include <boost/synapse/synapse_detail/weak_store.hpp>
+#include <boost/synapse/detail/common.hpp>
+#include <boost/synapse/detail/weak_store.hpp>
 
 namespace boost { namespace synapse {
 
-    class blocker
-    {
-        virtual synapse_detail::weak_store const & emitter_() const=0;
+	class blocker
+	{
+		virtual synapse_detail::weak_store const & emitter_() const=0;
 
-    protected:
+	protected:
 
-        blocker();
-        ~blocker();
+		blocker();
+		~blocker();
 
-    public:
+	public:
 
-        template <class T> shared_ptr<T> emitter() const;
-    };
+		template <class T> shared_ptr<T> emitter() const;
+	};
 
 } }
 
@@ -41,11 +41,11 @@ namespace boost { namespace synapse {
 
 namespace boost { namespace synapse {
 
-    template <class T>
-    shared_ptr<T> blocker::emitter() const
-    {
-        return emitter_().maybe_lock<T>();
-    }
+	template <class T>
+	shared_ptr<T> blocker::emitter() const
+	{
+		return emitter_().maybe_lock<T>();
+	}
 
 } }
 

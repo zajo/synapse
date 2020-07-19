@@ -14,13 +14,13 @@ typedef synapse::property<struct prop1_,std::string> prop1;
 
 int main( int argc, char const * argv[] )
 {
-    int obj;
-    BOOST_TEST_EQ(synapse::get<prop1>(&obj, "default"), "default");
-    auto c=synapse::set<prop1>(&obj, "Hello World");
-    BOOST_TEST_EQ(synapse::get<prop1>(&obj), "Hello World");
-    BOOST_TEST(!synapse::set<prop1>(&obj, "Reset World"));
-    BOOST_TEST_EQ(synapse::get<prop1>(&obj), "Reset World");
-    c.reset();
-    BOOST_TEST(synapse::get<prop1>(&obj).empty());
-    return boost::report_errors();
+	int obj;
+	BOOST_TEST_EQ(synapse::get<prop1>(&obj, "default"), "default");
+	auto c=synapse::set<prop1>(&obj, "Hello World");
+	BOOST_TEST_EQ(synapse::get<prop1>(&obj), "Hello World");
+	BOOST_TEST(!synapse::set<prop1>(&obj, "Reset World"));
+	BOOST_TEST_EQ(synapse::get<prop1>(&obj), "Reset World");
+	c.reset();
+	BOOST_TEST(synapse::get<prop1>(&obj).empty());
+	return boost::report_errors();
 }

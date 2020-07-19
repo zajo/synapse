@@ -14,8 +14,8 @@ typedef struct my_signal_(*my_signal)();
 
 int main( int argc, char const * argv[] )
 {
-    synapse::connect<synapse::meta::connected<my_signal> >( synapse::meta::emitter(), [ ]( synapse::connection &, unsigned ) { } );
-    shared_ptr<my_emitter_type> e=make_shared<my_emitter_type>();
-    auto connected = synapse::connect<my_signal>( e, [ ] ( ) { } );
-    return 0;
+	synapse::connect<synapse::meta::connected<my_signal> >( synapse::meta::emitter(), [ ]( synapse::connection &, unsigned ) { } );
+	shared_ptr<my_emitter_type> e=make_shared<my_emitter_type>();
+	auto connected = synapse::connect<my_signal>( e, [ ] ( ) { } );
+	return 0;
 }

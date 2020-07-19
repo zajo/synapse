@@ -22,9 +22,9 @@
 
 namespace boost { namespace synapse {
 
-    using boost::function;
-    using boost::ref;
-    using boost::cref;
+	using boost::function;
+	using boost::ref;
+	using boost::cref;
 
 } }
 
@@ -34,9 +34,9 @@ namespace boost { namespace synapse {
 
 namespace boost { namespace synapse {
 
-    using std::function;
-    using std::ref;
-    using std::cref;
+	using std::function;
+	using std::ref;
+	using std::cref;
 
 } }
 

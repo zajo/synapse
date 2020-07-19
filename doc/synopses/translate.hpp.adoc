@@ -3,15 +3,15 @@
 ----
 namespace boost { namespace synapse {
 
-    template <
-        class OriginalSignal,  class TranslatedSignal,
-        class OriginalEmitter, class TranslatedEmitter>
-    shared_ptr<connection> translate( OriginalEmitter * e1, TranslatedEmitter * e2 );
+	template <
+		class OriginalSignal,  class TranslatedSignal,
+		class OriginalEmitter, class TranslatedEmitter>
+	shared_ptr<connection> translate( OriginalEmitter * e1, TranslatedEmitter * e2 );
 
-    template <
-        class OriginalSignal,  class TranslatedSignal,
-        class OriginalEmitter, class TranslatedEmitter>
-    weak_ptr<pconnection> translate( <<OriginalEmitter>> e1, <<TranslatedEmitter>> e2 ); <1>
+	template <
+		class OriginalSignal,  class TranslatedSignal,
+		class OriginalEmitter, class TranslatedEmitter>
+	weak_ptr<pconnection> translate( <<OriginalEmitter>> e1, <<TranslatedEmitter>> e2 ); <1>
 
 } }
 ----
