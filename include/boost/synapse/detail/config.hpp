@@ -115,7 +115,7 @@
 //	example) also #define _MSC_VER
 
 #	if !defined(_CPPUNWIND) && !defined(BOOST_SYNAPSE_NO_EXCEPTIONS)
-		define BOOST_SYNAPSE_NO_EXCEPTIONS
+#		define BOOST_SYNAPSE_NO_EXCEPTIONS
 #	endif
 
 #	undef BOOST_SYNAPSE_MSVC
