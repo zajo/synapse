@@ -103,3 +103,11 @@ tests = [
 foreach t : tests
 	test(t[0], executable(t[0], 'test/'+t[0]+'.cpp', dependencies: t[1]) )
 endforeach
+
+if get_option('synapse_glfw_example')
+	executable('glfw_example', 'example/glfw/simple.cpp', dependencies: [ connect, dependency('glfw3'), dependency('gl') ] )
+endif
+
+if get_option('synapse_qt_example')
+	executable('qt_example', 'example/qt/qt_custom_signals.cpp', dependencies: [ connect, dependency('qt5', modules:['Widgets']) ] )
+endif

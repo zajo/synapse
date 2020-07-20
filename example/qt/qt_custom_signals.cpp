@@ -31,7 +31,7 @@ private slots: //<-- Not needed with Synapse but okay
 private:
 	int m_counter;
 	QPushButton *m_button;
-	boost::shared_ptr<synapse::connection> c_; //<-- Needed to keep the synapse connection afloat.
+	std::shared_ptr<synapse::connection> c_; //<-- Needed to keep the synapse connection afloat.
 };
 
 Window::Window(QWidget *parent) :
