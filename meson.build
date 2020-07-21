@@ -68,7 +68,6 @@ includes = [ include_directories('include') ]
 tests = [
 	[ '_hpp_compile_block_test', [ emit, dep_boost ] ],
 	[ '_hpp_compile_blocker_test', [ emit, dep_boost ] ],
-	[ '_hpp_compile_config_test', [ emit ] ],
 	[ '_hpp_compile_connect_test', [ emit, dep_boost ] ],
 	[ '_hpp_compile_connection_test', [ emit, dep_boost ] ],
 	[ '_hpp_compile_emit_test', [ emit, dep_boost ] ],
