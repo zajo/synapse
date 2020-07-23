@@ -69,9 +69,15 @@ namespace boost { namespace synapse {
 			emit_fn * emit_;
 			emitter_blocked_fn * emitter_blocked_;
 
-			struct connection_list; weak_ptr<connection_list> cl_; friend struct connection_list;
-			struct blocked_emitters_list; weak_ptr<blocked_emitters_list> bl_;
-			struct posted_signals; shared_ptr<posted_signals> ps_;
+			class connection_list;
+			friend class connection_list;
+			weak_ptr<connection_list> cl_;
+
+			class blocked_emitters_list;
+			weak_ptr<blocked_emitters_list> bl_;
+
+			class posted_signals;
+			shared_ptr<posted_signals> ps_;
 
 			shared_ptr<thread_local_signal_data const> keep_meta_connected_tlsd_afloat_;
 			shared_ptr<thread_local_signal_data const> keep_meta_blocked_tlsd_afloat_;

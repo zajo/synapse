@@ -137,12 +137,11 @@ namespace boost { namespace synapse {
 			};
 		}
 
-		struct thread_local_signal_data::connection_list
+		class thread_local_signal_data::connection_list
 		{
-		private:
-
 			connection_list( connection_list const & );
 			connection_list & operator=( connection_list const & );
+
 			weak_ptr<thread_local_signal_data> const tlsd_;
 			std::vector<conn_rec> conn_;
 			std::vector<conn_rec> * emit_conn_ptr_;

@@ -34,9 +34,8 @@ namespace boost { namespace synapse {
 			};
 		} //namespace
 
-		struct thread_local_signal_data::blocked_emitters_list
+		class thread_local_signal_data::blocked_emitters_list
 		{
-		private:
 			blocked_emitters_list( blocked_emitters_list const & );
 			blocked_emitters_list & operator=( blocked_emitters_list const & );
 

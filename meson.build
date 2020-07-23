@@ -9,12 +9,23 @@ compiler = meson.get_compiler('cpp')
 compiler_id = compiler.get_id()
 if not meson.is_subproject()
 	if compiler_id=='clang'
+		if get_option('buildtype')!='debug'
+			add_global_arguments(
+				'-Wno-unused-variable',
+				language:'cpp' )
+		endif
 		add_global_arguments(
 			'-Wno-delete-non-abstract-non-virtual-dtor',
 			'-Wno-non-virtual-dtor',
 			'-Wno-dangling-else',
 			language:'cpp' )
 	elif compiler_id=='gcc'
+		if get_option('buildtype')!='debug'
+			add_global_arguments(
+				'-Wno-unused-variable',
+				'-Wno-unused-but-set-variable',
+				language:'cpp' )
+		endif
 		add_global_arguments(
 			'-Wno-non-virtual-dtor',
 			'-Wno-dangling-else',
@@ -25,6 +36,8 @@ if not meson.is_subproject()
 			language:'cpp' )
 	endif
 endif
+
+dep_threads = dependency('threads')
 
 defines = [ ]
 dep_boost = [ ]
@@ -80,10 +93,10 @@ tests = [
 	[ 'connect_emit_test', [ connect ] ],
 	[ 'connection_lifetime_test', [ connect ] ],
 	[ 'connection_user_data_test', [ connect ] ],
-	[ 'ct_basic_test', [ connect ] ],
-	[ 'ct_lambda_test', [ connect ] ],
-	[ 'ct_tlq_lifetime_test', [ connect ] ],
-	[ 'ct_wait_test', [ connect ] ],
+	[ 'ct_basic_test', [ connect, dep_threads ] ],
+	[ 'ct_lambda_test', [ connect, dep_threads ] ],
+	[ 'ct_tlq_lifetime_test', [ connect, dep_threads ] ],
+	[ 'ct_wait_test', [ connect, dep_threads ] ],
 	[ 'emit_stub_test', [ emit, dep_boost ] ],
 	[ 'emit_test', [ connect ] ],
 	[ 'property_test', [ connect ] ],
