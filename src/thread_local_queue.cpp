@@ -314,20 +314,12 @@ namespace boost { namespace synapse {
 
 		std::thread::id const tid_;
 		shared_ptr<synapse_detail::thread_local_connection_list_list> const tlcll_;
-		shared_ptr<connection const> const conn_bare_lambda_;
-
-		static void call_bare_lambda( function<void()> const & f )
-		{
-			BOOST_SYNAPSE_ASSERT(f);
-			f();
-		}
 
 	public:
 
 		thread_local_queue():
 			tid_(std::this_thread::get_id()),
-			tlcll_(synapse_detail::get_thread_local_connection_list_list()),
-			conn_bare_lambda_(connect<bare_lambda>(this,&call_bare_lambda))
+			tlcll_(synapse_detail::get_thread_local_connection_list_list())
 		{
 			tlcll_->enable_tlq();
 		}
@@ -358,7 +350,13 @@ namespace boost { namespace synapse {
 
 	shared_ptr<thread_local_queue> create_thread_local_queue()
 	{
-		return make_shared<thread_local_queue>();
+		std::shared_ptr<thread_local_queue> tlq = make_shared<thread_local_queue>();
+		(void) connect<bare_lambda>(tlq, []( std::function<void()> const & f )
+			{
+				BOOST_SYNAPSE_ASSERT(f);
+				f();
+			} );
+		return tlq;
 	}
 
 	int poll( thread_local_queue & tlq )
