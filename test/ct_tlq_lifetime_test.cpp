@@ -104,7 +104,7 @@ namespace
 int main( int argc, char const * argv[] )
 {
 	test(1,1,50);
-	test(20,5,50);
-	test(30,10,50);
+	test(15,5,50);
+	test(25,10,50);
 	return boost::report_errors();
 }
