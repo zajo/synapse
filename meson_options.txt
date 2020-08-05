@@ -1,4 +1,5 @@
 option('synapse_use_boost',type:'boolean',value:false,description:'Use boost:: instead of std:: shared/weak_ptr')
 option('synapse_glfw_example',type:'boolean',value:false,description:'Build the GLFW example (requires GLFW to be installed)')
 option('synapse_qt_example',type:'boolean',value:false,description:'Build the Qt example (requires Qt 5 to be installed)')
+option('synapse_enable_unit_tests',type:'boolean',value:true,description:'Enable the building of unit test programs')
 option('synapse_suppress_warnings',type:'boolean',value:true,description:'Suppress compiler warnings (#pragma system_header)')

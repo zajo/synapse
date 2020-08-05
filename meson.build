@@ -5,6 +5,9 @@
 
 project('synapse', 'cpp', default_options : ['cpp_std=c++17', 'b_pch=false'], license : 'boost')
 
+option_suppress_warnings = get_option('synapse_suppress_warnings')
+option_enable_unit_tests = get_option('synapse_enable_unit_tests')
+
 compiler = meson.get_compiler('cpp')
 compiler_id = compiler.get_id()
 if not meson.is_subproject()
@@ -45,7 +48,7 @@ if get_option('synapse_use_boost') # Requires that Synapse resides under boost_r
 	dep_boost = declare_dependency(include_directories: '../..')
 	defines = [ '-DBOOST_SYNAPSE_USE_BOOST' ]
 endif
-if not get_option('synapse_suppress_warnings')
+if not option_suppress_warnings
 	defines = [ '-DBOOST_SYNAPSE_ENABLE_WARNINGS' ]
 endif
 
@@ -78,43 +81,47 @@ includes = [ include_directories('include') ]
 
 #################################
 
-tests = [
-	[ '_hpp_compile_block_test', [ emit, dep_boost ] ],
-	[ '_hpp_compile_blocker_test', [ emit, dep_boost ] ],
-	[ '_hpp_compile_connect_test', [ emit, dep_boost ] ],
-	[ '_hpp_compile_connection_test', [ emit, dep_boost ] ],
-	[ '_hpp_compile_emit_test', [ emit, dep_boost ] ],
-	[ '_hpp_compile_thread_local_queue_test', [ emit, dep_boost ] ],
-	[ '_hpp_compile_translate_test', [ emit, dep_boost ] ],
-	[ 'args_connect_test', [ connect ] ],
-	[ 'args_translate_test', [ connect ] ],
-	[ 'block_emit_test', [ connect, block ] ],
-	[ 'block_test', [ connect, block ] ],
-	[ 'connect_emit_test', [ connect ] ],
-	[ 'connection_lifetime_test', [ connect ] ],
-	[ 'connection_user_data_test', [ connect ] ],
-	[ 'ct_basic_test', [ connect, dep_threads ] ],
-	[ 'ct_lambda_test', [ connect, dep_threads ] ],
-	[ 'ct_tlq_lifetime_test', [ connect, dep_threads ] ],
-	[ 'ct_wait_test', [ connect, dep_threads ] ],
-	[ 'emit_stub_test', [ emit, dep_boost ] ],
-	[ 'emit_test', [ connect ] ],
-	[ 'property_test', [ connect ] ],
-	[ 'release_test', [ connect ] ],
-	[ 'shutdown_test1', [ connect ] ],
-	[ 'shutdown_test2', [ connect ] ],
-	[ 'shutdown_test3', [ connect ] ],
-	[ 'shutdown_test4', [ connect ] ],
-	[ 'shutdown_test5', [ connect ] ],
-	[ 'shutdown_test6', [ connect ] ],
-	[ 'shutdown_test7', [ connect ] ],
-	[ 'shutdown_test8', [ connect ] ],
-	[ 'shutdown_test9', [ connect ] ],
-	[ 'weak_store_test', [ connect ] ]
-]
-foreach t : tests
-	test(t[0], executable(t[0], 'test/'+t[0]+'.cpp', dependencies: t[1]) )
-endforeach
+if option_enable_unit_tests
+
+	tests = [
+		[ '_hpp_compile_block_test', [ emit, dep_boost ] ],
+		[ '_hpp_compile_blocker_test', [ emit, dep_boost ] ],
+		[ '_hpp_compile_connect_test', [ emit, dep_boost ] ],
+		[ '_hpp_compile_connection_test', [ emit, dep_boost ] ],
+		[ '_hpp_compile_emit_test', [ emit, dep_boost ] ],
+		[ '_hpp_compile_thread_local_queue_test', [ emit, dep_boost ] ],
+		[ '_hpp_compile_translate_test', [ emit, dep_boost ] ],
+		[ 'args_connect_test', [ connect ] ],
+		[ 'args_translate_test', [ connect ] ],
+		[ 'block_emit_test', [ connect, block ] ],
+		[ 'block_test', [ connect, block ] ],
+		[ 'connect_emit_test', [ connect ] ],
+		[ 'connection_lifetime_test', [ connect ] ],
+		[ 'connection_user_data_test', [ connect ] ],
+		[ 'ct_basic_test', [ connect, dep_threads ] ],
+		[ 'ct_lambda_test', [ connect, dep_threads ] ],
+		[ 'ct_tlq_lifetime_test', [ connect, dep_threads ] ],
+		[ 'ct_wait_test', [ connect, dep_threads ] ],
+		[ 'emit_stub_test', [ emit, dep_boost ] ],
+		[ 'emit_test', [ connect ] ],
+		[ 'property_test', [ connect ] ],
+		[ 'release_test', [ connect ] ],
+		[ 'shutdown_test1', [ connect ] ],
+		[ 'shutdown_test2', [ connect ] ],
+		[ 'shutdown_test3', [ connect ] ],
+		[ 'shutdown_test4', [ connect ] ],
+		[ 'shutdown_test5', [ connect ] ],
+		[ 'shutdown_test6', [ connect ] ],
+		[ 'shutdown_test7', [ connect ] ],
+		[ 'shutdown_test8', [ connect ] ],
+		[ 'shutdown_test9', [ connect ] ],
+		[ 'weak_store_test', [ connect ] ]
+	]
+	foreach t : tests
+		test(t[0], executable(t[0], 'test/'+t[0]+'.cpp', dependencies: t[1]) )
+	endforeach
+
+endif
 
 if get_option('synapse_glfw_example')
 	executable('glfw_example', 'example/glfw/simple.cpp', dependencies: [ connect, dependency('glfw3'), dependency('gl') ] )
