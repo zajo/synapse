@@ -1,0 +1,2576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="author" content="Non-Intrusive Signal Programming Library | Emil Dotchevski">
+<title>Synapse</title>
+<link rel="stylesheet" href="./zajo-dark.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<meta name="keywords" content="c++,signal,open source">
+<meta name="description" content="Non-intrusive C++ signal programming library">
+<link rel="stylesheet" href="./zajo-light.css" disabled=true>
+<script>
+function switch_style()
+{
+	var i, tag;
+	for( i=0, tag=document.getElementsByTagName("link"); i<tag.length; i++ )
+		if( tag[i].rel.indexOf("stylesheet")!=-1 && tag[i].href.includes("zajo-") )
+			tag[i].disabled = !tag[i].disabled;
+}
+</script>
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>Synapse<a href="https://ci.appveyor.com/project/zajo/synapse/branch/master"><img style="margin-left:8px; margin-top:21px; float:right; vertical-align: top" src="https://ci.appveyor.com/api/projects/status/gjv1je9hy2aswsl0/branch/master?svg=true"></a> <a href="https://travis-ci.org/zajo/synapse"><img style="margin-top:21px; float:right; vertical-align: top" src="https://travis-ci.org/zajo/synapse.svg?branch=master"></a><div style="z-index: 3; bottom:-16px; right:4px; position:fixed"><input width="32" height="32" type="image" alt="Skin" src="./skin.png" onclick="this.blur();switch_style();return false;"/></div></h1>
+<div class="details">
+<span id="author" class="author">Non-Intrusive Signal Programming Library | Emil Dotchevski</span><br>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle"></div>
+<ul class="sectlevel1">
+<li><a href="#_abstract">Abstract</a></li>
+<li><a href="#tutorial">Tutorial</a>
+<ul class="sectlevel2">
+<li><a href="#_signals_emitters_receivers">Signals, Emitters, Receivers</a></li>
+<li><a href="#_emitting_signals_from_objects_of_3rd_party_types">Emitting Signals from Objects of 3rd-Party Types</a></li>
+<li><a href="#_managing_connection_lifetime">Managing Connection Lifetime</a></li>
+<li><a href="#_blocking_of_signals">Blocking of Signals</a></li>
+<li><a href="#_meta_signals">Meta Signals</a></li>
+<li><a href="#_interthread_communication">Interthread Communication</a>
+<ul class="sectlevel3">
+<li><a href="#_emitting_signals_across_thread_boundaries">Emitting Signals Across Thread Boundaries</a></li>
+<li><a href="#_scheduling_function_calls_across_thread_boundaries">Scheduling Function Calls Across Thread Boundaries</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#synopsis">Synopsis</a></li>
+<li><a href="#reference">Reference</a>
+<ul class="sectlevel2">
+<li><a href="#emit"><code>emit</code></a></li>
+<li><a href="#connect"><code>connect</code></a></li>
+<li><a href="#release"><code>release</code></a></li>
+<li><a href="#translate"><code>translate</code></a></li>
+<li><a href="#connection"><code>connection</code></a></li>
+<li><a href="#pconnection"><code>pconnection</code></a>
+<ul class="sectlevel3">
+<li><a href="#connection::set_user_data"><code>set_user_data</code></a></li>
+<li><a href="#connection::get_user_data"><code>get_user_data</code></a></li>
+<li><a href="#connection::emitter"><code>emitter</code></a></li>
+<li><a href="#connection::receiver"><code>receiver</code></a></li>
+</ul>
+</li>
+<li><a href="#block"><code>block</code></a></li>
+<li><a href="#blocker"><code>blocker</code></a>
+<ul class="sectlevel3">
+<li><a href="#blocker::emitter"><code>emitter</code></a></li>
+</ul>
+</li>
+<li><a href="#thread_local_queue"><code>thread_local_queue</code></a>
+<ul class="sectlevel3">
+<li><a href="#create_thread_local_queue"><code>create_thread_local_queue</code></a></li>
+<li><a href="#poll"><code>poll</code></a></li>
+<li><a href="#wait"><code>wait</code></a></li>
+<li><a href="#post"><code>post</code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#techniques">Programming Techniques</a>
+<ul class="sectlevel2">
+<li><a href="#_monitoring_of_dynamic_systems">Monitoring of Dynamic Systems</a></li>
+<li><a href="#Synapsifying_C_Callbacks">Synapsifying C Callbacks</a></li>
+<li><a href="#_reporting_exceptions_from_noexcept_signal_handlers">Reporting Exceptions from <code>noexcept</code> Signal Handlers</a></li>
+<li><a href="#_using_synapse_with_qt_to_avoid_mocing">Using Synapse with Qt to Avoid MOCing</a></li>
+</ul>
+</li>
+<li><a href="#_case_study_synapsifying_glfw">Case Study: Synapsifying GLFW</a></li>
+<li><a href="#_alternatives_to_synapse">Alternatives to Synapse</a>
+<ul class="sectlevel2">
+<li><a href="#_comparison_to_boost_signals2">Comparison to Boost Signals2</a></li>
+</ul>
+</li>
+<li><a href="#_macros_and_configuration">Macros and Configuration</a>
+<ul class="sectlevel2">
+<li><a href="#_boost_synapse_use_boost"><code>BOOST_SYNAPSE_USE_BOOST</code></a></li>
+<li><a href="#_boost_synapse_assert"><code>BOOST_SYNAPSE_ASSERT</code></a></li>
+</ul>
+</li>
+<li><a href="#_distribution">Distribution</a></li>
+<li><a href="#_support">Support</a></li>
+<li><a href="#_portability">Portability</a></li>
+<li><a href="#_building">Building</a></li>
+<li><a href="#_qa">Q&amp;A</a></li>
+<li><a href="#_acknowledgements">Acknowledgements</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph text-right">
+<p><a href="https://github.com/zajo/synapse">GitHub</a> | <a href="./synapse.pdf">PDF</a></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_abstract">Abstract</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Synapse is a non-intrusive C&#43;&#43; signal programming library for C&#43;&#43;11. Features:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>Any C or C&#43;&#43; object of any type whatsoever can be used as a signal emitter.</p>
+</li>
+<li>
+<p>A system of meta signals for interoperability with other signal programming libraries and callback APIs. Lambda captures can be easily installed as C API callbacks!</p>
+</li>
+<li>
+<p>In a multi-thread environment signals can be emitted asynchronously and scheduled for synchronous execution when polled in other threads.</p>
+</li>
+<li>
+<p>No dependencies.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#tutorial">Tutorial</a> | <a href="#techniques">Programming Techniques</a> | <a href="#synopsis">Synopsis</a> | <a href="#reference">Reference</a></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tutorial">Tutorial</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_signals_emitters_receivers">Signals, Emitters, Receivers</h3>
+<div class="paragraph">
+<p>Signal programming libraries allow <em>signals</em> to be associated with emitter objects. Like function types, each signal has a signature. Emitting a signal is similar to function invocation, except it may call multiple functions that currently connect that particular signal from that particular emitter object. Naturally, the signature of any connected function must match the signature of the signal.</p>
+</div>
+<div class="paragraph">
+<p>In Synapse, signals are defined as function pointer typedefs. When a signal is emitted, the value returned from any connected function is discarded, but the return type of the signal definition is still important: it is used as an identifier of the signal, a way to tell apart different signals that have otherwise identical signatures. For example, the following typedefs define two different signals, even though they both take one <code>int</code> argument:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">struct</span> <span class="nc">this_signal_</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="nf">this_signal_</span><span class="p">(</span><span class="o">*</span><span class="n">this_signal</span><span class="p">)(</span><span class="kt">int</span><span class="p">);</span>
+
+<span class="k">struct</span> <span class="nc">that_signal_</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="nf">that_signal_</span><span class="p">(</span><span class="o">*</span><span class="n">that_signal</span><span class="p">)(</span><span class="kt">int</span><span class="p">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The two defined signals are different because they use different return types (<code>this_signal_</code> vs. <code>that_signal_</code>). By convention, the return types are defined implicitly within each <code>typedef</code>. This makes the signal definitions more compact:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">typedef</span> <span class="k">struct</span> <span class="nf">this_signal_</span><span class="p">(</span><span class="o">*</span><span class="n">this_signal</span><span class="p">)(</span><span class="kt">int</span><span class="p">);</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="nf">that_signal_</span><span class="p">(</span><span class="o">*</span><span class="n">that_signal</span><span class="p">)(</span><span class="kt">int</span><span class="p">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To emit a Synapse signal, we instantiate the <code>emit</code> function template with a pre-defined signal <code>typedef</code> (e.g. <code>this_signal</code>), passing the emitter object as the first argument. The rest of the arguments follow, as defined by the signal signature (in this case a single <code>int</code> argument). Note that the emitter object passed as the first argument to <code>emit&lt;S&gt;</code> is not forwarded implicitly to the connected functions; its only purpose is to specify the <em>emitter</em>, that is, which object is emitting the signal <code>S</code>.</p>
+</div>
+<div class="paragraph">
+<p>As a less abstract example, let&#8217;s define a type <code>button</code> that emits a Synapse signal <code>clicked</code> (which takes no arguments) when the member function <code>click</code> is called:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">typedef</span> <span class="k">struct</span> <span class="nf">clicked_</span><span class="p">(</span><span class="o">*</span><span class="n">clicked</span><span class="p">)();</span>
+
+<span class="k">class</span> <span class="nc">button</span> <span class="p">{</span>
+
+	<span class="nl">public:</span>
+
+	<span class="kt">void</span> <span class="n">click</span><span class="p">()</span> <span class="p">{</span>
+		<span class="n">synapse</span><span class="o">::</span><span class="n">emit</span><span class="o">&lt;</span><span class="n">clicked</span><span class="o">&gt;</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+	<span class="p">}</span>
+<span class="p">};</span></code></pre>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#emit"><code>emit</code></a></p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+It is possible to define the <code>clicked</code> <code>typedef</code> as a member of <code>class button</code>, but this coupling is usually not appropriate when using Synapse. It is better to treat signals as types with independent semantics that can be used with any appropriate object. In this case, anything clickable could emit the <code>clicked</code> signal.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Next, let&#8217;s connect the signal <code>clicked</code> to the <code>accept</code> member function of a dialog box object:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">class</span> <span class="nc">dialog</span> <span class="p">{</span>
+
+	<span class="nl">public:</span>
+
+	<span class="kt">void</span> <span class="n">accept</span><span class="p">();</span>
+
+<span class="p">};</span>
+
+<span class="p">....</span>
+<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">button</span><span class="o">&gt;</span> <span class="n">emitter</span><span class="o">=</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">button</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">dialog</span><span class="o">&gt;</span> <span class="n">receiver</span><span class="o">=</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">dialog</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="n">synapse</span><span class="o">::</span><span class="n">connect</span><span class="o">&lt;</span><span class="n">clicked</span><span class="o">&gt;</span><span class="p">(</span><span class="n">emitter</span><span class="p">,</span> <span class="n">receiver</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">dialog</span><span class="o">::</span><span class="n">accept</span><span class="p">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#connect"><code>connect</code></a></p>
+</div>
+<div class="paragraph">
+<p>Or we could use a lambda instead:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="n">synapse</span><span class="o">::</span><span class="n">connect</span><span class="o">&lt;</span><span class="n">clicked</span><span class="o">&gt;</span><span class="p">(</span><span class="n">emitter</span><span class="p">,</span> <span class="n">receiver</span><span class="p">,</span>
+	<span class="p">[</span> <span class="p">](</span><span class="n">dialog</span> <span class="o">*</span> <span class="n">d</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">d</span><span class="o">-&gt;</span><span class="n">accept</span><span class="p">();</span>
+	<span class="p">}</span> <span class="p">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#connect"><code>connect</code></a></p>
+</div>
+<div class="paragraph">
+<p>With this setup, <code>click()</code>-ing  the <code>button</code> will <code>accept()</code> the <code>dialog</code>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The <code>receiver</code> argument to <code>connect</code> is optional. If it is specified, a pointer to the receiver object is passed implicitly as the first argument to the connected function, followed by all other arguments as specified by the signal signature.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_emitting_signals_from_objects_of_3rd_party_types">Emitting Signals from Objects of 3rd-Party Types</h3>
+<div class="paragraph">
+<p>The <code>button</code>/<code>dialog</code> example from the previous section could have been similarly implemented using any other signal programming library, because the <code>button</code> type is specifically designed to be able to emit the <code>clicked</code> signal.</p>
+</div>
+<div class="paragraph">
+<p>But in Synapse, <em>any</em> object whatsoever can be used as an emitter. This makes it possible to <code>emit</code> non-intrusively even if the type of the emitter object was not designed to support signals. For example, a function that processes a file can use a standard <code>FILE</code> pointer as a Synapse emitter to report on its progress:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">typedef</span> <span class="k">struct</span> <span class="nf">report_progress_</span><span class="p">(</span><span class="o">*</span><span class="n">report_progress</span><span class="p">)(</span><span class="kt">int</span> <span class="n">progress</span><span class="p">);</span>
+
+<span class="kt">void</span> <span class="nf">process_file</span><span class="p">(</span> <span class="kt">FILE</span> <span class="o">*</span> <span class="n">f</span> <span class="p">)</span> <span class="p">{</span>
+
+	<span class="k">for</span><span class="p">(</span> <span class="kt">int</span> <span class="n">progress</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="o">!</span><span class="n">feof</span><span class="p">(</span><span class="n">f</span><span class="p">);</span> <span class="p">)</span> <span class="p">{</span>
+		<span class="p">....</span>
+		<span class="n">progress</span> <span class="o">+=</span> <span class="n">fread</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">nread</span><span class="p">,</span><span class="n">f</span><span class="p">);</span>
+		<span class="p">....</span>
+		<span class="n">synapse</span><span class="o">::</span><span class="n">emit</span><span class="o">&lt;</span><span class="n">report_progress</span><span class="o">&gt;</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">progress</span><span class="p">);</span>
+	<span class="p">}</span>
+
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#emit"><code>emit</code></a></p>
+</div>
+<div class="paragraph">
+<p>Outside of <code>process_file</code> the <code>report_progress</code> signal can be connected to some user interface function that updates a progress bar. For example, using Synapse, we could easily connect it to a Qt <code>QProgressBar</code> object:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">if</span><span class="p">(</span> <span class="kt">FILE</span> <span class="o">*</span> <span class="n">f</span><span class="o">=</span><span class="n">fopen</span><span class="p">(</span><span class="s">"file.dat"</span><span class="p">,</span><span class="s">"rb"</span><span class="p">)</span> <span class="p">)</span> <span class="p">{</span>
+	<span class="n">QProgressBar</span> <span class="n">pb</span><span class="p">(....);</span>
+	<span class="k">auto</span> <span class="n">c</span><span class="o">=</span><span class="n">synapse</span><span class="o">::</span><span class="n">connect</span><span class="o">&lt;</span><span class="n">report_progress</span><span class="o">&gt;</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">pb</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">QProgressBar</span><span class="o">::</span><span class="n">setValue</span><span class="p">);</span>
+	<span class="n">process_file</span><span class="p">(</span><span class="n">f</span><span class="p">);</span>
+	<span class="n">fclose</span><span class="p">(</span><span class="n">f</span><span class="p">);</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#connect"><code>connect</code></a> | <a href="#connection"><code>connection</code></a></p>
+</div>
+<div class="paragraph">
+<p>Notice that <code>process_file</code> is not coupled with <code>QProgressBar</code>: the <code>report_progress</code> signal could be connected to a different function or not connected at all, in which case the call to <code>emit</code> in <code>process_file</code> would be a no-op.</p>
+</div>
+<div class="paragraph">
+<p>The observant reader has surely noticed that in the above example we had to capture the return value of <code>synapse::connect&lt;report_progress&gt;</code> in the local variable  <code>c</code>, while we didn&#8217;t have to do this in the previous <code>button</code>/<code>dialog</code> example. This is explained below.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_managing_connection_lifetime">Managing Connection Lifetime</h3>
+<div class="paragraph">
+<p>In Synapse there are two types of connection objects: <a href="#connection"><code>connection</code></a> and <a href="#pconnection"><code>pconnection</code></a>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>shared_ptr&lt;<a href="#connection">connection</a>&gt;</code> objects are returned by overloads of <a href="#connect"><code>connect</code></a> which take the emitter (and, if specified, the receiver) as a raw pointer. The user is required to keep the <code>connection</code> object alive; the function passed to <code>connect</code> will be disconnected when that object expires.</p>
+</li>
+<li>
+<p><code>weak_ptr&lt;<a href="#pconnection">pconnection</a>&gt;</code> objects are returned by overloads of <a href="#connect"><code>connect</code></a> which take at least one of the emitter or the receiver as a <code>weak_ptr</code> or <code>shared_ptr</code>. The user is <em>not</em> required to keep <code>pconnection</code> objects alive; the connected function is disconnected when Synapse detects that the emitter or the receiver have expired.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+The <a href="#release"><code>release</code></a> function can be used to convert a <a href="#pconnection"><code>weak_ptr&lt;pconnection&gt;</code></a> object to a <a href="#connection"><code>shared_ptr&lt;connection&gt;</code></a> object, in case we need to disconnect the function before the receiver or the emitter have expired.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_blocking_of_signals">Blocking of Signals</h3>
+<div class="paragraph">
+<p>It is possible to temporarily block a specific signal for a specific emitter. This allows users to dynamically disable functionality implemented by emitting signals&#8201;&#8212;&#8201;without having to disconnect them.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Blocking affects pre-existing as well as future connections.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="cp">#include &lt;boost/synapse/connect.hpp&gt;
+#include &lt;boost/synapse/block.hpp&gt;
+#include &lt;string&gt;
+#include &lt;iostream&gt;
+</span>
+<span class="k">namespace</span> <span class="n">synapse</span> <span class="o">=</span> <span class="n">boost</span><span class="o">::</span><span class="n">synapse</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="nf">print_</span><span class="p">(</span><span class="o">*</span><span class="n">print</span><span class="p">)(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="k">const</span> <span class="o">&amp;</span> <span class="n">s</span><span class="p">);</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+
+	<span class="kt">int</span> <span class="n">emitter</span><span class="p">;</span>
+
+	<span class="k">auto</span> <span class="n">c</span> <span class="o">=</span> <span class="n">synapse</span><span class="o">::</span><span class="n">connect</span><span class="o">&lt;</span><span class="n">print</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">emitter</span><span class="p">,</span>
+		<span class="p">[</span> <span class="p">](</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="k">const</span> <span class="o">&amp;</span> <span class="n">s</span><span class="p">)</span> <span class="p">{</span>
+			<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">s</span><span class="p">;</span>
+		<span class="p">}</span> <span class="p">);</span>
+
+	<span class="n">synapse</span><span class="o">::</span><span class="n">emit</span><span class="o">&lt;</span><span class="n">print</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">emitter</span><span class="p">,</span><span class="s">"Hello World"</span><span class="p">);</span> <i class="conum" data-value="1"></i><b>(1)</b>
+
+	<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">synapse</span><span class="o">::</span><span class="n">blocker</span><span class="o">&gt;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">synapse</span><span class="o">::</span><span class="n">block</span><span class="o">&lt;</span><span class="n">print</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">emitter</span><span class="p">);</span> <i class="conum" data-value="2"></i><b>(2)</b>
+	<span class="n">synapse</span><span class="o">::</span><span class="n">emit</span><span class="o">&lt;</span><span class="n">print</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">emitter</span><span class="p">,</span><span class="s">"no-op"</span><span class="p">);</span>
+
+	<span class="n">b</span><span class="p">.</span><span class="n">reset</span><span class="p">();</span>
+	<span class="n">synapse</span><span class="o">::</span><span class="n">emit</span><span class="o">&lt;</span><span class="n">print</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">emitter</span><span class="p">,</span><span class="s">"Hello World"</span><span class="p">);</span> <i class="conum" data-value="3"></i><b>(3)</b>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#emit"><code>emit</code></a> | <a href="#connect"><code>connect</code></a> | <a href="#connection"><code>connection</code></a> | <a href="#block"><code>block</code></a> | <a href="#blocker"><code>blocker</code></a></p>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>emit</code> calls the connected lambda, printing <code>Hello World</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <code>print</code> signal will be blocked until <code>b</code> expires, therefore the call to <code>emit</code> on the next line is a no-op, even though the signal is still connected.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>At this point <code>b</code> has expired, so the call to <code>emit</code> will call the connected lambda, printing <code>Hello World</code>, again.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_meta_signals">Meta Signals</h3>
+<div class="paragraph">
+<p>Synapse features a special global emitter that emits meta signals to notify connected functions about user interactions with other signals. It can be accessed by the <a href="#meta::connected"><code>meta::emitter</code></a> function.</p>
+</div>
+<div class="paragraph">
+<p>When a signal <code>S</code> is blocked or unblocked, the meta emitter emits the <code>meta::blocked&lt;S&gt;</code> signal. Connecting this <code>meta::blocked&lt;S&gt;</code> signal allows the blocked state of the signal <code>S</code> to be automatically reflected in other systems, for example in user interface.</p>
+</div>
+<div class="paragraph">
+<p>Similarly, when a signal <code>S</code> is connected or disconnected, the meta emitter emits the <a href="#meta::connected"><code>meta::connected&lt;S&gt;</code></a> signal, which is useful when integrating Synapse with 3rd-party callback systems; see <a href="#Synapsifying_C_Callbacks">Synapsifying C Callbacks</a>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+To further facilitate interoperability between Synapse and other callback APIs, <a href="#connection"><code>connection</code></a>/<a href="#pconnection"><code>pconnection</code></a>  objects (returned by overloads of <a href="#connect"><code>connect</code></a>) can store arbitrary user data.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_interthread_communication">Interthread Communication</h3>
+<div class="sect3">
+<h4 id="_emitting_signals_across_thread_boundaries">Emitting Signals Across Thread Boundaries</h4>
+<div class="paragraph">
+<p>Synapse can be used to implement interthread communication using signals. The data structures created by <a href="#connect"><code>connect</code></a> (or <a href="#translate"><code>translate</code></a>) use thread-local storage, so by default calling <a href="#emit"><code>emit</code></a> will call only functions connected by the calling thread (and will not return until all such functions have been called in order, or one of them throws.)</p>
+</div>
+<div class="paragraph">
+<p>The following diagram shows the connections created (by calls to <code><a href="#connect">connect</a>&lt;S&gt;</code>) in a single thread for a given signal type <code>S</code>, each connecting an emitter to a function. When <code><a href="#emit">emit</a>&lt;S&gt;(e1,arg,&#8230;&#8203;)</code> is called, all functions connecting the signal <code>S</code> from the given emitter <code>e1</code> are called in the order in which the connections were created:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="fig1.png" alt="fig1">
+</div>
+</div>
+<div class="paragraph">
+<p>It is also possible for any thread to request to receive all signals emitted by other threads, by creating its own <a href="#thread_local_queue"><code>thread_local_queue</code></a> object.</p>
+</div>
+<div class="paragraph">
+<p>In this case, <em>in addition</em> to the behavior described above, <code><a href="#emit">emit</a>&lt;S&gt;(e1,arg,&#8230;&#8203;)</code> will capture its arguments (depending on the signature of <code>S</code>) and queue them into the <a href="#thread_local_queue"><code>thread_local_queue</code></a> object created by any thread <em>other</em> than the calling thread. Each such thread must poll its own <a href="#thread_local_queue"><code>thread_local_queue</code></a> regularly; this "emits" the queued objects locally and removes them from the queue (note that <a href="#poll"><code>poll</code></a> is not given an emitter or a signal type, it emits locally all queued objects, regardless of signal type or emitter).</p>
+</div>
+<div class="paragraph">
+<p>This is illustrated by the following diagram:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="fig2.png" alt="fig2">
+</div>
+</div>
+<div class="paragraph">
+<p>A typical use case for this system is to update user interface objects with data generated by one or multiple worker threads: the user interface objects themselves need not be thread-safe, because they will be updated only synchronously, at the time <a href="#poll"><code>poll</code></a> is called.</p>
+</div>
+<div class="paragraph">
+<p>Special care must be taken to ensure that any objects referred to by arguments passed to <a href="#emit"><code>emit</code></a> will remain valid at least until all other threads have polled their <a href="#thread_local_queue"><code>thread_local_queue</code></a> objects. For example, the following code is incorrect in the presence of <code>thread_local_queue</code> objects:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">typedef</span> <span class="k">struct</span> <span class="nf">my_signal_</span><span class="p">(</span><span class="o">*</span><span class="n">my_signal</span><span class="p">)(</span> <span class="kt">int</span> <span class="o">*</span> <span class="p">);</span>
+
+<span class="kt">void</span> <span class="nf">emit_my_signal</span><span class="p">(</span> <span class="kt">void</span> <span class="o">*</span> <span class="n">emitter</span><span class="p">,</span> <span class="kt">int</span> <span class="n">x</span> <span class="p">)</span> <span class="p">{</span>
+	<span class="n">emit</span><span class="o">&lt;</span><span class="n">my_signal</span><span class="o">&gt;</span><span class="p">(</span><span class="n">emitter</span><span class="p">,</span><span class="o">&amp;</span><span class="n">x</span><span class="p">);</span> <span class="c1">//Undefined behavior in the presence of thread_local_queues!</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#emit"><code>emit</code></a></p>
+</div>
+<div class="paragraph">
+<p>The problem is that the address of <code>x</code> may be queued into other threads' queues, and since <code>x</code> is local to <code>emit_my_signal</code>, it may be destroyed by the time these threads call <a href="#poll"><code>poll</code></a>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_scheduling_function_calls_across_thread_boundaries">Scheduling Function Calls Across Thread Boundaries</h4>
+<div class="paragraph">
+<p>The <a href="#post"><code>post</code></a> function can be used to queue into a <a href="#thread_local_queue"><code>thread_local_queue</code></a> arbitrary functions for execution at the time <a href="#poll"><code>poll</code></a> is called. This feature allows critical worker threads to minimize the amount of time they consume by offloading expensive non-critical computations to another, non-critical thread. This also removes the need for synchronization, since the queued functions are executed synchronously in the thread that owns the <a href="#thread_local_queue"><code>thread_local_queue</code></a> object.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="synopsis">Synopsis</h2>
+<div class="sectionbody">
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/emit.hpp&gt;</div>
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">namespace</span> <span class="n">boost</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">synapse</span> <span class="p">{</span>
+
+	<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Signal</span><span class="p">,</span> <span class="k">class</span><span class="o">...</span> <span class="nc">A</span><span class="p">&gt;</span>
+	<span class="kt">int</span> <span class="n">emit</span><span class="p">(</span> <span class="kt">void</span> <span class="k">const</span> <span class="o">*</span><span class="p">,</span> <span class="n">A</span><span class="p">...</span> <span class="p">);</span>
+
+<span class="p">}</span> <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#emit"><code>emit</code></a></p>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/connect.hpp&gt;</div>
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">namespace</span> <span class="n">boost</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">synapse</span> <span class="p">{</span>
+
+	<span class="k">class</span> <span class="nc">connection</span><span class="p">;</span>
+
+	<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Signal</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Emitter</span><span class="p">,</span> <span class="k">class</span> <span class="nc">F</span><span class="p">&gt;</span>
+	<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">connection</span><span class="o">&gt;</span> <span class="n">connect</span><span class="p">(</span> <span class="n">Emitter</span> <span class="o">*</span> <span class="n">e</span><span class="p">,</span> <span class="n">F</span> <span class="n">f</span> <span class="p">);</span>
+
+	<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Signal</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Emitter</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Receiver</span><span class="p">,</span> <span class="k">class</span> <span class="nc">F</span><span class="p">&gt;</span>
+	<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">connection</span><span class="o">&gt;</span> <span class="n">connect</span><span class="p">(</span> <span class="n">Emitter</span> <span class="o">*</span> <span class="n">e</span><span class="p">,</span> <span class="n">Receiver</span> <span class="o">*</span> <span class="n">r</span><span class="p">,</span> <span class="n">F</span> <span class="n">f</span> <span class="p">);</span>
+
+	<span class="k">class</span> <span class="nc">pconnection</span><span class="p">;</span>
+
+	<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Signal</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Emitter</span><span class="p">,</span> <span class="k">class</span> <span class="nc">F</span><span class="p">&gt;</span>
+	<span class="n">weak_ptr</span><span class="o">&lt;</span><span class="n">pconnection</span><span class="o">&gt;</span> <span class="n">connect</span><span class="p">(</span> <span class="o">&lt;&lt;</span><span class="n">Emitter</span><span class="o">&gt;&gt;</span> <span class="n">e</span><span class="p">,</span> <span class="n">F</span> <span class="n">f</span> <span class="p">);</span> <i class="conum" data-value="1"></i><b>(1)</b>
+
+	<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Signal</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Emitter</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Receiver</span><span class="p">,</span> <span class="k">class</span> <span class="nc">F</span><span class="p">&gt;</span>
+	<span class="n">weak_ptr</span><span class="o">&lt;</span><span class="n">pconnection</span><span class="o">&gt;</span> <span class="n">connect</span><span class="p">(</span> <span class="o">&lt;&lt;</span><span class="n">Emitter</span><span class="o">&gt;&gt;</span> <span class="n">e</span><span class="p">,</span> <span class="o">&lt;&lt;</span><span class="n">Receiver</span><span class="o">&gt;&gt;</span> <span class="n">r</span><span class="p">,</span> <span class="n">F</span> <span class="n">f</span> <span class="p">);</span> <i class="conum" data-value="2"></i><b>(2)</b>
+
+	<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">connection</span> <span class="k">const</span><span class="o">&gt;</span> <span class="n">release</span><span class="p">(</span> <span class="n">weak_ptr</span><span class="o">&lt;</span><span class="n">pconnection</span> <span class="k">const</span><span class="o">&gt;</span> <span class="k">const</span> <span class="o">&amp;</span> <span class="n">c</span> <span class="p">);</span>
+	<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">connection</span><span class="o">&gt;</span> <span class="n">release</span><span class="p">(</span> <span class="n">weak_ptr</span><span class="o">&lt;</span><span class="n">pconnection</span><span class="o">&gt;</span> <span class="k">const</span> <span class="o">&amp;</span> <span class="n">c</span> <span class="p">);</span>
+
+	<span class="k">namespace</span> <span class="n">meta</span> <span class="p">{</span>
+
+		<span class="n">weak_ptr</span><span class="o">&lt;</span><span class="kt">void</span> <span class="k">const</span><span class="o">&gt;</span> <span class="n">emitter</span><span class="p">();</span>
+
+		<span class="k">namespace</span> <span class="n">connect_flags</span> <span class="p">{</span>
+
+			<span class="kt">unsigned</span> <span class="k">const</span> <span class="n">connecting</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+			<span class="kt">unsigned</span> <span class="k">const</span> <span class="n">first_for_this_emitter</span><span class="o">=</span><span class="mi">2</span><span class="p">;</span>
+			<span class="kt">unsigned</span> <span class="k">const</span> <span class="n">last_for_this_emitter</span><span class="o">=</span><span class="mi">4</span><span class="p">;</span>
+
+		<span class="p">}</span>
+
+		<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Signal</span><span class="p">&gt;</span>
+		<span class="k">struct</span> <span class="nc">connected</span> <span class="p">{</span>
+			<span class="k">typedef</span> <span class="n">connected</span><span class="o">&lt;</span><span class="n">Signal</span><span class="o">&gt;</span><span class="p">(</span><span class="o">*</span><span class="n">type</span><span class="p">)(</span> <span class="n">connection</span> <span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="n">connect_flags</span> <span class="n">cf</span> <span class="p">);</span>
+		<span class="p">};</span>
+	<span class="p">}</span>
+
+<span class="p">}</span> <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Two overloads are provided: <code>&lt;&lt;Emitter&gt;&gt;</code>  is <code>weak_ptr&lt;Emitter&gt; const &amp;</code> or, equivalently, <code>shared_ptr&lt;Emitter&gt; const &amp;</code>;</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Multple overloads are provided: <code>&lt;&lt;Emitter&gt;&gt;</code>  is <code>Emitter *</code>, <code>weak_ptr&lt;Emitter&gt; const &amp;</code> or, equivalently, <code>shared_ptr&lt;Emitter&gt; const &amp;</code>; at least one of <code>e</code> and <code>r</code> is <em>not</em> a raw pointer.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph text-right">
+<p><a href="#connection"><code>connection</code></a> |  <code><a href="#connection">pconnection</a></code> | <a href="#connect"><code>connect</code></a> | <a href="#release"><code>release</code></a> | <code><a href="#meta::connected">meta::emitter</a></code> | <code><a href="#meta::connected">meta::connected</a></code></p>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/translate.hpp&gt;</div>
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">namespace</span> <span class="n">boost</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">synapse</span> <span class="p">{</span>
+
+	<span class="k">template</span> <span class="o">&lt;</span>
+		<span class="k">class</span> <span class="nc">OriginalSignal</span><span class="p">,</span>  <span class="k">class</span> <span class="nc">TranslatedSignal</span><span class="p">,</span>
+		<span class="k">class</span> <span class="nc">OriginalEmitter</span><span class="p">,</span> <span class="k">class</span> <span class="nc">TranslatedEmitter</span><span class="p">&gt;</span>
+	<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">connection</span><span class="o">&gt;</span> <span class="n">translate</span><span class="p">(</span> <span class="n">OriginalEmitter</span> <span class="o">*</span> <span class="n">e1</span><span class="p">,</span> <span class="n">TranslatedEmitter</span> <span class="o">*</span> <span class="n">e2</span> <span class="p">);</span>
+
+	<span class="k">template</span> <span class="o">&lt;</span>
+		<span class="k">class</span> <span class="nc">OriginalSignal</span><span class="p">,</span>  <span class="k">class</span> <span class="nc">TranslatedSignal</span><span class="p">,</span>
+		<span class="k">class</span> <span class="nc">OriginalEmitter</span><span class="p">,</span> <span class="k">class</span> <span class="nc">TranslatedEmitter</span><span class="p">&gt;</span>
+	<span class="n">weak_ptr</span><span class="o">&lt;</span><span class="n">pconnection</span><span class="o">&gt;</span> <span class="n">translate</span><span class="p">(</span> <span class="o">&lt;&lt;</span><span class="n">OriginalEmitter</span><span class="o">&gt;&gt;</span> <span class="n">e1</span><span class="p">,</span> <span class="o">&lt;&lt;</span><span class="n">TranslatedEmitter</span><span class="o">&gt;&gt;</span> <span class="n">e2</span> <span class="p">);</span> <i class="conum" data-value="1"></i><b>(1)</b>
+
+<span class="p">}</span> <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Multiple overloads are provided: <code>&lt;&lt;OriginalEmitter&gt;&gt;</code> is either <code>OriginalEmitter *</code>, <code>weak_ptr&lt;OriginalEmitter&gt; const &amp;</code> or, equivalently, <code>shared_ptr&lt;OriginalEmitter&gt; const &amp;</code>; <code>&lt;&lt;TranslatedEmitter&gt;&gt;</code> by analogy. At least one of <code>e1</code> and <code>e2</code> is <em>not</em> a raw pointer.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph text-right">
+<p><a href="#translate"><code>translate</code></a></p>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/connection.hpp&gt;</div>
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">namespace</span> <span class="n">boost</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">synapse</span> <span class="p">{</span>
+
+	<span class="k">class</span> <span class="nc">connection</span> <span class="p">{</span> <span class="c1">//abstract base</span>
+
+	<span class="nl">protected:</span>
+
+		<span class="n">connection</span><span class="p">();</span>
+		<span class="o">~</span><span class="n">connection</span><span class="p">();</span>
+
+	<span class="nl">public:</span>
+
+		<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="p">&gt;</span>
+		<span class="kt">void</span> <span class="n">set_user_data</span><span class="p">(</span> <span class="n">T</span> <span class="k">const</span> <span class="o">&amp;</span> <span class="p">);</span>
+
+		<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="p">&gt;</span>
+		<span class="n">T</span> <span class="o">*</span> <span class="n">get_user_data</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+
+		<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="p">&gt;</span>
+		<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">emitter</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+
+		<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="p">&gt;</span>
+		<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">receiver</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+	<span class="p">};</span>
+
+	<span class="k">class</span> <span class="nc">pconnection</span><span class="o">:</span> <span class="k">protected</span> <span class="n">connection</span> <span class="p">{</span> <span class="c1">//abstract base</span>
+
+	<span class="nl">protected:</span>
+
+		<span class="n">pconnection</span><span class="p">();</span>
+		<span class="o">~</span><span class="n">pconnection</span><span class="p">();</span>
+
+	<span class="nl">public:</span>
+
+		<span class="k">using</span> <span class="n">connection</span><span class="o">::</span><span class="n">set_user_data</span><span class="p">;</span>
+		<span class="k">using</span> <span class="n">connection</span><span class="o">::</span><span class="n">get_user_data</span><span class="p">;</span>
+		<span class="k">using</span> <span class="n">connection</span><span class="o">::</span><span class="n">emitter</span><span class="p">;</span>
+		<span class="k">using</span> <span class="n">connection</span><span class="o">::</span><span class="n">receiver</span><span class="p">;</span>
+
+	<span class="p">};</span>
+
+<span class="p">}</span> <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#connection"><code>connection</code></a> | <a href="#pconnection"><code>pconnection</code></a> | <a href="#connection::set_user_data"><code>set_user_data</code></a> | <a href="#connection::get_user_data"><code>get_user_data</code></a> | <a href="#connection::emitter"><code>emitter</code></a> | <a href="#connection::receiver"><code>receiver</code></a></p>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/block.hpp&gt;</div>
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">namespace</span> <span class="n">boost</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">synapse</span> <span class="p">{</span>
+
+	<span class="k">class</span> <span class="nc">blocker</span><span class="p">;</span>
+
+	<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Signal</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Emitter</span><span class="p">&gt;</span>
+	<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">blocker</span><span class="o">&gt;</span> <span class="n">block</span><span class="p">(</span> <span class="o">&lt;&lt;</span><span class="n">Emitter</span><span class="o">&gt;&gt;</span> <span class="n">e</span> <span class="p">);</span> <i class="conum" data-value="1"></i><b>(1)</b>
+
+	<span class="k">namespace</span> <span class="n">meta</span> <span class="p">{</span>
+
+		<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Signal</span><span class="p">&gt;</span>
+		<span class="k">struct</span> <span class="nc">blocked</span> <span class="p">{</span>
+			<span class="k">typedef</span> <span class="n">blocked</span><span class="o">&lt;</span><span class="n">Signal</span><span class="o">&gt;</span><span class="p">(</span><span class="o">*</span><span class="n">type</span><span class="p">)(</span> <span class="n">blocker</span> <span class="o">&amp;</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">is_blocked</span> <span class="p">);</span>
+		<span class="p">};</span>
+
+	<span class="p">}</span>
+
+<span class="p">}</span> <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Multiple overloads are provided: <code>&lt;&lt;Emitter&gt;&gt;</code>  is <code>Emitter *</code>, <code>weak_ptr&lt;Emitter&gt; const &amp;</code> or, equivalently, <code>shared_ptr&lt;Emitter&gt; const &amp;</code>.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph text-right">
+<p><a href="#blocker"><code>blocker</code></a> | <a href="#block"><code>block</code></a> | <code><a href="#meta::blocked">meta::blocked</a></code></p>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/blocker.hpp&gt;</div>
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">namespace</span> <span class="n">boost</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">synapse</span> <span class="p">{</span>
+
+	<span class="k">class</span> <span class="nc">blocker</span> <span class="p">{</span> <span class="c1">//abstract base</span>
+
+	<span class="nl">protected:</span>
+
+		<span class="n">blocker</span><span class="p">();</span>
+		<span class="o">~</span><span class="n">blocker</span><span class="p">();</span>
+
+	<span class="nl">public:</span>
+
+		<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="p">&gt;</span>
+		<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">emitter</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+	<span class="p">};</span>
+
+<span class="p">}</span> <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#blocker"><code>blocker</code></a> | <a href="#blocker::emitter"><code>emitter</code></a></p>
+</div>
+</div>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/thread_local_queue.hpp&gt;</div>
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">namespace</span> <span class="n">boost</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">synapse</span> <span class="p">{</span>
+
+	<span class="k">struct</span> <span class="nc">thread_local_queue</span><span class="p">;</span>
+	<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">thread_local_queue</span><span class="o">&gt;</span> <span class="n">create_thread_local_queue</span><span class="p">();</span>
+
+	<span class="kt">int</span> <span class="n">poll</span><span class="p">(</span> <span class="n">thread_local_queue</span> <span class="o">&amp;</span> <span class="n">q</span> <span class="p">);</span>
+	<span class="kt">int</span> <span class="n">wait</span><span class="p">(</span> <span class="n">thread_local_queue</span> <span class="o">&amp;</span> <span class="n">q</span> <span class="p">);</span>
+	<span class="kt">void</span> <span class="n">post</span><span class="p">(</span> <span class="n">thread_local_queue</span> <span class="o">&amp;</span> <span class="n">q</span><span class="p">,</span> <span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">()</span><span class="o">&gt;</span> <span class="k">const</span> <span class="o">&amp;</span> <span class="n">f</span> <span class="p">);</span>
+
+<span class="p">}</span> <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#thread_local_queue"><code>thread_local_queue</code></a> | <a href="#create_thread_local_queue"><code>create_thread_local_queue</code></a> | <a href="#poll"><code>poll</code></a> | <a href="#wait"><code>wait</code></a> | <a href="#post"><code>post</code></a></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="reference">Reference</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="emit"><code>emit</code></h3>
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/emit.hpp&gt;</div>
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">namespace</span> <span class="n">boost</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">synapse</span> <span class="p">{</span>
+
+	<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Signal</span><span class="p">,</span> <span class="k">class</span><span class="o">...</span> <span class="nc">A</span><span class="p">&gt;</span>
+	<span class="kt">int</span> <span class="n">emit</span><span class="p">(</span> <span class="kt">void</span> <span class="k">const</span> <span class="o">*</span><span class="p">,</span> <span class="n">A</span><span class="p">...</span> <span class="p">);</span>
+
+<span class="p">}</span> <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Effects: </dt>
+<dd>
+<p>Calls all function objects that are connected to the specified <code>Signal</code> from the emitter <code>e</code>, in the order in which they were connected by <a href="#connect"><code>connect</code></a> or <a href="#translate"><code>translate</code></a>, passing the specified arguments depending on the <code>Signal</code> signature, subject to the connection lifetime/blocking restrictions.</p>
+</dd>
+<dt class="hdlist1">Returns: </dt>
+<dd>
+<p>The count of the connected function objects that were called. Signals that are currently blocked are not included in the count returned by <code>emit</code>.</p>
+</dd>
+</dl>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+It is the responsibility of the caller to ensure that the emitter object <code>e</code> does not expire before <code>emit</code> returns, otherwise the behavior is undefined.
+</td>
+</tr>
+</table>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Throws: </dt>
+<dd>
+<p>Any exception thrown by one of the connected function objects, in which case the remaining function objects are not called.</p>
+</dd>
+<dt class="hdlist1">Notes: </dt>
+<dd>
+<div class="ulist">
+<ul>
+<li>
+<p>Values returned by the connected function objects are discarded.</p>
+</li>
+<li>
+<p>If before <code>emit</code> returns <a href="#connect"><code>connect</code></a> is called on the same signal and the same emitter, any newly connected functions are not called during the same <code>emit</code>.</p>
+</li>
+<li>
+<p>If before <code>emit</code> returns a <a href="#connection"><code>connection</code></a> object expires, it may or may not get called during the same <code>emit</code>.</p>
+</li>
+<li>
+<p>If <code>e</code> is <code>0</code>, <code>emit</code> simply returns <code>0</code> without calling any functions. Because of this feature, if the emitter is held by a <code>shared_ptr</code> object <code>sp</code>, there is no harm in calling <code>emit&lt;Signal&gt;(sp.get(),&#8230;&#8203;)</code> even if <code>sp</code> is empty. Similarly, if the caller holds a <code>weak_ptr</code> reference <code>wp</code> to an emitter object which has expired, calling <code>emit&lt;Signal&gt;(wp.lock().get(),&#8230;&#8203;)</code> will simply return <code>0</code>.</p>
+</li>
+<li>
+<p><code>emit</code> takes its arguments by value. Use <code>std::ref</code> to pass by reference (but beware of <a href="#thread_local_queue"><code>thread_local_queue</code></a> objects).</p>
+</li>
+</ul>
+</div>
+</dd>
+<dt class="hdlist1">Thread safety: </dt>
+<dd>
+<p>By default <code>emit</code> will only call functions connected from the calling thread. In addition, the signal is pushed onto any <a href="#thread_local_queue"><code>thread_local_queue</code></a> objects created by other threads, but only if those threads currently have at least one active connection for the specified <code>Signal</code>. In this case <code>emit</code> captures its arguments similarly to <code>std::bind</code>, and it is the responsibility of the caller to ensure that they remain valid until the posted signal is processed in all other threads, by a call to <a href="#poll"><code>thread_local_queue::poll</code></a> or <a href="#wait"><code>thread_local_queue::wait</code></a>.</p>
+</dd>
+</dl>
+</div>
+<hr>
+</div>
+<div class="sect2">
+<h3 id="connect"><code>connect</code></h3>
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/connect.hpp&gt;</div>
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">namespace</span> <span class="n">boost</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">synapse</span> <span class="p">{</span>
+
+	<span class="k">class</span> <span class="nc">connection</span><span class="p">;</span>
+
+	<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Signal</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Emitter</span><span class="p">,</span> <span class="k">class</span> <span class="nc">F</span><span class="p">&gt;</span>
+	<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">connection</span><span class="o">&gt;</span> <span class="n">connect</span><span class="p">(</span> <span class="n">Emitter</span> <span class="o">*</span> <span class="n">e</span><span class="p">,</span> <span class="n">F</span> <span class="n">f</span> <span class="p">);</span>
+
+	<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Signal</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Emitter</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Receiver</span><span class="p">,</span> <span class="k">class</span> <span class="nc">F</span><span class="p">&gt;</span>
+	<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">connection</span><span class="o">&gt;</span> <span class="n">connect</span><span class="p">(</span> <span class="n">Emitter</span> <span class="o">*</span> <span class="n">e</span><span class="p">,</span> <span class="n">Receiver</span> <span class="o">*</span> <span class="n">r</span><span class="p">,</span> <span class="n">F</span> <span class="n">f</span> <span class="p">);</span>
+
+	<span class="k">class</span> <span class="nc">pconnection</span><span class="p">;</span>
+
+	<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Signal</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Emitter</span><span class="p">,</span> <span class="k">class</span> <span class="nc">F</span><span class="p">&gt;</span>
+	<span class="n">weak_ptr</span><span class="o">&lt;</span><span class="n">pconnection</span><span class="o">&gt;</span> <span class="n">connect</span><span class="p">(</span> <span class="o">&lt;&lt;</span><span class="n">Emitter</span><span class="o">&gt;&gt;</span> <span class="n">e</span><span class="p">,</span> <span class="n">F</span> <span class="n">f</span> <span class="p">);</span> <i class="conum" data-value="1"></i><b>(1)</b>
+
+	<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Signal</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Emitter</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Receiver</span><span class="p">,</span> <span class="k">class</span> <span class="nc">F</span><span class="p">&gt;</span>
+	<span class="n">weak_ptr</span><span class="o">&lt;</span><span class="n">pconnection</span><span class="o">&gt;</span> <span class="n">connect</span><span class="p">(</span> <span class="o">&lt;&lt;</span><span class="n">Emitter</span><span class="o">&gt;&gt;</span> <span class="n">e</span><span class="p">,</span> <span class="o">&lt;&lt;</span><span class="n">Receiver</span><span class="o">&gt;&gt;</span> <span class="n">r</span><span class="p">,</span> <span class="n">F</span> <span class="n">f</span> <span class="p">);</span> <i class="conum" data-value="2"></i><b>(2)</b>
+
+<span class="p">}</span> <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Two overloads are provided: <code>&lt;&lt;Emitter&gt;&gt;</code>  is <code>weak_ptr&lt;Emitter&gt; const &amp;</code> or, equivalently, <code>shared_ptr&lt;Emitter&gt; const &amp;</code>;</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Multiple overloads are provided: <code>&lt;&lt;Emitter&gt;&gt;</code>  is <code>Emitter *</code>, <code>weak_ptr&lt;Emitter&gt; const &amp;</code> or, equivalently, <code>shared_ptr&lt;Emitter&gt; const &amp;</code>; at least one of <code>e</code> and <code>r</code> is <em>not</em> a raw pointer.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Overloads of <code>connect</code> that return <code>shared_ptr&lt;<a href="#connection">connection</a>&gt;</code> create connections whose lifetime is explicitly managed by the user. Such connections require that the caller keeps the returned <a href="#connection"><code>connection</code></a> object alive for as long as the connection should persist.</p>
+</div>
+<div class="paragraph">
+<p>Overloads of <code>connect</code> that return <code>weak_ptr&lt;<a href="#pconnection">pconnection</a>&gt;</code> take at least one of <code>e</code> and <code>r</code> as a <code>weak_ptr</code> or <code>shared_ptr</code>. They create <em>persistent</em> connections which expire automatically when either <code>e</code> or <code>r</code> expire.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Effects: </dt>
+<dd>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Connects the specified <code>Signal</code> from the emitter <code>e</code> to the function object <code>f</code>. The arguments of <code>F</code> must match the arguments of <code>Signal</code>, except that if <code>r</code> is specified, a pointer to the receiver object is passed as the first argument to <code>F</code>, followed by the rest of the arguments as specified by the <code>Signal</code> signature. The signal is considered disconnected when either of the following occurs:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>The returned <code>shared_ptr&lt;<a href="#connection">connection</a>&gt;</code> object expires (this applies only to overloads that return <code>shared_ptr&lt;<a href="#connection">connection</a>&gt;</code>);</p>
+</li>
+<li>
+<p><code>e</code> (passed as either <code>weak_ptr&lt;Emitter&gt;</code> or <code>shared_ptr&lt;Emitter&gt;</code>) expires;</p>
+</li>
+<li>
+<p><code>r</code> (passed as either <code>weak_ptr&lt;Emitter&gt;</code> or <code>shared_ptr&lt;Emitter&gt;</code>) expires.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The returned object does not assume ownership of <code>e</code> or <code>r</code>: passing <code>shared_ptr</code> to <code>connect</code> is equivalent to passing <code>weak_ptr</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+If either the emitter or the receiver, if passed as raw pointers, expire before the returned <a href="#connection"><code>connection</code></a> object has expired, the behavior is undefined.
+</td>
+</tr>
+</table>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><a id="meta::connected"></a> The <code>meta::emitter</code> emits the <code>meta::connected&lt;Signal&gt;</code> signal:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">namespace</span> <span class="n">boost</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">synapse</span> <span class="p">{</span>
+
+	<span class="k">namespace</span> <span class="n">meta</span> <span class="p">{</span>
+
+		<span class="n">weak_ptr</span><span class="o">&lt;</span><span class="kt">void</span> <span class="k">const</span><span class="o">&gt;</span> <span class="n">emitter</span><span class="p">();</span>
+
+		<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Signal</span><span class="p">&gt;</span>
+		<span class="k">struct</span> <span class="nc">connected</span> <span class="p">{</span>
+			<span class="c1">//unspecified</span>
+		<span class="p">};</span>
+
+		<span class="k">namespace</span> <span class="n">connect_flags</span> <span class="p">{</span>
+			<span class="kt">unsigned</span> <span class="k">const</span> <span class="n">connecting</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+			<span class="kt">unsigned</span> <span class="k">const</span> <span class="n">first_for_this_emitter</span><span class="o">=</span><span class="mi">2</span><span class="p">;</span>
+			<span class="kt">unsigned</span> <span class="k">const</span> <span class="n">last_for_this_emitter</span><span class="o">=</span><span class="mi">4</span><span class="p">;</span>
+		<span class="p">}</span>
+
+	<span class="p">}</span>
+
+<span class="p">}</span> <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>meta::connected&lt;Signal&gt;</code> signal is also emitted when the returned object expires. Handlers of the meta signal take a reference to the <a href="#connection"><code>connection</code></a> object being created or destroyed, and a second <code>unsigned</code> argument, <code>flags</code>, which indicates the circumstances under which the meta signal is emitted:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>If the <a href="#connection"><code>connection</code></a> object is being created, the <code>connecting</code> bit is set, otherwise it is clear;</p>
+</li>
+<li>
+<p>If this is the first <code>Signal</code> connection being created for the emitter <code>e</code>, the <code>first_for_this_emitter</code> bit is set, otherwise it is clear;</p>
+</li>
+<li>
+<p>If this is the last <code>Signal</code> connection being destroyed for the emitter <code>e</code>, the <code>last_for_this_emitter</code> bit is set, otherwise it is clear.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>Because class <a href="#connection"><code>connection</code></a> is the protected base of class <a href="#pconnection"><code>pconnection</code></a>, handlers of <code>meta::connected&lt;Signal&gt;</code> take <code>connection &amp;</code> regardless of which <code>connect</code> overload was used.</p>
+</li>
+<li>
+<p>The <code>meta::connected&lt;Signal&gt;</code> signal is thread-local; it will never be queued into other threads' <code>thread_local_queue</code> objects.</p>
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+The passed <a href="#connection"><code>connection</code></a> object can be used to access the emitter and receiver objects passed to <code>connect</code>.
+</td>
+</tr>
+</table>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+</dd>
+<dt class="hdlist1">Thread safety: </dt>
+<dd>
+<p>Please see <a href="#emit"><code>emit</code></a> and <a href="#thread_local_queue"><code>thread_local_queue</code></a>.</p>
+</dd>
+</dl>
+</div>
+<hr>
+</div>
+<div class="sect2">
+<h3 id="release"><code>release</code></h3>
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/connect.hpp&gt;</div>
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">namespace</span> <span class="n">boost</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">synapse</span> <span class="p">{</span>
+
+	<span class="k">class</span> <span class="nc">connection</span><span class="p">;</span>
+	<span class="k">class</span> <span class="nc">pconnection</span><span class="p">;</span>
+
+	<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">connection</span> <span class="k">const</span><span class="o">&gt;</span> <span class="n">release</span><span class="p">(</span> <span class="n">weak_ptr</span><span class="o">&lt;</span><span class="n">pconnection</span> <span class="k">const</span><span class="o">&gt;</span> <span class="k">const</span> <span class="o">&amp;</span> <span class="n">c</span> <span class="p">);</span>
+	<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">connection</span><span class="o">&gt;</span> <span class="n">release</span><span class="p">(</span> <span class="n">weak_ptr</span><span class="o">&lt;</span><span class="n">pconnection</span><span class="o">&gt;</span> <span class="k">const</span> <span class="o">&amp;</span> <span class="n">c</span> <span class="p">);</span>
+
+<span class="p">}</span> <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Effects: </dt>
+<dd>
+<p>Converts a weak <a href="#pconnection"><code>pconnection</code></a> reference to shared ownership <a href="#connection"><code>connection</code></a> reference. The lifetime of the connection is now explicitly managed by the returned <code>shared_ptr</code> object; see <a href="#connect"><code>connect</code></a>.</p>
+</dd>
+</dl>
+</div>
+<hr>
+</div>
+<div class="sect2">
+<h3 id="translate"><code>translate</code></h3>
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/translate.hpp&gt;</div>
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">namespace</span> <span class="n">boost</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">synapse</span> <span class="p">{</span>
+
+	<span class="k">template</span> <span class="o">&lt;</span>
+		<span class="k">class</span> <span class="nc">OriginalSignal</span><span class="p">,</span>  <span class="k">class</span> <span class="nc">TranslatedSignal</span><span class="p">,</span>
+		<span class="k">class</span> <span class="nc">OriginalEmitter</span><span class="p">,</span> <span class="k">class</span> <span class="nc">TranslatedEmitter</span><span class="p">&gt;</span>
+	<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">connection</span><span class="o">&gt;</span> <span class="n">translate</span><span class="p">(</span> <span class="n">OriginalEmitter</span> <span class="o">*</span> <span class="n">e1</span><span class="p">,</span> <span class="n">TranslatedEmitter</span> <span class="o">*</span> <span class="n">e2</span> <span class="p">);</span>
+
+	<span class="k">template</span> <span class="o">&lt;</span>
+		<span class="k">class</span> <span class="nc">OriginalSignal</span><span class="p">,</span>  <span class="k">class</span> <span class="nc">TranslatedSignal</span><span class="p">,</span>
+		<span class="k">class</span> <span class="nc">OriginalEmitter</span><span class="p">,</span> <span class="k">class</span> <span class="nc">TranslatedEmitter</span><span class="p">&gt;</span>
+	<span class="n">weak_ptr</span><span class="o">&lt;</span><span class="n">pconnection</span><span class="o">&gt;</span> <span class="n">translate</span><span class="p">(</span> <span class="o">&lt;&lt;</span><span class="n">OriginalEmitter</span><span class="o">&gt;&gt;</span> <span class="n">e1</span><span class="p">,</span> <span class="o">&lt;&lt;</span><span class="n">TranslatedEmitter</span><span class="o">&gt;&gt;</span> <span class="n">e2</span> <span class="p">);</span> <i class="conum" data-value="1"></i><b>(1)</b>
+
+<span class="p">}</span> <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Multiple overloads are provided: <code>&lt;&lt;OriginalEmitter&gt;&gt;</code> is either <code>OriginalEmitter *</code>, <code>weak_ptr&lt;OriginalEmitter&gt; const &amp;</code> or, equivalently, <code>shared_ptr&lt;OriginalEmitter&gt; const &amp;</code>; <code>&lt;&lt;TranslatedEmitter&gt;&gt;</code> by analogy. At least one of <code>e1</code> and <code>e2</code> is <em>not</em> a raw pointer.
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Effects: </dt>
+<dd>
+<p>The <code>translate</code> function template creates a connection which causes the emitter <code>e2</code> to emit <code>TranslatedSignal</code> each time the emitter <code>e1</code> emits <code>OriginalSignal</code> (the two signals must have compatible signatures). This behavior persists until:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>the returned <a href="#connection"><code>connection</code></a> object expires (this applies only to the <code>translate</code> overload that takes <code>e1</code> and <code>e2</code> as raw pointers);</p>
+</li>
+<li>
+<p><code>e1</code> (passed as either <code>weak_ptr</code> or <code>shared_ptr</code> expires;</p>
+</li>
+<li>
+<p><code>e2</code> (passed as either <code>weak_ptr</code> or <code>shared_ptr</code> expires.</p>
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div></td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The returned <a href="#connection"><code>connection</code></a> object does not assume ownership of <code>e1</code> or <code>e2</code>: passing <code>shared_ptr</code> is equivalent to passing <code>weak_ptr</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+If either <code>e1</code> or <code>e2</code>, passed as raw pointers, expire before the returned <a href="#connection"><code>connection</code></a> object has expired, the behavior is undefined.
+</td>
+</tr>
+</table>
+</div>
+<hr>
+</div>
+<div class="sect2">
+<h3 id="connection"><code>connection</code></h3>
+
+</div>
+<div class="sect2">
+<h3 id="pconnection"><code>pconnection</code></h3>
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/connection.hpp&gt;</div>
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">namespace</span> <span class="n">boost</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">synapse</span> <span class="p">{</span>
+
+	<span class="k">class</span> <span class="nc">connection</span> <span class="p">{</span> <span class="c1">//abstract base</span>
+
+	<span class="nl">protected:</span>
+
+		<span class="n">connection</span><span class="p">();</span>
+		<span class="o">~</span><span class="n">connection</span><span class="p">();</span>
+
+	<span class="nl">public:</span>
+
+		<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="p">&gt;</span>
+		<span class="kt">void</span> <span class="n">set_user_data</span><span class="p">(</span> <span class="n">T</span> <span class="k">const</span> <span class="o">&amp;</span> <span class="p">);</span>
+
+		<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="p">&gt;</span>
+		<span class="n">T</span> <span class="o">*</span> <span class="n">get_user_data</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+
+		<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="p">&gt;</span>
+		<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">emitter</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+
+		<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="p">&gt;</span>
+		<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">receiver</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+	<span class="p">};</span>
+
+	<span class="k">class</span> <span class="nc">pconnection</span><span class="o">:</span> <span class="k">protected</span> <span class="n">connection</span> <span class="p">{</span> <span class="c1">//abstract base</span>
+
+	<span class="nl">protected:</span>
+
+		<span class="n">pconnection</span><span class="p">();</span>
+		<span class="o">~</span><span class="n">pconnection</span><span class="p">();</span>
+
+	<span class="nl">public:</span>
+
+		<span class="k">using</span> <span class="n">connection</span><span class="o">::</span><span class="n">set_user_data</span><span class="p">;</span>
+		<span class="k">using</span> <span class="n">connection</span><span class="o">::</span><span class="n">get_user_data</span><span class="p">;</span>
+		<span class="k">using</span> <span class="n">connection</span><span class="o">::</span><span class="n">emitter</span><span class="p">;</span>
+		<span class="k">using</span> <span class="n">connection</span><span class="o">::</span><span class="n">receiver</span><span class="p">;</span>
+
+	<span class="p">};</span>
+
+<span class="p">}</span> <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#connection::set_user_data"><code>set_user_data</code></a> | <a href="#connection::get_user_data"><code>get_user_data</code></a> | <a href="#connection::emitter"><code>emitter</code></a> | <a href="#connection::receiver"><code>receiver</code></a></p>
+</div>
+<div class="paragraph">
+<p>Overloads of <a href="#connect"><code>connect</code></a> and <a href="#translate"><code>translate</code></a> return either <code>shared_ptr&lt;connection&gt;</code>  or <code>weak_ptr&lt;pconnection&gt;</code>, depending on whether or not the emitter and the receiver are passed as raw pointers. The former is used to control the lifetime of the connection explicitly, while the latter represents persistent connections, which expire implicitly with the expiration of the emitter or the receiver object.</p>
+</div>
+<div class="paragraph">
+<p>Before being returned to the caller, <code>connection</code> objects are passed to handlers of the <a href="#meta::connected"><code>meta::connected</code></a> signal, which can use the <a href="#connection::emitter"><code>emitter</code></a>/<a href="#connection::receiver"><code>receiver</code></a> member function templates to access the emitter/receiver object passed to <a href="#connect"><code>connect</code></a>. The <a href="#connection::set_user_data"><code>set_user_data</code></a>/<a href="#connection::get_user_data"><code>get_user_data</code></a> member function templates can be used to store and access auxiliary information.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+Use <a href="#release"><code>release</code></a> to convert a non-owning <code>weak_ptr&lt;pconnection&gt;</code> reference to an owning <code>shared_ptr&lt;connection&gt;</code> reference.
+</td>
+</tr>
+</table>
+</div>
+<hr>
+<div class="sect3">
+<h4 id="connection::set_user_data"><code>set_user_data</code></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="p">&gt;</span>
+<span class="kt">void</span> <span class="nf">set_user_data</span><span class="p">(</span> <span class="n">T</span> <span class="k">const</span> <span class="o">&amp;</span> <span class="n">data</span> <span class="p">);</span></code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Description: </dt>
+<dd>
+<p>Stores a copy of <code>data</code> into <code>this</code>. Use <code>get_user_data</code> to access it.</p>
+</dd>
+</dl>
+</div>
+<hr>
+</div>
+<div class="sect3">
+<h4 id="connection::get_user_data"><code>get_user_data</code></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="p">&gt;</span>
+<span class="n">T</span> <span class="o">*</span> <span class="n">get_user_data</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span></code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Returns: </dt>
+<dd>
+<div class="ulist">
+<ul>
+<li>
+<p>If <code>this</code> contains object of type <code>T</code> previously copied by a call to <a href="#connection::set_user_data"><code>set_user_data</code></a>, returns a pointer to that data.</p>
+</li>
+<li>
+<p>If <a href="#connection::set_user_data"><code>set_user_data</code></a> has not been called for <code>this</code>, or if the type used to instantiate the <code>set_user_data</code> function template doesn&#8217;t match the type used with <code>get_user_data</code>, returns <code>0</code>.</p>
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+<hr>
+</div>
+<div class="sect3">
+<h4 id="connection::emitter"><code>emitter</code></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="p">&gt;</span>
+<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">emitter</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span></code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Returns: </dt>
+<dd>
+<p>A <code>shared_ptr</code> that points the emitter that was passed to an overload of the <a href="#connect"><code>connect</code></a> (or <a href="#translate"><code>translate</code></a>) function template that returned the <a href="#connection"><code>connection</code></a> object.</p>
+</dd>
+<dt class="hdlist1">Notes: </dt>
+<dd>
+<div class="ulist">
+<ul>
+<li>
+<p>An empty <code>shared_ptr</code> is returned if:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>T</code> does not match the static type of the emitter passed to <a href="#connect"><code>connect</code></a> (or <a href="#translate"><code>translate</code></a>), or</p>
+</li>
+<li>
+<p>the emitter was passed to <a href="#connect"><code>connect</code></a> (or <a href="#translate"><code>translate</code></a>) as a <code>shared_ptr</code>/<code>weak_ptr</code> and it has expired.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>If the emitter was passed to <a href="#connect"><code>connect</code></a> (or <a href="#translate"><code>translate</code></a>) as a raw pointer, the returned <code>shared_ptr</code> points that emitter but does not (can not) keep it alive.</p>
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+<hr>
+</div>
+<div class="sect3">
+<h4 id="connection::receiver"><code>receiver</code></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="p">&gt;</span>
+<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">receiver</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span></code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Returns: </dt>
+<dd>
+<p>A <code>shared_ptr</code> that points the receiver that was passed to an overload of the <a href="#connect"><code>connect</code></a> (or <a href="#translate"><code>translate</code></a>) function template that returned the <a href="#connection"><code>connection</code></a> object.</p>
+</dd>
+<dt class="hdlist1">Notes: </dt>
+<dd>
+<div class="ulist">
+<ul>
+<li>
+<p>An empty <code>shared_ptr</code> is returned if:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>No receiver object was passed to <a href="#connect"><code>connect</code></a> (or <a href="#translate"><code>translate</code></a>), or</p>
+</li>
+<li>
+<p><code>T</code> does not match the static type of the receiver passed to <a href="#connect"><code>connect</code></a> (or <a href="#translate"><code>translate</code></a>), or</p>
+</li>
+<li>
+<p>the receiver was passed to <a href="#connect"><code>connect</code></a> (or <a href="#translate"><code>translate</code></a>) as a <code>shared_ptr</code>/<code>weak_ptr</code> and it has expired.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>If the receiver was passed to <a href="#connect"><code>connect</code></a> (or <a href="#translate"><code>translate</code></a>) as a raw pointer, the returned <code>shared_ptr</code> points that receiver but does not (can not) keep it alive.</p>
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+<hr>
+</div>
+</div>
+<div class="sect2">
+<h3 id="block"><code>block</code></h3>
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/block.hpp&gt;</div>
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">namespace</span> <span class="n">boost</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">synapse</span> <span class="p">{</span>
+
+	<span class="k">class</span> <span class="nc">blocker</span><span class="p">;</span>
+
+	<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Signal</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Emitter</span><span class="p">&gt;</span>
+	<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">blocker</span><span class="o">&gt;</span> <span class="n">block</span><span class="p">(</span> <span class="o">&lt;&lt;</span><span class="n">Emitter</span><span class="o">&gt;&gt;</span> <span class="n">e</span> <span class="p">);</span> <i class="conum" data-value="1"></i><b>(1)</b>
+
+<span class="p">}</span> <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Multiple overloads are provided: <code>&lt;&lt;Emitter&gt;&gt;</code> is either <code>Emitter *</code>, <code>weak_ptr&lt;Emitter&gt;</code> or, equivalently, <code>shared_ptr&lt;Emitter&gt;</code>.
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Effects: </dt>
+<dd>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Blocks the specified <code>Signal</code> from the emitter <code>e</code> until the returned <code>blocker</code> object expires. While the <code>Signal</code> is blocked, calls to <code>emit&lt;Signal&gt;</code> for <code>e</code> are ignored and return <code>0</code>. The returned <code>blocker</code> object does not own <code>e</code> even if <code>block</code> was passed a <code>shared_ptr</code>.</p>
+</li>
+<li>
+<p><a id="meta::blocked"></a> The <a href="#meta::connected"><code>meta::emitter</code></a> emits the <code>meta::blocked&lt;Signal&gt;</code> signal:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">namespace</span> <span class="n">boost</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">synapse</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">meta</span> <span class="p">{</span>
+
+	<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Signal</span><span class="p">&gt;</span>
+	<span class="k">struct</span> <span class="nc">blocked</span> <span class="p">{</span>
+		<span class="c1">//unspecified</span>
+	<span class="p">};</span>
+
+<span class="p">}</span> <span class="p">}</span> <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>meta::blocked&lt;Signal&gt;</code> signal is also emitted when the returned <a href="#blocker"><code>blocker</code></a> object expires. Handlers of the meta signal take a reference to the <a href="#blocker"><code>blocker</code></a> object being created or destroyed, and a second <code>bool</code> argument, <code>is_blocked</code>, which is true if the signal is becoming blocked, false if it is becoming unblocked.</p>
+</div>
+</li>
+</ol>
+</div>
+</dd>
+</dl>
+</div></td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>Blocking affects existing as well as future connections.</p>
+</li>
+<li>
+<p>The <code>meta::blocked&lt;Signal&gt;</code> signal is thread-local; it will never be queued into other threads' <code>thread_local_queue</code> objects.</p>
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+If <code>block</code> is passed a raw pointer, deleting the emitter before the returned <code>blocker</code> object has expired results in undefined behavior.
+</td>
+</tr>
+</table>
+</div>
+<hr>
+</div>
+<div class="sect2">
+<h3 id="blocker"><code>blocker</code></h3>
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/blocker.hpp&gt;</div>
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">namespace</span> <span class="n">boost</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">synapse</span> <span class="p">{</span>
+
+	<span class="k">class</span> <span class="nc">blocker</span> <span class="p">{</span> <span class="c1">//abstract base</span>
+
+	<span class="nl">protected:</span>
+
+		<span class="n">blocker</span><span class="p">();</span>
+		<span class="o">~</span><span class="n">blocker</span><span class="p">();</span>
+
+	<span class="nl">public:</span>
+
+		<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="p">&gt;</span>
+		<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">emitter</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+	<span class="p">};</span>
+
+<span class="p">}</span> <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#blocker::emitter"><code>emitter</code></a></p>
+</div>
+<div class="paragraph">
+<p>The <a href="#block"><code>block</code></a> function returns <code>shared_ptr&lt;blocker&gt;</code> that is used to control the time the signal remains blocked. As well, <code>blocker</code> objects are passed to handlers of the <a href="#meta::blocked"><code>meta::blocked</code></a> signal, which can use the <code>emitter</code> member function template to access the emitter object passed to <a href="#block"><code>block</code></a>.</p>
+</div>
+<hr>
+<div class="sect3">
+<h4 id="blocker::emitter"><code>emitter</code></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="p">&gt;</span>
+<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">emitter</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span></code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Returns: </dt>
+<dd>
+<p>A <code>shared_ptr</code> that points the emitter that was passed to <a href="#block"><code>block</code></a>.</p>
+</dd>
+<dt class="hdlist1">Notes: </dt>
+<dd>
+<div class="ulist">
+<ul>
+<li>
+<p>An empty shared_ptr is returned if:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>T</code> does not match the static type of the emitter passed to <a href="#block"><code>block</code></a>, or</p>
+</li>
+<li>
+<p>the emitter was passed to <a href="#block"><code>block</code></a> as a <code>shared</code>/<code>weak_ptr</code> and it has expired.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>If the emitter was passed to <a href="#block"><code>block</code></a> as a raw pointer, the returned <code>shared_ptr</code> points that emitter but does not (can not) keep it alive.</p>
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+<hr>
+</div>
+</div>
+<div class="sect2">
+<h3 id="thread_local_queue"><code>thread_local_queue</code></h3>
+<div class="sect3">
+<h4 id="create_thread_local_queue"><code>create_thread_local_queue</code></h4>
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/thread_local_queue.hpp&gt;</div>
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">namespace</span> <span class="n">boost</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">synapse</span> <span class="p">{</span>
+
+	<span class="k">struct</span> <span class="nc">thread_local_queue</span><span class="p">;</span>
+	<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">thread_local_queue</span><span class="o">&gt;</span> <span class="n">create_thread_local_queue</span><span class="p">();</span>
+
+<span class="p">}</span> <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Returns: </dt>
+<dd>
+<p>A thread-local object that can be used to queue signals emitted asynchronously from other threads. Use <a href="#poll"><code>poll</code></a> to emit the queued signals synchronously into the calling thread. See <a href="#Interthread communication">[Interthread communication]</a>.</p>
+</dd>
+</dl>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+While any number of threads can use this function to create their own <a href="#thread_local_queue"><code>thread_local_queue</code></a>, it is invalid to create more than one <code>thread_local_queue</code> object per thread.
+</td>
+</tr>
+</table>
+</div>
+<hr>
+</div>
+<div class="sect3">
+<h4 id="poll"><code>poll</code></h4>
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/thread_local_queue.hpp&gt;</div>
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">namespace</span> <span class="n">boost</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">synapse</span> <span class="p">{</span>
+
+	<span class="kt">int</span> <span class="n">poll</span><span class="p">(</span> <span class="n">thread_local_queue</span> <span class="o">&amp;</span> <span class="n">q</span> <span class="p">);</span>
+
+<span class="p">}</span> <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Effects: </dt>
+<dd>
+<p>Synchronously emits all signals queued asynchronously into <code>q</code> by calls to <a href="#emit"><code>emit</code></a> from other threads. See <a href="#Interthread communication">[Interthread communication]</a>.</p>
+</dd>
+<dt class="hdlist1">Returns: </dt>
+<dd>
+<p>The total number of signals emitted.</p>
+</dd>
+</dl>
+</div>
+<hr>
+</div>
+<div class="sect3">
+<h4 id="wait"><code>wait</code></h4>
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/thread_local_queue.hpp&gt;</div>
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">namespace</span> <span class="n">boost</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">synapse</span> <span class="p">{</span>
+
+	<span class="kt">int</span> <span class="n">wait</span><span class="p">(</span> <span class="n">thread_local_queue</span> <span class="o">&amp;</span> <span class="n">q</span> <span class="p">);</span>
+
+<span class="p">}</span> <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Effects: </dt>
+<dd>
+<p>The same as <code><a href="#poll">poll</a>(q)</code>, except that it blocks and does not return until at least one signal was delivered.</p>
+</dd>
+<dt class="hdlist1">Returns: </dt>
+<dd>
+<p>The total number of signals emitted (always greater than 0).</p>
+</dd>
+</dl>
+</div>
+<hr>
+</div>
+<div class="sect3">
+<h4 id="post"><code>post</code></h4>
+<div class="listingblock">
+<div class="title">#include &lt;boost/synapse/thread_local_queue.hpp&gt;</div>
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">namespace</span> <span class="n">boost</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">synapse</span> <span class="p">{</span>
+
+	<span class="kt">void</span> <span class="n">post</span><span class="p">(</span> <span class="n">thread_local_queue</span> <span class="o">&amp;</span> <span class="n">q</span><span class="p">,</span> <span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">()</span><span class="o">&gt;</span> <span class="k">const</span> <span class="o">&amp;</span> <span class="n">f</span> <span class="p">);</span>
+
+<span class="p">}</span> <span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Effects: </dt>
+<dd>
+<p>Queues <code>f</code> to be called next time <code>q</code> is polled; that is, <code>f</code> will be executed synchronously in the thread that has created <code>q</code>.</p>
+</dd>
+</dl>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+While <a href="#poll"><code>poll</code></a> (or <a href="#wait"><code>wait</code></a>) must be called from the thread that created the <a href="#thread_local_queue"><code>thread_local_queue</code></a> object, <a href="#post"><code>post</code></a> may be called from any thread.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="techniques">Programming Techniques</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_monitoring_of_dynamic_systems">Monitoring of Dynamic Systems</h3>
+<div class="paragraph">
+<p>It is often needed to monitor the operations of a complex dynamic system beyond the facilities available in its public API. One possible option to accomplish this is to use a logging library. Synapse provides another.</p>
+</div>
+<div class="paragraph">
+<p>Consider a dynamic object environment in a video game, where various art assets may be loaded on the fly, cached, and eventually unloaded when they are no longer needed. Such events are typically not accessible through a formal interface because they are implementation details; yet there is still a need to analyze the efficiency of the caching algorithm.</p>
+</div>
+<div class="paragraph">
+<p>Using Synapse, we can easily define a set of signal typedefs to represent such events:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">typedef</span> <span class="k">struct</span> <span class="nf">object_loaded_</span><span class="p">(</span><span class="o">*</span><span class="n">object_loaded</span><span class="p">)(</span> <span class="kt">char</span> <span class="k">const</span> <span class="o">*</span> <span class="n">type</span><span class="p">,</span> <span class="kt">char</span> <span class="k">const</span> <span class="o">*</span> <span class="n">name</span> <span class="p">);</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="nf">object_unloaded_</span><span class="p">(</span><span class="o">*</span><span class="n">object_unloaded</span><span class="p">)(</span> <span class="kt">char</span> <span class="k">const</span> <span class="o">*</span> <span class="n">type</span><span class="p">,</span> <span class="kt">char</span> <span class="k">const</span> <span class="o">*</span> <span class="n">name</span> <span class="p">);</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="nf">cache_miss_</span><span class="p">(</span><span class="o">*</span><span class="n">cache_miss</span><span class="p">)(</span> <span class="kt">char</span> <span class="k">const</span> <span class="o">*</span> <span class="n">type</span><span class="p">,</span> <span class="kt">char</span> <span class="k">const</span> <span class="o">*</span> <span class="n">name</span> <span class="p">);</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="nf">cache_hit_</span><span class="p">(</span><span class="o">*</span><span class="n">cache_hit</span><span class="p">)(</span> <span class="kt">char</span> <span class="k">const</span> <span class="o">*</span> <span class="n">type</span><span class="p">,</span> <span class="kt">char</span> <span class="k">const</span> <span class="o">*</span> <span class="n">name</span> <span class="p">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As part of the implementation of the <code>object_cache</code> class, we call <a href="#emit"><code>emit</code></a> to signal the corresponding events as they occur:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="kt">void</span> <span class="n">object_cache</span><span class="o">::</span><span class="n">load_object</span><span class="p">(</span> <span class="kt">char</span> <span class="k">const</span> <span class="o">*</span> <span class="n">type</span><span class="p">,</span> <span class="kt">char</span> <span class="k">const</span> <span class="o">*</span> <span class="n">name</span> <span class="p">)</span> <span class="p">{</span>
+	<span class="p">....</span>
+	<span class="c1">//load the object</span>
+	<span class="p">....</span>
+	<span class="n">synapse</span><span class="o">::</span><span class="n">emit</span><span class="o">&lt;</span><span class="n">object_loaded</span><span class="o">&gt;</span><span class="p">(</span><span class="k">this</span><span class="p">,</span><span class="n">type</span><span class="p">,</span><span class="n">name</span><span class="p">);</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#emit"><code>emit</code></a></p>
+</div>
+<div class="paragraph">
+<p>During development, users of the <code>object_cache</code> class may connect the Synapse signals in order to analyze its efficiency, yet there is no need to compile calls to <code>emit</code> out of release builds; typically it is sufficient to not connect the signals. Synapse is carefully designed to support this use case: programs that do not call <a href="#connect"><code>connect</code></a> do not need to link with Synapse.</p>
+</div>
+<div class="paragraph">
+<p>On the other hand, because Synapse connections are dynamic, it is possible to connect the signals only when/if we need to monitor the <code>object_cache</code> operations. For example, they can be connected only while a diagnostic information window is active.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="Synapsifying_C_Callbacks">Synapsifying C Callbacks</h3>
+<div class="paragraph">
+<p>It is common for C APIs to use function pointers to implement callback systems. A typical example is the <code>SSL_set_info_callback</code> function from <a href="https://www.openssl.org/docs/manmaster/man3/SSL_set_info_callback.html">OpenSSL</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c"><span class="kt">void</span> <span class="nf">SSL_set_info_callback</span><span class="p">(</span><span class="n">SSL</span> <span class="o">*</span><span class="n">ssl</span><span class="p">,</span>
+		<span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">cb</span><span class="p">)</span> <span class="p">(</span><span class="k">const</span> <span class="n">SSL</span> <span class="o">*</span><span class="n">ssl</span><span class="p">,</span> <span class="kt">int</span> <span class="n">type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">val</span><span class="p">));</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Once the user calls <code>SSL_set_info_callback</code>, the C function pointed to by <code>cb</code> will be called with state information for <code>ssl</code> during connection setup and use.</p>
+</div>
+<div class="paragraph">
+<p>One difficulty with such low level C APIs is that often the user needs to pass to the callback function program-specific data. Sometimes such callback setters can be given an additional <code>void * user_data</code> argument which they retain and pass verbatim when they invoke the callback function, together with its other arguments. While this solution is rather cumbersome, it&#8217;s not even supported by <code>SSL_set_info_callback</code>.</p>
+</div>
+<div class="paragraph">
+<p>Synapse can be used with this, as well as any other C-style callback API, to install C&#43;&#43; function objects&#8201;&#8212;&#8201;including lambda functions&#8201;&#8212;&#8201;as callbacks. This enables additional objects needed by the callback to be captured as usual.</p>
+</div>
+<div class="paragraph">
+<p>To do this for the <code>SSL_set_info_callback</code> function, we first  define a Synapse signal with a matching signature:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">typedef</span> <span class="k">struct</span> <span class="nf">SSL_info_callback_</span><span class="p">(</span><span class="o">*</span><span class="n">SSL_info_callback</span><span class="p">)(</span> <span class="k">const</span> <span class="n">SSL</span> <span class="o">*</span><span class="n">ssl</span><span class="p">,</span> <span class="kt">int</span> <span class="n">type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">val</span> <span class="p">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Next, at global scope or during initialization, we install a handler for the <code>meta::connected&lt;SSL_info_callback&gt;</code> signal, which the <a href="#meta::connected"><code>meta::emitter</code></a> emits every time the user connects or disconnects the <code>SSL_info_callback</code> signal we defined:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="kt">void</span> <span class="nf">emit_fwd</span><span class="p">(</span> <span class="n">SSL</span> <span class="k">const</span> <span class="o">*</span> <span class="n">ssl</span><span class="p">,</span> <span class="kt">int</span> <span class="n">type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">val</span> <span class="p">);</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span> <span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="k">const</span> <span class="o">*</span> <span class="n">argv</span><span class="p">[</span> <span class="p">]</span> <span class="p">)</span> <span class="p">{</span>
+
+	<span class="n">connect</span><span class="o">&lt;</span><span class="n">meta</span><span class="o">::</span><span class="n">connected</span><span class="o">&lt;</span><span class="n">SSL_info_callback</span><span class="o">&gt;</span> <span class="o">&gt;</span><span class="p">(</span> <span class="n">meta</span><span class="o">::</span><span class="n">emitter</span><span class="p">(),</span>
+		<span class="p">[</span> <span class="p">](</span> <span class="n">connection</span> <span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="n">flags</span> <span class="p">)</span> <span class="p">{</span> <i class="conum" data-value="1"></i><b>(1)</b>
+
+			<span class="k">if</span><span class="p">(</span> <span class="n">flags</span> <span class="o">&amp;</span> <span class="n">meta</span><span class="o">::</span><span class="n">connect_flags</span><span class="o">::</span><span class="n">connecting</span> <span class="p">)</span> <span class="p">{</span> <i class="conum" data-value="2"></i><b>(2)</b>
+
+				<span class="k">if</span><span class="p">(</span> <span class="n">flags</span> <span class="o">&amp;</span> <span class="n">meta</span><span class="o">::</span><span class="n">connect_flags</span><span class="o">::</span><span class="n">first_for_this_emitter</span> <span class="p">)</span> <i class="conum" data-value="3"></i><b>(3)</b>
+					<span class="n">SSL_set_info_callback</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">emitter</span><span class="o">&lt;</span><span class="n">SSL</span><span class="o">&gt;</span><span class="p">().</span><span class="n">get</span><span class="p">(),</span><span class="o">&amp;</span><span class="n">emit_fwd</span><span class="p">);</span> <i class="conum" data-value="4"></i><b>(4)</b>
+
+			<span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <i class="conum" data-value="5"></i><b>(5)</b>
+
+				<span class="k">if</span><span class="p">(</span> <span class="n">flags</span> <span class="o">&amp;</span> <span class="n">meta</span><span class="o">::</span><span class="n">connect_flags</span><span class="o">::</span><span class="n">last_for_this_emitter</span> <span class="p">)</span> <i class="conum" data-value="6"></i><b>(6)</b>
+					<span class="k">if</span><span class="p">(</span> <span class="k">auto</span> <span class="n">ssl</span> <span class="o">=</span> <span class="n">c</span><span class="p">.</span><span class="n">emitter</span><span class="o">&lt;</span><span class="n">SSL</span><span class="o">&gt;</span><span class="p">()</span> <span class="p">)</span> <i class="conum" data-value="7"></i><b>(7)</b>
+						<span class="n">SSL_set_info_callback</span><span class="p">(</span><span class="n">ssl</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span><span class="mi">0</span><span class="p">);</span> <i class="conum" data-value="8"></i><b>(8)</b>
+
+			<span class="p">}</span>
+
+		<span class="p">}</span> <span class="p">);</span>
+
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">emit_fwd</span><span class="p">(</span> <span class="n">SSL</span> <span class="k">const</span> <span class="o">*</span> <span class="n">ssl</span><span class="p">,</span> <span class="kt">int</span> <span class="n">type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">val</span> <span class="p">)</span> <span class="p">{</span>
+	<span class="n">emit</span><span class="o">&lt;</span><span class="n">SSL_info_callback</span><span class="o">&gt;</span><span class="p">(</span><span class="n">ssl</span><span class="p">,</span><span class="n">ssl</span><span class="p">,</span><span class="n">type</span><span class="p">,</span><span class="n">val</span><span class="p">);</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#connect"><code>connect</code></a> | <code><a href="#meta::connected">meta::connected</a></code> | <a href="#emit"><code>emit</code></a></p>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>This lambda function is called every time the user connects or disconnects the <code>SSL_info_callback</code> Synapse signal.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <code>SSL_info_callback</code> signal is being <em>connected</em>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>This is the <em>first</em> time the <code>SSL_info_callback</code> signal is being connected for a particular <code>SSL</code> object (emitter).</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Call <a href="#connection::emitter"><code>connection::emitter</code></a> to get the emitter as a <code>shared_ptr&lt;SSL&gt;</code> (we know the emitter is of type <code>SSL *</code>), and then use the OpenSSL API to install a C callback <code>emit_fwd</code>, which uses <code><a href="#emit">emit</a>&lt;SSL_info_callback&gt;</code> to call all connected Synapse functions.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>The <code>SSL_info_callback</code> signal is being <em>disconnected</em>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>This is the <em>last</em> <code>SSL_info_callback</code> connection being destroyed for a particular <code>SSL</code> object (emitter).</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Check if the SSL object is still accessible (it may have been destroyed already).</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>Uninstall the <code>emit_fwd</code> callback.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Once the above handler for the <code>meta::connected&lt;SSL_info_callback&gt;</code> signal is installed, we can simply use <a href="#connect"><code>connect</code></a> to install a C&#43;&#43; lambda handler for the <code>SSL_info_callback</code> signal we defined:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">SSL</span><span class="o">&gt;</span> <span class="n">ssl</span><span class="p">(</span><span class="n">SSL_new</span><span class="p">(</span><span class="n">ctx</span><span class="p">),</span><span class="o">&amp;</span><span class="n">SSL_free</span><span class="p">);</span>
+
+<span class="n">connect</span><span class="o">&lt;</span><span class="n">SSL_info_callback</span><span class="o">&gt;</span><span class="p">(</span> <span class="n">ssl</span><span class="p">,</span>
+	<span class="p">[</span> <span class="p">](</span> <span class="k">const</span> <span class="n">SSL</span> <span class="o">*</span><span class="n">ssl</span><span class="p">,</span> <span class="kt">int</span> <span class="n">type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">val</span> <span class="p">)</span> <span class="k">noexcept</span> <span class="p">{</span>
+
+	<span class="p">}</span> <span class="p">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#connect"><code>connect</code></a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_reporting_exceptions_from_noexcept_signal_handlers">Reporting Exceptions from <code>noexcept</code> Signal Handlers</h3>
+<div class="paragraph">
+<p>Sometimes connected functions are not permitted to throw exceptions&#8201;&#8212;&#8201;this is usually the case when the callback originates in C code. With Synapse, such exceptions can be reported safely to a C&#43;&#43; context that can store them for later processing.</p>
+</div>
+<div class="paragraph">
+<p>First, we define a Synapse signal we will use to report exceptions:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">typedef</span> <span class="k">struct</span> <span class="nf">exception_caught_</span><span class="p">(</span><span class="o">*</span><span class="n">exception_caught</span><span class="p">)();</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we take a handler of the <code>SSL_info_callback</code> (see above) as an example, we could modify it like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">SSL</span><span class="o">&gt;</span> <span class="n">ssl</span><span class="p">(</span><span class="n">SSL_new</span><span class="p">(</span><span class="n">ctx</span><span class="p">),</span><span class="o">&amp;</span><span class="n">SSL_free</span><span class="p">);</span>
+
+<span class="n">connect</span><span class="o">&lt;</span><span class="n">SSL_info_callback</span><span class="o">&gt;</span><span class="p">(</span> <span class="n">ssl</span><span class="p">,</span>
+	<span class="p">[</span> <span class="p">](</span> <span class="k">const</span> <span class="n">SSL</span> <span class="o">*</span><span class="n">ssl</span><span class="p">,</span> <span class="kt">int</span> <span class="n">type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">val</span> <span class="p">)</span> <span class="k">noexcept</span> <span class="p">{</span>
+		<span class="k">try</span> <span class="p">{</span>
+
+			<span class="c1">//code which may throw</span>
+
+		<span class="p">}</span> <span class="k">catch</span><span class="p">(...)</span> <span class="p">{</span>
+
+			<span class="kt">int</span> <span class="n">n</span><span class="o">=</span><span class="n">synapse</span><span class="o">::</span><span class="n">emit</span><span class="o">&lt;</span><span class="n">exception_caught</span><span class="o">&gt;</span><span class="p">(</span><span class="n">ssl</span><span class="p">);</span> <i class="conum" data-value="1"></i><b>(1)</b>
+			<span class="n">assert</span><span class="p">(</span><span class="n">n</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">);</span> <i class="conum" data-value="2"></i><b>(2)</b>
+
+		<span class="p">}</span>
+	<span class="p">}</span> <span class="p">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#connect"><code>connect</code></a> | <a href="#emit"><code>emit</code></a></p>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><a href="#emit"><code>emit</code></a> the <code>exception_caught</code> Synapse signal from the <code>ssl</code> object. Handlers of this signal must be able to deal with any exception, for example they can use <code>std::current_exception</code> to capture the exception and rethrow it once control has exited the critical <code>noexcept</code> path.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><a href="#emit"><code>emit</code></a> returns the number of connected functions it called, so this <code>assert</code> ensures that the exception won&#8217;t get ignored.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_using_synapse_with_qt_to_avoid_mocing">Using Synapse with Qt to Avoid MOCing</h3>
+<div class="paragraph">
+<p>The signal programming API that is used in <a href="https://www.qt.io/">Qt</a> is intrusive: signals must be specified in the definition of each type. For this reason, it is not possible to add signals to existing Qt types. When this is needed, users are directed to define the new signals in their own class which derives from the Qt type they wanted to add signal(s) to.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://wiki.qt.io/Qt_for_Beginners#Creating_custom_signals_and_slots">There is a special example that illustrates this approach</a>. Unfortunately, this requires the use of the proprietary Qt Meta Object Compiler which the author finds cumbersome. Below is the same example modified to use Synapse signals, which requires no MOCing (the changes made to the original program are marked with numbers):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="cp">#include &lt;boost/synapse/connect.hpp&gt;
+#define QT_NO_EMIT //Suppress the #define emit from Qt since it clashes with synapse::emit.
+#include &lt;QtWidgets/QApplication&gt;
+#include &lt;QtWidgets/QPushButton&gt;
+</span>
+<span class="k">namespace</span> <span class="n">synapse</span><span class="o">=</span><span class="n">boost</span><span class="o">::</span><span class="n">synapse</span><span class="p">;</span>
+
+<span class="k">class</span> <span class="nc">Window</span> <span class="o">:</span> <span class="k">public</span> <span class="n">QWidget</span>
+<span class="p">{</span>
+<span class="nl">public:</span>
+	<span class="k">explicit</span> <span class="n">Window</span><span class="p">(</span><span class="n">QWidget</span> <span class="o">*</span><span class="n">parent</span> <span class="o">=</span> <span class="mi">0</span><span class="p">);</span>
+	<span class="nl">signals:</span> <span class="c1">//Not needed with Synapse but okay</span>
+	<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">counterReached_</span><span class="p">(</span><span class="o">*</span><span class="n">counterReached</span><span class="p">)();</span> <i class="conum" data-value="1"></i><b>(1)</b>
+<span class="k">private</span> <span class="n">slots</span><span class="o">:</span> <span class="c1">//&lt;-- Not needed with Synapse but okay</span>
+	<span class="kt">void</span> <span class="n">slotButtonClicked</span><span class="p">(</span><span class="kt">bool</span> <span class="n">checked</span><span class="p">);</span>
+<span class="nl">private:</span>
+	<span class="kt">int</span> <span class="n">m_counter</span><span class="p">;</span>
+	<span class="n">QPushButton</span> <span class="o">*</span><span class="n">m_button</span><span class="p">;</span>
+	<span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">synapse</span><span class="o">::</span><span class="n">connection</span><span class="o">&gt;</span> <span class="n">c_</span><span class="p">;</span> <i class="conum" data-value="2"></i><b>(2)</b>
+<span class="p">};</span>
+
+<span class="n">Window</span><span class="o">::</span><span class="n">Window</span><span class="p">(</span><span class="n">QWidget</span> <span class="o">*</span><span class="n">parent</span><span class="p">)</span> <span class="o">:</span>
+	<span class="n">QWidget</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+<span class="p">{</span>
+	 <span class="c1">// Set size of the window</span>
+	 <span class="n">setFixedSize</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">50</span><span class="p">);</span>
+
+	<span class="c1">// Create and position the button</span>
+	<span class="n">m_button</span> <span class="o">=</span> <span class="k">new</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s">"Hello World"</span><span class="p">,</span> <span class="k">this</span><span class="p">);</span>
+	<span class="n">m_button</span><span class="o">-&gt;</span><span class="n">setGeometry</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">30</span><span class="p">);</span>
+	<span class="n">m_button</span><span class="o">-&gt;</span><span class="n">setCheckable</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+
+	<span class="c1">// Set the counter to 0</span>
+	<span class="n">m_counter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+	<span class="n">connect</span><span class="p">(</span><span class="n">m_button</span><span class="p">,</span><span class="o">&amp;</span><span class="n">QPushButton</span><span class="o">::</span><span class="n">clicked</span><span class="p">,</span>
+		<span class="p">[</span><span class="k">this</span><span class="p">](</span> <span class="kt">bool</span> <span class="n">checked</span> <span class="p">)</span>
+		<span class="p">{</span>
+			<span class="n">slotButtonClicked</span><span class="p">(</span><span class="n">checked</span><span class="p">);</span>
+		<span class="p">}</span> <span class="p">);</span> <i class="conum" data-value="3"></i><b>(3)</b>
+
+	<span class="n">c_</span><span class="o">=</span><span class="n">synapse</span><span class="o">::</span><span class="n">connect</span><span class="o">&lt;</span><span class="n">counterReached</span><span class="o">&gt;</span><span class="p">(</span><span class="k">this</span><span class="p">,</span><span class="o">&amp;</span><span class="n">QApplication</span><span class="o">::</span><span class="n">quit</span><span class="p">);</span> <i class="conum" data-value="4"></i><b>(4)</b>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="n">Window</span><span class="o">::</span><span class="n">slotButtonClicked</span><span class="p">(</span><span class="kt">bool</span> <span class="n">checked</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">checked</span><span class="p">)</span>
+		<span class="n">m_button</span><span class="o">-&gt;</span><span class="n">setText</span><span class="p">(</span><span class="s">"Checked"</span><span class="p">);</span>
+	<span class="k">else</span>
+		<span class="n">m_button</span><span class="o">-&gt;</span><span class="n">setText</span><span class="p">(</span><span class="s">"Hello World"</span><span class="p">);</span>
+	<span class="n">m_counter</span> <span class="o">++</span><span class="p">;</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">m_counter</span> <span class="o">==</span> <span class="mi">10</span><span class="p">)</span>
+		<span class="n">synapse</span><span class="o">::</span><span class="n">emit</span><span class="o">&lt;</span><span class="n">counterReached</span><span class="o">&gt;</span><span class="p">(</span><span class="k">this</span><span class="p">);</span> <i class="conum" data-value="5"></i><b>(5)</b>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="n">QApplication</span> <span class="n">app</span> <span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">);</span>
+
+	<span class="n">Window</span> <span class="n">window</span><span class="p">;</span>
+	<span class="n">window</span><span class="p">.</span><span class="n">show</span><span class="p">();</span>
+
+	<span class="k">return</span> <span class="n">app</span><span class="p">.</span><span class="n">exec</span><span class="p">();</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#connection"><code>connection</code></a> | <a href="#connect"><code>connect</code></a> |  <a href="#emit"><code>emit</code></a></p>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Was: <code>void counterReached();</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Needed to keep the Synapse connection alive.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td><code>Was: connect(m_button, SIGNAL (clicked(bool)), this, SLOT (slotButtonClicked(bool)));</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Was: <code>connect(this, SIGNAL (counterReached()), QApplication::instance(), SLOT (quit()));</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Was: <code>emit counterReached();</code></td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_case_study_synapsifying_glfw">Case Study: Synapsifying GLFW</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Synapse integrates well with some C event handling APIs. As an example, let&#8217;s consider <a href="http://www.glfw.org/">GLFW</a>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+GLFW is an Open Source, multi-platform library for OpenGL, OpenGL ES and Vulkan development on the desktop. It provides a simple API for creating windows, contexts and surfaces, <strong>receiving input and events</strong>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Here is the function provided by GLFW for installing a key event handler for a window:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c"><span class="n">GLFWkeyfun</span> <span class="nf">glfwSetKeyCallback</span><span class="p">(</span> <span class="n">GLFWwindow</span> <span class="o">*</span><span class="n">window</span><span class="p">,</span> <span class="n">GLFWkeyfun</span> <span class="n">cbfun</span> <span class="p">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>where <code>GLFWkeyfun</code> is declared as:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c"><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">GLFWkeyfun</span><span class="p">)(</span> <span class="n">GLFWwindow</span> <span class="o">*</span> <span class="n">window</span><span class="p">,</span> <span class="kt">int</span> <span class="n">key</span><span class="p">,</span> <span class="kt">int</span> <span class="n">scancode</span><span class="p">,</span> <span class="kt">int</span> <span class="n">action</span><span class="p">,</span> <span class="kt">int</span> <span class="n">mods</span> <span class="p">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>With Synapse, we can define signals to represent this as well as all other GLFW <a href="http://www.glfw.org/docs/latest/input_guide.html">input</a> and <a href="http://www.glfw.org/docs/latest/window_guide.html#window_properties">window state</a> events:</p>
+</div>
+<div class="listingblock">
+<div class="title">glfw_signals.hpp:</div>
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">extern</span> <span class="s">"C"</span> <span class="p">{</span> <span class="k">typedef</span> <span class="k">struct</span> <span class="nc">GLFWwindow</span> <span class="n">GLFWwindow</span><span class="p">;</span> <span class="p">}</span>
+
+<span class="k">namespace</span> <span class="n">glfw_signals</span>
+<span class="p">{</span>
+	<span class="c1">//User input callbacks</span>
+	<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">Key_</span><span class="p">(</span><span class="o">*</span><span class="n">Key</span><span class="p">)(</span> <span class="n">GLFWwindow</span> <span class="o">*</span><span class="p">,</span> <span class="kt">int</span> <span class="n">key</span><span class="p">,</span> <span class="kt">int</span> <span class="n">scancode</span><span class="p">,</span> <span class="kt">int</span> <span class="n">action</span><span class="p">,</span> <span class="kt">int</span> <span class="n">mods</span> <span class="p">);</span>
+	<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">Char_</span><span class="p">(</span><span class="o">*</span><span class="n">Char</span><span class="p">)(</span> <span class="n">GLFWwindow</span> <span class="o">*</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">codepoint</span> <span class="p">);</span>
+	<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">CharMods_</span><span class="p">(</span><span class="o">*</span><span class="n">CharMods</span><span class="p">)(</span> <span class="n">GLFWwindow</span> <span class="o">*</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">codepoint</span><span class="p">,</span> <span class="kt">int</span> <span class="n">mods</span> <span class="p">);</span>
+	<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">CursorPos_</span> <span class="p">(</span><span class="o">*</span><span class="n">CursorPos</span><span class="p">)(</span> <span class="n">GLFWwindow</span> <span class="o">*</span><span class="p">,</span> <span class="kt">double</span> <span class="n">xpos</span><span class="p">,</span> <span class="kt">double</span> <span class="n">ypos</span> <span class="p">);</span>
+	<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">CursorEnter_</span><span class="p">(</span><span class="o">*</span><span class="n">CursorEnter</span><span class="p">)(</span> <span class="n">GLFWwindow</span> <span class="o">*</span><span class="p">,</span> <span class="kt">int</span> <span class="n">entered</span> <span class="p">);</span>
+	<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">MouseButton_</span><span class="p">(</span><span class="o">*</span><span class="n">MouseButton</span><span class="p">)(</span> <span class="n">GLFWwindow</span> <span class="o">*</span><span class="p">,</span> <span class="kt">int</span> <span class="n">button</span><span class="p">,</span> <span class="kt">int</span> <span class="n">action</span><span class="p">,</span> <span class="kt">int</span> <span class="n">mods</span> <span class="p">);</span>
+	<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">Scroll_</span><span class="p">(</span><span class="o">*</span><span class="n">Scroll</span><span class="p">)(</span> <span class="n">GLFWwindow</span> <span class="o">*</span><span class="p">,</span> <span class="kt">double</span> <span class="n">xoffset</span><span class="p">,</span> <span class="kt">double</span> <span class="n">yoffset</span> <span class="p">);</span>
+	<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">Drop_</span><span class="p">(</span><span class="o">*</span><span class="n">Drop</span><span class="p">)(</span> <span class="n">GLFWwindow</span> <span class="o">*</span><span class="p">,</span> <span class="kt">int</span> <span class="n">count</span><span class="p">,</span> <span class="kt">char</span> <span class="k">const</span> <span class="o">*</span> <span class="o">*</span> <span class="n">paths</span> <span class="p">);</span>
+
+	<span class="c1">//Window state callbacks</span>
+	<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">WindowClose_</span><span class="p">(</span><span class="o">*</span><span class="n">WindowClose</span><span class="p">)(</span> <span class="n">GLFWwindow</span> <span class="o">*</span> <span class="p">);</span>
+	<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">WindowSize_</span><span class="p">(</span><span class="o">*</span><span class="n">WindowSize</span><span class="p">)(</span> <span class="n">GLFWwindow</span> <span class="o">*</span><span class="p">,</span> <span class="kt">int</span> <span class="n">width</span><span class="p">,</span> <span class="kt">int</span> <span class="n">height</span> <span class="p">);</span>
+	<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">FramebufferSize_</span><span class="p">(</span><span class="o">*</span><span class="n">FramebufferSize</span><span class="p">)(</span> <span class="n">GLFWwindow</span> <span class="o">*</span><span class="p">,</span> <span class="kt">int</span> <span class="n">width</span><span class="p">,</span> <span class="kt">int</span> <span class="n">height</span> <span class="p">);</span>
+	<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">WindowPos_</span><span class="p">(</span><span class="o">*</span><span class="n">WindowPos</span><span class="p">)(</span> <span class="n">GLFWwindow</span> <span class="o">*</span><span class="p">,</span> <span class="kt">int</span> <span class="n">xpos</span><span class="p">,</span> <span class="kt">int</span> <span class="n">ypos</span> <span class="p">);</span>
+	<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">WindowIconify_</span><span class="p">(</span><span class="o">*</span><span class="n">WindowIconify</span><span class="p">)(</span> <span class="n">GLFWwindow</span> <span class="o">*</span><span class="p">,</span> <span class="kt">int</span> <span class="n">iconified</span> <span class="p">);</span>
+	<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">WindowFocus_</span><span class="p">(</span><span class="o">*</span><span class="n">WindowFocus</span><span class="p">)(</span> <span class="n">GLFWwindow</span> <span class="o">*</span><span class="p">,</span> <span class="kt">int</span> <span class="n">focused</span> <span class="p">);</span>
+	<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">WindowRefresh_</span><span class="p">(</span><span class="o">*</span><span class="n">WindowRefresh</span><span class="p">)(</span> <span class="n">GLFWwindow</span> <span class="o">*</span> <span class="p">);</span>
+
+	<span class="c1">//This is emitted from the GLFWwindow object to report exceptions from connected signal handlers</span>
+	<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">exception_caught_</span><span class="p">(</span><span class="o">*</span><span class="n">exception_caught</span><span class="p">)(</span> <span class="n">GLFWwindow</span> <span class="o">*</span> <span class="p">);</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Next, in a different header we install <code>meta::connected</code> signal handlers for the signals above:</p>
+</div>
+<div class="listingblock">
+<div class="title">glfw_synapsify.hpp:</div>
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="cp">#include "glfw_signals.hpp"
+#include &lt;boost/synapse/connect.hpp&gt;
+#include &lt;boost/synapse/connection.hpp&gt;
+#include "GLFW/glfw3.h"
+</span>
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">Signal</span><span class="p">&gt;</span>
+<span class="k">class</span> <span class="nc">synapsifier</span><span class="p">;</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">R</span><span class="p">,</span> <span class="k">class</span><span class="o">...</span> <span class="nc">A</span><span class="p">&gt;</span>
+<span class="k">class</span> <span class="nc">synapsifier</span><span class="o">&lt;</span><span class="n">R</span><span class="p">(</span><span class="o">*</span><span class="p">)(</span><span class="n">GLFWwindow</span> <span class="o">*</span><span class="p">,</span><span class="n">A</span><span class="p">...)</span><span class="o">&gt;</span>
+<span class="p">{</span>
+	<span class="k">typedef</span> <span class="n">R</span><span class="p">(</span><span class="o">*</span><span class="n">Signal</span><span class="p">)(</span><span class="n">GLFWwindow</span> <span class="o">*</span><span class="p">,</span><span class="n">A</span><span class="p">...);</span>
+	<span class="k">typedef</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">GLFWfun</span><span class="p">)(</span> <span class="n">GLFWwindow</span> <span class="o">*</span><span class="p">,</span><span class="n">A</span><span class="p">...</span> <span class="p">);</span>
+
+	<span class="k">static</span> <span class="n">GLFWfun</span> <span class="n">prev_</span><span class="p">;</span>
+
+	<span class="c1">//This is the handler that GLFW calls. It emits the corresponding Synapse</span>
+	<span class="c1">//signal and calls the previous GLFW handler for the same event, if any.</span>
+	<span class="k">static</span> <span class="kt">void</span> <span class="n">handler</span><span class="p">(</span> <span class="n">GLFWwindow</span> <span class="o">*</span> <span class="n">w</span><span class="p">,</span> <span class="n">A</span><span class="p">...</span> <span class="n">a</span> <span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">using</span> <span class="k">namespace</span> <span class="n">boost</span><span class="o">::</span><span class="n">synapse</span><span class="p">;</span>
+		<span class="k">try</span>
+		<span class="p">{</span>
+			<span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="n">emit</span><span class="o">&lt;</span><span class="n">Signal</span><span class="o">&gt;</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">w</span><span class="p">,</span><span class="n">a</span><span class="p">...);</span>
+		<span class="p">}</span>
+		<span class="k">catch</span><span class="p">(...)</span>
+		<span class="p">{</span>
+			<span class="c1">//We can't let exceptions propagate up into C code, so the window</span>
+			<span class="c1">//emits the exception_caught signal, which (if exceptions are</span>
+			<span class="c1">//expected) should be connected to capture and handle the current</span>
+			<span class="c1">//exception.</span>
+			<span class="kt">bool</span> <span class="n">handled</span> <span class="o">=</span> <span class="n">emit</span><span class="o">&lt;</span><span class="n">glfw_signals</span><span class="o">::</span><span class="n">exception_caught</span><span class="o">&gt;</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">w</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">;</span>
+			<span class="n">assert</span><span class="p">(</span><span class="n">handled</span><span class="p">);</span>
+		<span class="p">}</span>
+		<span class="k">if</span><span class="p">(</span> <span class="n">prev_</span> <span class="p">)</span>
+			<span class="n">prev_</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">a</span><span class="p">...);</span>
+	<span class="p">}</span>
+
+	<span class="nl">public:</span>
+
+	<span class="k">explicit</span> <span class="n">synapsifier</span><span class="p">(</span> <span class="n">GLFWfun</span> <span class="p">(</span><span class="o">*</span><span class="n">setter</span><span class="p">)(</span><span class="n">GLFWwindow</span> <span class="o">*</span><span class="p">,</span><span class="n">GLFWfun</span><span class="p">)</span> <span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">using</span> <span class="k">namespace</span> <span class="n">boost</span><span class="o">::</span><span class="n">synapse</span><span class="p">;</span>
+
+		<span class="c1">//Here we connect the Synapse meta::connected&lt;Signal&gt; signal. This</span>
+		<span class="c1">//signal is emitted by the meta::emitter() when the Signal is being</span>
+		<span class="c1">//connected (the user calls synapse::connect&lt;Signal&gt;) or disconnected</span>
+		<span class="c1">//(when the connection expires). The emitter pointer passed to connect</span>
+		<span class="c1">//(which in this case is of type GLFWwindow) is stored in the</span>
+		<span class="c1">//synapse::connection object passed to the lambda below, and can be</span>
+		<span class="c1">//accessed by the connection::emitter member function template.</span>
+		<span class="n">connect</span><span class="o">&lt;</span><span class="n">meta</span><span class="o">::</span><span class="n">connected</span><span class="o">&lt;</span><span class="n">Signal</span><span class="o">&gt;</span> <span class="o">&gt;</span><span class="p">(</span> <span class="n">meta</span><span class="o">::</span><span class="n">emitter</span><span class="p">(),</span>
+			<span class="p">[</span><span class="n">setter</span><span class="p">](</span> <span class="n">connection</span> <span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="n">flags</span> <span class="p">)</span>
+			<span class="p">{</span>
+				<span class="k">if</span><span class="p">(</span> <span class="n">flags</span><span class="o">&amp;</span><span class="n">meta</span><span class="o">::</span><span class="n">connect_flags</span><span class="o">::</span><span class="n">connecting</span> <span class="p">)</span>
+				<span class="p">{</span>
+					<span class="c1">//When the Signal is being connected for the first time,</span>
+					<span class="c1">//use the GLFW API to install our handler.</span>
+					<span class="k">if</span><span class="p">(</span> <span class="n">flags</span><span class="o">&amp;</span><span class="n">meta</span><span class="o">::</span><span class="n">connect_flags</span><span class="o">::</span><span class="n">first_for_this_emitter</span> <span class="p">)</span>
+						<span class="n">prev_</span><span class="o">=</span><span class="n">setter</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">emitter</span><span class="o">&lt;</span><span class="n">GLFWwindow</span><span class="o">&gt;</span><span class="p">().</span><span class="n">get</span><span class="p">(),</span><span class="o">&amp;</span><span class="n">handler</span><span class="p">);</span>
+				<span class="p">}</span>
+				<span class="k">else</span>
+				<span class="p">{</span>
+					<span class="c1">//When the last Signal connection expires, use the GLFW API</span>
+					<span class="c1">//to uninstall our handler and restore the previous handler.</span>
+					<span class="k">if</span><span class="p">(</span> <span class="n">flags</span><span class="o">&amp;</span><span class="n">meta</span><span class="o">::</span><span class="n">connect_flags</span><span class="o">::</span><span class="n">last_for_this_emitter</span> <span class="p">)</span>
+					<span class="p">{</span>
+						<span class="n">GLFWfun</span> <span class="n">p</span><span class="o">=</span><span class="n">setter</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">emitter</span><span class="o">&lt;</span><span class="n">GLFWwindow</span><span class="o">&gt;</span><span class="p">().</span><span class="n">get</span><span class="p">(),</span><span class="n">prev_</span><span class="p">);</span>
+						<span class="n">assert</span><span class="p">(</span><span class="n">p</span><span class="o">==&amp;</span><span class="n">handler</span><span class="p">);</span>
+					<span class="p">}</span>
+				<span class="p">}</span>
+			<span class="p">}</span> <span class="p">);</span>
+	<span class="p">}</span>
+<span class="p">};</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">R</span><span class="p">,</span> <span class="k">class</span><span class="o">...</span> <span class="nc">A</span><span class="p">&gt;</span>
+<span class="k">typename</span> <span class="n">synapsifier</span><span class="o">&lt;</span><span class="n">R</span><span class="p">(</span><span class="o">*</span><span class="p">)(</span><span class="n">GLFWwindow</span> <span class="o">*</span><span class="p">,</span><span class="n">A</span><span class="p">...)</span><span class="o">&gt;::</span><span class="n">GLFWfun</span> <span class="n">synapsifier</span><span class="o">&lt;</span><span class="n">R</span><span class="p">(</span><span class="o">*</span><span class="p">)(</span><span class="n">GLFWwindow</span> <span class="o">*</span><span class="p">,</span><span class="n">A</span><span class="p">...)</span><span class="o">&gt;::</span><span class="n">prev_</span><span class="p">;</span>
+
+<span class="c1">//Install all the synapse::meta::connected&lt;....&gt; handlers</span>
+<span class="n">synapsifier</span><span class="o">&lt;</span><span class="n">glfw_signals</span><span class="o">::</span><span class="n">WindowClose</span><span class="o">&gt;</span> <span class="n">s1</span><span class="p">(</span><span class="o">&amp;</span><span class="n">glfwSetWindowCloseCallback</span><span class="p">);</span>
+<span class="n">synapsifier</span><span class="o">&lt;</span><span class="n">glfw_signals</span><span class="o">::</span><span class="n">WindowSize</span><span class="o">&gt;</span> <span class="n">s2</span><span class="p">(</span><span class="o">&amp;</span><span class="n">glfwSetWindowSizeCallback</span><span class="p">);</span>
+<span class="n">synapsifier</span><span class="o">&lt;</span><span class="n">glfw_signals</span><span class="o">::</span><span class="n">FramebufferSize</span><span class="o">&gt;</span> <span class="n">s3</span><span class="p">(</span><span class="o">&amp;</span><span class="n">glfwSetFramebufferSizeCallback</span><span class="p">);</span>
+<span class="n">synapsifier</span><span class="o">&lt;</span><span class="n">glfw_signals</span><span class="o">::</span><span class="n">WindowPos</span><span class="o">&gt;</span> <span class="n">s4</span><span class="p">(</span><span class="o">&amp;</span><span class="n">glfwSetWindowPosCallback</span><span class="p">);</span>
+<span class="n">synapsifier</span><span class="o">&lt;</span><span class="n">glfw_signals</span><span class="o">::</span><span class="n">WindowIconify</span><span class="o">&gt;</span> <span class="n">s5</span><span class="p">(</span><span class="o">&amp;</span><span class="n">glfwSetWindowIconifyCallback</span><span class="p">);</span>
+<span class="n">synapsifier</span><span class="o">&lt;</span><span class="n">glfw_signals</span><span class="o">::</span><span class="n">WindowFocus</span><span class="o">&gt;</span> <span class="n">s6</span><span class="p">(</span><span class="o">&amp;</span><span class="n">glfwSetWindowFocusCallback</span><span class="p">);</span>
+<span class="n">synapsifier</span><span class="o">&lt;</span><span class="n">glfw_signals</span><span class="o">::</span><span class="n">WindowRefresh</span><span class="o">&gt;</span> <span class="n">s7</span><span class="p">(</span><span class="o">&amp;</span><span class="n">glfwSetWindowRefreshCallback</span><span class="p">);</span>
+<span class="n">synapsifier</span><span class="o">&lt;</span><span class="n">glfw_signals</span><span class="o">::</span><span class="n">Key</span><span class="o">&gt;</span> <span class="n">s8</span><span class="p">(</span><span class="o">&amp;</span><span class="n">glfwSetKeyCallback</span><span class="p">);</span>
+<span class="n">synapsifier</span><span class="o">&lt;</span><span class="n">glfw_signals</span><span class="o">::</span><span class="n">Char</span><span class="o">&gt;</span> <span class="n">s9</span><span class="p">(</span><span class="o">&amp;</span><span class="n">glfwSetCharCallback</span><span class="p">);</span>
+<span class="n">synapsifier</span><span class="o">&lt;</span><span class="n">glfw_signals</span><span class="o">::</span><span class="n">CharMods</span><span class="o">&gt;</span> <span class="n">s10</span><span class="p">(</span><span class="o">&amp;</span><span class="n">glfwSetCharModsCallback</span><span class="p">);</span>
+<span class="n">synapsifier</span><span class="o">&lt;</span><span class="n">glfw_signals</span><span class="o">::</span><span class="n">CursorPos</span><span class="o">&gt;</span> <span class="n">s11</span><span class="p">(</span><span class="o">&amp;</span><span class="n">glfwSetCursorPosCallback</span><span class="p">);</span>
+<span class="n">synapsifier</span><span class="o">&lt;</span><span class="n">glfw_signals</span><span class="o">::</span><span class="n">CursorEnter</span><span class="o">&gt;</span> <span class="n">s12</span><span class="p">(</span><span class="o">&amp;</span><span class="n">glfwSetCursorEnterCallback</span><span class="p">);</span>
+<span class="n">synapsifier</span><span class="o">&lt;</span><span class="n">glfw_signals</span><span class="o">::</span><span class="n">MouseButton</span><span class="o">&gt;</span> <span class="n">s13</span><span class="p">(</span><span class="o">&amp;</span><span class="n">glfwSetMouseButtonCallback</span><span class="p">);</span>
+<span class="n">synapsifier</span><span class="o">&lt;</span><span class="n">glfw_signals</span><span class="o">::</span><span class="n">Scroll</span><span class="o">&gt;</span> <span class="n">s14</span><span class="p">(</span><span class="o">&amp;</span><span class="n">glfwSetScrollCallback</span><span class="p">);</span>
+<span class="n">synapsifier</span><span class="o">&lt;</span><span class="n">glfw_signals</span><span class="o">::</span><span class="n">Drop</span><span class="o">&gt;</span> <span class="n">s15</span><span class="p">(</span><span class="o">&amp;</span><span class="n">glfwSetDropCallback</span><span class="p">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#emit"><code>emit</code></a> | <a href="#connect"><code>connect</code></a> | <code><a href="#meta::connected">meta::connected</a></code></p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+The above <code>glfw_synapsify.hpp</code> should be included in exactly one compilation unit of a GLFW program, for example the main compilation unit. This will automatically install all <code>meta::connected</code> signal handlers.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>With this, we simply use <a href="#connect"><code>connect</code></a> to hook up any <code>GLFWwindow</code> event. For example, if we have a <code>GLFWwindow</code> pointer <code>w</code>, we can install a key event handler like so:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="k">auto</span> <span class="n">c</span> <span class="o">=</span> <span class="n">synapse</span><span class="o">::</span><span class="n">connect</span><span class="o">&lt;</span><span class="n">glfw_signals</span><span class="o">::</span><span class="n">key</span><span class="o">&gt;</span><span class="p">(</span><span class="n">w</span><span class="p">,</span>
+	<span class="p">[</span> <span class="p">](</span> <span class="n">GLFWwindow</span> <span class="o">*</span> <span class="n">w</span><span class="p">,</span> <span class="kt">int</span> <span class="n">key</span><span class="p">,</span> <span class="kt">int</span> <span class="n">scancode</span><span class="p">,</span> <span class="kt">int</span> <span class="n">action</span><span class="p">,</span> <span class="kt">int</span> <span class="n">mods</span> <span class="p">)</span>
+	<span class="p">{</span>
+		<span class="p">....</span>
+	<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#connect"><code>connect</code></a></p>
+</div>
+<div class="paragraph">
+<p>Finally, this is the example from the GLFW <a href="http://www.glfw.org/docs/latest/quick.html">Getting started page</a>, modified to use the "synapsify" framework above (changes to the original example are marked with numbers):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="c++"><span class="c1">//========================================================================</span>
+<span class="c1">// Simple GLFW example</span>
+<span class="c1">// Copyright (c) Camilla Löwy &lt;elmindreda@glfw.org&gt;</span>
+<span class="c1">//</span>
+<span class="c1">// This software is provided 'as-is', without any express or implied</span>
+<span class="c1">// warranty. In no event will the authors be held liable for any damages</span>
+<span class="c1">// arising from the use of this software.</span>
+<span class="c1">//</span>
+<span class="c1">// Permission is granted to anyone to use this software for any purpose,</span>
+<span class="c1">// including commercial applications, and to alter it and redistribute it</span>
+<span class="c1">// freely, subject to the following restrictions:</span>
+<span class="c1">//</span>
+<span class="c1">// 1. The origin of this software must not be misrepresented; you must not</span>
+<span class="c1">//    claim that you wrote the original software. If you use this software</span>
+<span class="c1">//    in a product, an acknowledgment in the product documentation would</span>
+<span class="c1">//    be appreciated but is not required.</span>
+<span class="c1">//</span>
+<span class="c1">// 2. Altered source versions must be plainly marked as such, and must not</span>
+<span class="c1">//    be misrepresented as being the original software.</span>
+<span class="c1">//</span>
+<span class="c1">// 3. This notice may not be removed or altered from any source</span>
+<span class="c1">//    distribution.</span>
+<span class="c1">//</span>
+<span class="c1">//========================================================================</span>
+
+<span class="cp">#include "glfw_synapsify.hpp" <i class="conum" data-value="1"></i><b>(1)</b>
+</span><span class="k">namespace</span> <span class="n">synapse</span> <span class="o">=</span> <span class="n">boost</span><span class="o">::</span><span class="n">synapse</span><span class="p">;</span>
+
+<span class="cp">#include &lt;glad/glad.h&gt;
+#include &lt;GLFW/glfw3.h&gt;
+</span>
+<span class="cp">#include "linmath.h"
+</span>
+<span class="cp">#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+</span>
+<span class="k">static</span> <span class="k">const</span> <span class="k">struct</span>
+<span class="p">{</span>
+	<span class="kt">float</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">;</span>
+	<span class="kt">float</span> <span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">vertices</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span>
+<span class="p">{</span>
+	<span class="p">{</span> <span class="o">-</span><span class="mf">0.6</span><span class="n">f</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4</span><span class="n">f</span><span class="p">,</span> <span class="mf">1.</span><span class="n">f</span><span class="p">,</span> <span class="mf">0.</span><span class="n">f</span><span class="p">,</span> <span class="mf">0.</span><span class="n">f</span> <span class="p">},</span>
+	<span class="p">{</span>  <span class="mf">0.6</span><span class="n">f</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4</span><span class="n">f</span><span class="p">,</span> <span class="mf">0.</span><span class="n">f</span><span class="p">,</span> <span class="mf">1.</span><span class="n">f</span><span class="p">,</span> <span class="mf">0.</span><span class="n">f</span> <span class="p">},</span>
+	<span class="p">{</span>   <span class="mf">0.</span><span class="n">f</span><span class="p">,</span>  <span class="mf">0.6</span><span class="n">f</span><span class="p">,</span> <span class="mf">0.</span><span class="n">f</span><span class="p">,</span> <span class="mf">0.</span><span class="n">f</span><span class="p">,</span> <span class="mf">1.</span><span class="n">f</span> <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="k">static</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">vertex_shader_text</span> <span class="o">=</span>
+<span class="s">"#version 110</span><span class="se">\n</span><span class="s">"</span>
+<span class="s">"uniform mat4 MVP;</span><span class="se">\n</span><span class="s">"</span>
+<span class="s">"attribute vec3 vCol;</span><span class="se">\n</span><span class="s">"</span>
+<span class="s">"attribute vec2 vPos;</span><span class="se">\n</span><span class="s">"</span>
+<span class="s">"varying vec3 color;</span><span class="se">\n</span><span class="s">"</span>
+<span class="s">"void main()</span><span class="se">\n</span><span class="s">"</span>
+<span class="s">"{</span><span class="se">\n</span><span class="s">"</span>
+<span class="s">"    gl_Position = MVP * vec4(vPos, 0.0, 1.0);</span><span class="se">\n</span><span class="s">"</span>
+<span class="s">"    color = vCol;</span><span class="se">\n</span><span class="s">"</span>
+<span class="s">"}</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+
+<span class="k">static</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">fragment_shader_text</span> <span class="o">=</span>
+<span class="s">"#version 110</span><span class="se">\n</span><span class="s">"</span>
+<span class="s">"varying vec3 color;</span><span class="se">\n</span><span class="s">"</span>
+<span class="s">"void main()</span><span class="se">\n</span><span class="s">"</span>
+<span class="s">"{</span><span class="se">\n</span><span class="s">"</span>
+<span class="s">"    gl_FragColor = vec4(color, 1.0);</span><span class="se">\n</span><span class="s">"</span>
+<span class="s">"}</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+
+<span class="k">static</span> <span class="kt">void</span> <span class="nf">error_callback</span><span class="p">(</span><span class="kt">int</span> <span class="n">error</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">description</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">"Error: %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">description</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="cm">/* <i class="conum" data-value="2"></i><b>(2)</b>
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if (key == GLFW_KEY_ESCAPE &amp;&amp; action == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, GLFW_TRUE);
+}
+*/</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="n">GLFWwindow</span><span class="o">*</span> <span class="n">window</span><span class="p">;</span>
+	<span class="n">GLuint</span> <span class="n">vertex_buffer</span><span class="p">,</span> <span class="n">vertex_shader</span><span class="p">,</span> <span class="n">fragment_shader</span><span class="p">,</span> <span class="n">program</span><span class="p">;</span>
+	<span class="n">GLint</span> <span class="n">mvp_location</span><span class="p">,</span> <span class="n">vpos_location</span><span class="p">,</span> <span class="n">vcol_location</span><span class="p">;</span>
+
+	<span class="n">glfwSetErrorCallback</span><span class="p">(</span><span class="n">error_callback</span><span class="p">);</span>
+
+	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">glfwInit</span><span class="p">())</span>
+		<span class="n">exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">);</span>
+
+	<span class="n">glfwWindowHint</span><span class="p">(</span><span class="n">GLFW_CONTEXT_VERSION_MAJOR</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+	<span class="n">glfwWindowHint</span><span class="p">(</span><span class="n">GLFW_CONTEXT_VERSION_MINOR</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+
+	<span class="n">window</span> <span class="o">=</span> <span class="n">glfwCreateWindow</span><span class="p">(</span><span class="mi">640</span><span class="p">,</span> <span class="mi">480</span><span class="p">,</span> <span class="s">"Simple example"</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">window</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">glfwTerminate</span><span class="p">();</span>
+		<span class="n">exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">);</span>
+	<span class="p">}</span>
+
+	<span class="c1">//glfwSetKeyCallback(window, key_callback); </span><i class="conum" data-value="2"></i><b>(2)</b>
+
+	<span class="k">auto</span> <span class="n">connected</span> <span class="o">=</span> <span class="n">synapse</span><span class="o">::</span><span class="n">connect</span><span class="o">&lt;</span><span class="n">glfw_signals</span><span class="o">::</span><span class="n">Key</span><span class="o">&gt;</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <i class="conum" data-value="3"></i><b>(3)</b>
+		<span class="p">[</span> <span class="p">](</span> <span class="n">GLFWwindow</span> <span class="o">*</span> <span class="n">window</span><span class="p">,</span> <span class="kt">int</span> <span class="n">key</span><span class="p">,</span> <span class="kt">int</span> <span class="cm">/*scancode*/</span><span class="p">,</span> <span class="kt">int</span> <span class="n">action</span><span class="p">,</span> <span class="kt">int</span> <span class="cm">/*mods*/</span> <span class="p">)</span>
+		<span class="p">{</span>
+			<span class="k">if</span> <span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="n">GLFW_KEY_ESCAPE</span> <span class="o">&amp;&amp;</span> <span class="n">action</span> <span class="o">==</span> <span class="n">GLFW_PRESS</span><span class="p">)</span>
+				<span class="n">glfwSetWindowShouldClose</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">GLFW_TRUE</span><span class="p">);</span>
+		<span class="p">}</span> <span class="p">);</span>
+
+	<span class="n">glfwMakeContextCurrent</span><span class="p">(</span><span class="n">window</span><span class="p">);</span>
+	<span class="n">gladLoadGLLoader</span><span class="p">((</span><span class="n">GLADloadproc</span><span class="p">)</span> <span class="n">glfwGetProcAddress</span><span class="p">);</span>
+	<span class="n">glfwSwapInterval</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+
+	<span class="c1">// NOTE: OpenGL error checks have been omitted for brevity</span>
+
+	<span class="n">glGenBuffers</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">vertex_buffer</span><span class="p">);</span>
+	<span class="n">glBindBuffer</span><span class="p">(</span><span class="n">GL_ARRAY_BUFFER</span><span class="p">,</span> <span class="n">vertex_buffer</span><span class="p">);</span>
+	<span class="n">glBufferData</span><span class="p">(</span><span class="n">GL_ARRAY_BUFFER</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">vertices</span><span class="p">),</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">GL_STATIC_DRAW</span><span class="p">);</span>
+
+	<span class="n">vertex_shader</span> <span class="o">=</span> <span class="n">glCreateShader</span><span class="p">(</span><span class="n">GL_VERTEX_SHADER</span><span class="p">);</span>
+	<span class="n">glShaderSource</span><span class="p">(</span><span class="n">vertex_shader</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">vertex_shader_text</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+	<span class="n">glCompileShader</span><span class="p">(</span><span class="n">vertex_shader</span><span class="p">);</span>
+
+	<span class="n">fragment_shader</span> <span class="o">=</span> <span class="n">glCreateShader</span><span class="p">(</span><span class="n">GL_FRAGMENT_SHADER</span><span class="p">);</span>
+	<span class="n">glShaderSource</span><span class="p">(</span><span class="n">fragment_shader</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">fragment_shader_text</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+	<span class="n">glCompileShader</span><span class="p">(</span><span class="n">fragment_shader</span><span class="p">);</span>
+
+	<span class="n">program</span> <span class="o">=</span> <span class="n">glCreateProgram</span><span class="p">();</span>
+	<span class="n">glAttachShader</span><span class="p">(</span><span class="n">program</span><span class="p">,</span> <span class="n">vertex_shader</span><span class="p">);</span>
+	<span class="n">glAttachShader</span><span class="p">(</span><span class="n">program</span><span class="p">,</span> <span class="n">fragment_shader</span><span class="p">);</span>
+	<span class="n">glLinkProgram</span><span class="p">(</span><span class="n">program</span><span class="p">);</span>
+
+	<span class="n">mvp_location</span> <span class="o">=</span> <span class="n">glGetUniformLocation</span><span class="p">(</span><span class="n">program</span><span class="p">,</span> <span class="s">"MVP"</span><span class="p">);</span>
+	<span class="n">vpos_location</span> <span class="o">=</span> <span class="n">glGetAttribLocation</span><span class="p">(</span><span class="n">program</span><span class="p">,</span> <span class="s">"vPos"</span><span class="p">);</span>
+	<span class="n">vcol_location</span> <span class="o">=</span> <span class="n">glGetAttribLocation</span><span class="p">(</span><span class="n">program</span><span class="p">,</span> <span class="s">"vCol"</span><span class="p">);</span>
+
+	<span class="n">glEnableVertexAttribArray</span><span class="p">(</span><span class="n">vpos_location</span><span class="p">);</span>
+	<span class="n">glVertexAttribPointer</span><span class="p">(</span><span class="n">vpos_location</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">GL_FLOAT</span><span class="p">,</span> <span class="n">GL_FALSE</span><span class="p">,</span>
+						  <span class="k">sizeof</span><span class="p">(</span><span class="n">vertices</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span> <span class="mi">0</span><span class="p">);</span>
+	<span class="n">glEnableVertexAttribArray</span><span class="p">(</span><span class="n">vcol_location</span><span class="p">);</span>
+	<span class="n">glVertexAttribPointer</span><span class="p">(</span><span class="n">vcol_location</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">GL_FLOAT</span><span class="p">,</span> <span class="n">GL_FALSE</span><span class="p">,</span>
+						  <span class="k">sizeof</span><span class="p">(</span><span class="n">vertices</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span> <span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">float</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">));</span>
+
+	<span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">glfwWindowShouldClose</span><span class="p">(</span><span class="n">window</span><span class="p">))</span>
+	<span class="p">{</span>
+		<span class="kt">float</span> <span class="n">ratio</span><span class="p">;</span>
+		<span class="kt">int</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">;</span>
+		<span class="n">mat4x4</span> <span class="n">m</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">mvp</span><span class="p">;</span>
+
+		<span class="n">glfwGetFramebufferSize</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">width</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">height</span><span class="p">);</span>
+		<span class="n">ratio</span> <span class="o">=</span> <span class="n">width</span> <span class="o">/</span> <span class="p">(</span><span class="kt">float</span><span class="p">)</span> <span class="n">height</span><span class="p">;</span>
+
+		<span class="n">glViewport</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">);</span>
+		<span class="n">glClear</span><span class="p">(</span><span class="n">GL_COLOR_BUFFER_BIT</span><span class="p">);</span>
+
+		<span class="n">mat4x4_identity</span><span class="p">(</span><span class="n">m</span><span class="p">);</span>
+		<span class="n">mat4x4_rotate_Z</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="p">(</span><span class="kt">float</span><span class="p">)</span> <span class="n">glfwGetTime</span><span class="p">());</span>
+		<span class="n">mat4x4_ortho</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="o">-</span><span class="n">ratio</span><span class="p">,</span> <span class="n">ratio</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="n">f</span><span class="p">,</span> <span class="mf">1.</span><span class="n">f</span><span class="p">,</span> <span class="mf">1.</span><span class="n">f</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="n">f</span><span class="p">);</span>
+		<span class="n">mat4x4_mul</span><span class="p">(</span><span class="n">mvp</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">m</span><span class="p">);</span>
+
+		<span class="n">glUseProgram</span><span class="p">(</span><span class="n">program</span><span class="p">);</span>
+		<span class="n">glUniformMatrix4fv</span><span class="p">(</span><span class="n">mvp_location</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">GL_FALSE</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">GLfloat</span><span class="o">*</span><span class="p">)</span> <span class="n">mvp</span><span class="p">);</span>
+		<span class="n">glDrawArrays</span><span class="p">(</span><span class="n">GL_TRIANGLES</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+
+		<span class="n">glfwSwapBuffers</span><span class="p">(</span><span class="n">window</span><span class="p">);</span>
+		<span class="n">glfwPollEvents</span><span class="p">();</span>
+	<span class="p">}</span>
+
+	<span class="n">glfwDestroyWindow</span><span class="p">(</span><span class="n">window</span><span class="p">);</span>
+
+	<span class="n">glfwTerminate</span><span class="p">();</span>
+	<span class="n">exit</span><span class="p">(</span><span class="n">EXIT_SUCCESS</span><span class="p">);</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph text-right">
+<p><a href="#connect"><code>connect</code></a> | <a href="#connection"><code>connection</code></a></p>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Automatically install <code>meta::connected</code> signal handlers to synapsify GLFW.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Commented-out parts of the original example, and&#8230;&#8203;</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>&#8230;&#8203;the C&#43;&#43; lambda function connected to the <code>Key</code> Synapse signal from <code>glfw_signals.hpp</code> to handle the <code>Esc</code> key.</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_alternatives_to_synapse">Alternatives to Synapse</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The unique design feature of Synapse is that it is non-intrusive with respect to the emitter object type. While other libraries provide users with types that can emit signals, Synapse is able to emit any signal from any object of any type whatsoever.</p>
+</div>
+<div class="paragraph">
+<p>For a list of other signal programming libraries, see this <a href="https://en.wikipedia.org/wiki/Signals_and_slots#Alternative_implementations">Wikipedia page</a>.</p>
+</div>
+<div class="sect2">
+<h3 id="_comparison_to_boost_signals2">Comparison to Boost Signals2</h3>
+<div class="paragraph">
+<p>Because Synapse is formatted for Boost review, people often ask what are the differences between Synapse and <a href="https://www.boost.org/doc/libs/release/doc/html/signals2.html">Boost Signals2</a>.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Comparison between Signals2 and Synapse</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top"></th>
+<th class="tableblock halign-left valign-top">Signals2</th>
+<th class="tableblock halign-left valign-top">Synapse</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">What is a signal?</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An object of type <code>signal&lt;T&gt;</code>, which maintains a list of connected functions, and is callable like <code>std::function&lt;T&gt;</code> is.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A type, a C function pointer <code>typedef</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">How does emitting a signal work?</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Invoking <code>s(&#8230;&#8203;)</code>, where <code>s</code> is of type <code>signal&lt;T&gt;</code>, calls all connected functions.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Invoking <a href="#emit"><code>emit&lt;S&gt;(e,&#8230;&#8203;)</code></a> calls all functions connecting the signal <code>S</code> for the object <code>e</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">What objects can emit signals?</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Only instances of the <code>signal&lt;T&gt;</code> class template.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Any object of any type whatsoever: the <a href="#emit"><code>emit&lt;S&gt;(e)</code></a> function template takes <code>e</code> as a <code>void</code> pointer.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">How does connecting a signal work?</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Calling <code>s.connect(f)</code>, where <code>s</code> is of type <code>signal&lt;T&gt;</code>, connects the function <code>f</code>.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Calling <a href="#connect"><code>connect&lt;S&gt;(e,f)</code></a> connects the signal <code>S</code> from the emitter object <code>e</code> to the function <code>f</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Support for meta signals?</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">No (not possible, a signal is an object).</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Yes. Connecting a signal of type <code>S</code> emits the signal <a href="#meta::connected"><code>meta::connected&lt;S&gt;</code></a> from the <a href="#meta::connected"><code>meta::emitter</code></a>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integration with C-style callback APIs?</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">No (not possible).</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Yes, through meta signals, see <a href="#Synapsifying_C_Callbacks">Synapsifying C Callbacks</a>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Multi-threading support?</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Yes, the connection list maintained in each signal object is thread-safe.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Yes, the connection lists are thread-local, and signals are transported to other threads using <a href="#thread_local_queue"><code>thread_local_queue</code></a> objects.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Can connected functions return values?</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Yes, there is an elaborate system for dealing with multiple returns when a signal is invoked.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">No, but of course it&#8217;s possible to pass an argument by reference or a custom object to collect and/or accumulate the results if needed.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_macros_and_configuration">Macros and Configuration</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_boost_synapse_use_boost"><code>BOOST_SYNAPSE_USE_BOOST</code></h3>
+<div class="paragraph">
+<p>If this macro is defined, Synapse will use <code>boost::shared_ptr</code>, <code>boost::weak_ptr</code> and <code>boost::function</code>. By default, it will use <code>std::shared_ptr</code>, <code>std::weak_ptr</code> and <code>std::function</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_boost_synapse_assert"><code>BOOST_SYNAPSE_ASSERT</code></h3>
+<div class="paragraph">
+<p>All assertions in Synapse use this macro. If it is not defined, Synapse header files <code>#define</code> it either as <code>BOOST_ASSERT</code> or <code>assert</code>, depending on whether <code>BOOST_SYNAPSE_USE_BOOST</code> is defined.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_distribution">Distribution</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Synapse is distributed under the <a href="http://www.boost.org/LICENSE_1_0.txt">Boost Software License, Version 1.0</a>.</p>
+</div>
+<div class="paragraph">
+<p>The source code is available on <a href="https://github.com/zajo/synapse">GitHub</a>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Synapse is not part of Boost.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_support">Support</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The following support options are available:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://Cpplang.slack.com">cpplang on Slack</a> (use the <code>#boost</code> channel)</p>
+</li>
+<li>
+<p><a href="https://lists.boost.org/mailman/listinfo.cgi/boost-users">Boost Users Mailing List</a></p>
+</li>
+<li>
+<p><a href="https://lists.boost.org/mailman/listinfo.cgi/boost">Boost Developers Mailing List</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_portability">Portability</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Synapse requires a C&#43;&#43; compiler that supports at least C&#43;&#43;11.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_building">Building</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There are two build scripts provided, one for <a href="https://mesonbuild.com/">Meson Build</a>, the other for Boost Build.</p>
+</div>
+<div class="paragraph">
+<p>To build the source code:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Using Meson Build, from the Synapse root directory, execute e.g.:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="sh">meson bld/debug
+<span class="nb">cd </span>bld/debug
+ninja</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Using Boost Build, make sure Synapse is cloned under the <code>&lt;boost-root&gt;/libs</code> directory. From the Synapse root directory, execute:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="sh">../../b2 build</code></pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>To run the unit tests:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Using Meson Build, from the Synapse root directory, execute e.g.:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="sh">meson bld/debug
+<span class="nb">cd </span>bld/debug
+meson <span class="nb">test</span></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Using Boost Build, make sure Synapse is cloned under the <code>&lt;boost-root&gt;/libs</code> directory. From the Synapse root directory, execute:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="sh">../../b2 build/test</code></pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<code>boost/synapse/emit.hpp</code> is a header-only component: if a program only emits signals, but does not connect signals, it needs not link with Synapse. This enables libraries to emit signals without forcing a link dependency on Synapse on programs that do not use it.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_qa">Q&amp;A</h2>
+<div class="sectionbody">
+<div class="qlist qanda">
+<ol>
+<li>
+<p><em>Is there a way to stop the emit loop before all connected functions have been called?</em></p>
+<p>No, except by throwing an exception.</p>
+</li>
+<li>
+<p><em>I am concerned about code size, does Synapse use a lot of templates?</em></p>
+<p>Yes, there are templates instantiated for each signal type. This is done so that the dispatch by signal type occurs at compile-time, leaving only emitter dispatch at run-time. However, static types are erased as soon as possible, so template bloat is kept to a minimum.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_acknowledgements">Acknowledgements</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Special thanks to Peter Dimov for his valuable feedback on the Synapse design and for coming up with the perfect name for this library.</p>
+</div>
+<hr>
+<div class="paragraph text-right">
+<p>&#169; 2015-2020 Emil Dotchevski</p>
+</div>
+<div class="paragraph text-right">
+<p>Documentation rendered by <a href="https://asciidoctor.org/">Asciidoctor</a> with <a href="https://github.com/zajo/asciidoctor_skin">these customizations</a>.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+</div>
+</div>
+<link rel="stylesheet" href="./rouge-github.css">
+</body>
+</html>
