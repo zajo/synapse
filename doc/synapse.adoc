@@ -11,7 +11,7 @@ endif::[]
 ifndef::backend-pdf[]
 = Synapsepass:[<a href="https://ci.appveyor.com/project/zajo/synapse/branch/master"><img style="margin-left:8px; margin-top:21px; float:right; vertical-align: top" src="https://ci.appveyor.com/api/projects/status/gjv1je9hy2aswsl0/branch/master?svg=true"></a> <a href="https://travis-ci.org/zajo/synapse"><img style="margin-top:21px; float:right; vertical-align: top" src="https://travis-ci.org/zajo/synapse.svg?branch=master"></a><div style="z-index: 3; bottom:-16px; right:4px; position:fixed"><input width="32" height="32" type="image" alt="Skin" src="./skin.png" onclick="this.blur();switch_style();return false;"/></div>]
 endif::[]
-Non-Intrusive Signal Programming Library | Emil Dotchevski
+Non-Intrusive Publish-Subscribe Library | Emil Dotchevski
 ifndef::backend-pdf[]
 :toc: left
 :toclevels: 3
@@ -23,12 +23,12 @@ endif::[]
 
 [abstract]
 == Abstract
-Synapse is a non-intrusive {CPP} signal programming library for {CPP}11. Features:
+Synapse is a non-intrusive {CPP} publish–subscribe library for {CPP}11. Features:
 
 ====
 * Any C or {CPP} object of any type whatsoever can be used as a signal emitter.
-* A system of meta signals for interoperability with other signal programming libraries and callback APIs. Lambda captures can be easily installed as C API callbacks!
-* In a multi-thread environment signals can be emitted asynchronously and scheduled for synchronous execution when polled in other threads.
+* A system of meta signals for interoperability with other publish–subscribe, signal programming libraries, and callback APIs. Lambda expressions / closures can be easily installed as C API callbacks!
+* In a multi-thread environment signals can be emitted asynchronously and scheduled for synchronous execution when polled from other threads.
 * No dependencies.
 ====
 
@@ -124,7 +124,7 @@ NOTE: The `receiver` argument to `connect` is optional. If it is specified, a po
 
 === Emitting Signals from Objects of 3rd-Party Types
 
-The `button`/`dialog` example from the previous section could have been similarly implemented using any other signal programming library, because the `button` type is specifically designed to be able to emit the `clicked` signal.
+The `button`/`dialog` example from the previous section could have been similarly implemented using any signal programming library, because the `button` type is specifically designed to be able to emit the `clicked` signal.
 
 But in Synapse, _any_ object whatsoever can be used as an emitter. This makes it possible to `emit` non-intrusively even if the type of the emitter object was not designed to support signals. For example, a function that processes a file can use a standard `FILE` pointer as a Synapse emitter to report on its progress:
 
@@ -1135,7 +1135,7 @@ auto c = synapse::connect<glfw_signals::key>(w,
 	[ ]( GLFWwindow * w, int key, int scancode, int action, int mods )
 	{
 		....
-	}
+	} );
 ----
 
 [.text-right]
@@ -1332,7 +1332,7 @@ int main(void)
 
 The unique design feature of Synapse is that it is non-intrusive with respect to the emitter object type. While other libraries provide users with types that can emit signals, Synapse is able to emit any signal from any object of any type whatsoever.
 
-For a list of other signal programming libraries, see this https://en.wikipedia.org/wiki/Signals_and_slots#Alternative_implementations[Wikipedia page].
+For a list of signal programming libraries, see this https://en.wikipedia.org/wiki/Signals_and_slots#Alternative_implementations[Wikipedia page].
 
 === Comparison to Boost Signals2
 
