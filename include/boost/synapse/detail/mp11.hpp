@@ -1,7 +1,7 @@
 #ifndef BOOST_SYNAPSE_DETAIL_MP11_HPP_INCLUDED
 #define BOOST_SYNAPSE_DETAIL_MP11_HPP_INCLUDED
 
-// Copyright (c) 2015-2020 Emil Dotchevski and Reverge Studios, Inc.
+// Copyright (c) 2015-2021 Emil Dotchevski and Reverge Studios, Inc.
 // Copyright 2015, 2017 Peter Dimov.
 
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
