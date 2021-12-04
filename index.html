@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
-<meta name="author" content="Non-Intrusive Signal Programming Library | Emil Dotchevski">
+<meta name="generator" content="Asciidoctor 2.0.16">
+<meta name="author" content="Non-Intrusive Publish-Subscribe Library | Emil Dotchevski">
 <title>Synapse</title>
 <link rel="stylesheet" href="./zajo-dark.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="./rouge-github.css">
 <meta name="keywords" content="c++,signal,open source">
 <meta name="description" content="Non-intrusive C++ signal programming library">
 <link rel="stylesheet" href="./zajo-light.css" disabled=true>
@@ -26,7 +27,7 @@ function switch_style()
 <div id="header">
 <h1>Synapse<a href="https://ci.appveyor.com/project/zajo/synapse/branch/master"><img style="margin-left:8px; margin-top:21px; float:right; vertical-align: top" src="https://ci.appveyor.com/api/projects/status/gjv1je9hy2aswsl0/branch/master?svg=true"></a> <a href="https://travis-ci.org/zajo/synapse"><img style="margin-top:21px; float:right; vertical-align: top" src="https://travis-ci.org/zajo/synapse.svg?branch=master"></a><div style="z-index: 3; bottom:-16px; right:4px; position:fixed"><input width="32" height="32" type="image" alt="Skin" src="./skin.png" onclick="this.blur();switch_style();return false;"/></div></h1>
 <div class="details">
-<span id="author" class="author">Non-Intrusive Signal Programming Library | Emil Dotchevski</span><br>
+<span id="author" class="author">Non-Intrusive Publish-Subscribe Library | Emil Dotchevski</span><br>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle"></div>
@@ -95,7 +96,6 @@ function switch_style()
 </li>
 <li><a href="#_macros_and_configuration">Macros and Configuration</a>
 <ul class="sectlevel2">
-<li><a href="#_boost_synapse_use_boost"><code>BOOST_SYNAPSE_USE_BOOST</code></a></li>
 <li><a href="#_boost_synapse_assert"><code>BOOST_SYNAPSE_ASSERT</code></a></li>
 </ul>
 </li>
@@ -120,7 +120,7 @@ function switch_style()
 <h2 id="_abstract">Abstract</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Synapse is a non-intrusive C&#43;&#43; signal programming library for C&#43;&#43;11. Features:</p>
+<p>Synapse is a non-intrusive C&#43;&#43; publish–subscribe library for C&#43;&#43;11. Features:</p>
 </div>
 <div class="exampleblock">
 <div class="content">
@@ -130,10 +130,10 @@ function switch_style()
 <p>Any C or C&#43;&#43; object of any type whatsoever can be used as a signal emitter.</p>
 </li>
 <li>
-<p>A system of meta signals for interoperability with other signal programming libraries and callback APIs. Lambda captures can be easily installed as C API callbacks!</p>
+<p>A system of meta signals for interoperability with other publish–subscribe, signal programming libraries, and callback APIs. Lambda expressions / closures can be easily installed as C API callbacks!</p>
 </li>
 <li>
-<p>In a multi-thread environment signals can be emitted asynchronously and scheduled for synchronous execution when polled in other threads.</p>
+<p>In a multi-thread environment signals can be emitted asynchronously and scheduled for synchronous execution when polled from other threads.</p>
 </li>
 <li>
 <p>No dependencies.</p>
@@ -266,7 +266,7 @@ The <code>receiver</code> argument to <code>connect</code> is optional. If it is
 <div class="sect2">
 <h3 id="_emitting_signals_from_objects_of_3rd_party_types">Emitting Signals from Objects of 3rd-Party Types</h3>
 <div class="paragraph">
-<p>The <code>button</code>/<code>dialog</code> example from the previous section could have been similarly implemented using any other signal programming library, because the <code>button</code> type is specifically designed to be able to emit the <code>clicked</code> signal.</p>
+<p>The <code>button</code>/<code>dialog</code> example from the previous section could have been similarly implemented using any signal programming library, because the <code>button</code> type is specifically designed to be able to emit the <code>clicked</code> signal.</p>
 </div>
 <div class="paragraph">
 <p>But in Synapse, <em>any</em> object whatsoever can be used as an emitter. This makes it possible to <code>emit</code> non-intrusively even if the type of the emitter object was not designed to support signals. For example, a function that processes a file can use a standard <code>FILE</code> pointer as a Synapse emitter to report on its progress:</p>
@@ -2113,7 +2113,7 @@ The above <code>glfw_synapsify.hpp</code> should be included in exactly one comp
 	<span class="p">[</span> <span class="p">](</span> <span class="n">GLFWwindow</span> <span class="o">*</span> <span class="n">w</span><span class="p">,</span> <span class="kt">int</span> <span class="n">key</span><span class="p">,</span> <span class="kt">int</span> <span class="n">scancode</span><span class="p">,</span> <span class="kt">int</span> <span class="n">action</span><span class="p">,</span> <span class="kt">int</span> <span class="n">mods</span> <span class="p">)</span>
 	<span class="p">{</span>
 		<span class="p">....</span>
-	<span class="p">}</span></code></pre>
+	<span class="p">}</span> <span class="p">);</span></code></pre>
 </div>
 </div>
 <div class="paragraph text-right">
@@ -2328,7 +2328,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 <p>The unique design feature of Synapse is that it is non-intrusive with respect to the emitter object type. While other libraries provide users with types that can emit signals, Synapse is able to emit any signal from any object of any type whatsoever.</p>
 </div>
 <div class="paragraph">
-<p>For a list of other signal programming libraries, see this <a href="https://en.wikipedia.org/wiki/Signals_and_slots#Alternative_implementations">Wikipedia page</a>.</p>
+<p>For a list of signal programming libraries, see this <a href="https://en.wikipedia.org/wiki/Signals_and_slots#Alternative_implementations">Wikipedia page</a>.</p>
 </div>
 <div class="sect2">
 <h3 id="_comparison_to_boost_signals2">Comparison to Boost Signals2</h3>
@@ -2398,12 +2398,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 <div class="sect1">
 <h2 id="_macros_and_configuration">Macros and Configuration</h2>
 <div class="sectionbody">
-<div class="sect2">
-<h3 id="_boost_synapse_use_boost"><code>BOOST_SYNAPSE_USE_BOOST</code></h3>
-<div class="paragraph">
-<p>If this macro is defined, Synapse will use <code>boost::shared_ptr</code>, <code>boost::weak_ptr</code> and <code>boost::function</code>. By default, it will use <code>std::shared_ptr</code>, <code>std::weak_ptr</code> and <code>std::function</code>.</p>
-</div>
-</div>
 <div class="sect2">
 <h3 id="_boost_synapse_assert"><code>BOOST_SYNAPSE_ASSERT</code></h3>
 <div class="paragraph">
@@ -2571,6 +2565,5 @@ meson <span class="nb">test</span></code></pre>
 <div id="footer-text">
 </div>
 </div>
-<link rel="stylesheet" href="./rouge-github.css">
 </body>
 </html>
