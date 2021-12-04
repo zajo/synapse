@@ -7,12 +7,10 @@
 #include "boost/core/lightweight_test.hpp"
 
 namespace synapse=boost::synapse;
-using synapse::shared_ptr;
-using synapse::weak_ptr;
 
 struct test_type { test_type() { } };
 
-bool shared( shared_ptr<void const> const & a, shared_ptr<void const> const & b )
+bool shared( std::shared_ptr<void const> const & a, std::shared_ptr<void const> const & b )
 {
 	return !a.owner_before(b) && !b.owner_before(a);
 }
@@ -27,10 +25,10 @@ int main( int argc, char const * argv[] )
 		BOOST_TEST_EQ(sx.maybe_lock<void>().get(), &x);
 		BOOST_TEST_EQ(sx.maybe_lock<test_type const>().get(), &x);
 		BOOST_TEST_EQ(sx.maybe_lock<test_type>().get(), &x);
-		BOOST_TEST(shared(sx.maybe_lock<void const>(),shared_ptr<void const>()));
-		BOOST_TEST(shared(sx.maybe_lock<void>(),shared_ptr<void const>()));
-		BOOST_TEST(shared(sx.maybe_lock<test_type const>(),shared_ptr<void const>()));
-		BOOST_TEST(shared(sx.maybe_lock<test_type>(),shared_ptr<void const>()));
+		BOOST_TEST(shared(sx.maybe_lock<void const>(),std::shared_ptr<void const>()));
+		BOOST_TEST(shared(sx.maybe_lock<void>(),std::shared_ptr<void const>()));
+		BOOST_TEST(shared(sx.maybe_lock<test_type const>(),std::shared_ptr<void const>()));
+		BOOST_TEST(shared(sx.maybe_lock<test_type>(),std::shared_ptr<void const>()));
 		BOOST_TEST(!sx.empty());
 		BOOST_TEST(!sx.expired());
 		sx.clear();
@@ -45,10 +43,10 @@ int main( int argc, char const * argv[] )
 		BOOST_TEST(!sx.maybe_lock<void>());
 		BOOST_TEST_EQ(sx.maybe_lock<test_type const>().get(), &x);
 		BOOST_TEST(!sx.maybe_lock<test_type>());
-		BOOST_TEST(shared(sx.maybe_lock<void const>(),shared_ptr<void const>()));
-		BOOST_TEST(shared(sx.maybe_lock<void>(),shared_ptr<void const>()));
-		BOOST_TEST(shared(sx.maybe_lock<test_type const>(),shared_ptr<void const>()));
-		BOOST_TEST(shared(sx.maybe_lock<test_type>(),shared_ptr<void const>()));
+		BOOST_TEST(shared(sx.maybe_lock<void const>(),std::shared_ptr<void const>()));
+		BOOST_TEST(shared(sx.maybe_lock<void>(),std::shared_ptr<void const>()));
+		BOOST_TEST(shared(sx.maybe_lock<test_type const>(),std::shared_ptr<void const>()));
+		BOOST_TEST(shared(sx.maybe_lock<test_type>(),std::shared_ptr<void const>()));
 		BOOST_TEST(!sx.empty());
 		BOOST_TEST(!sx.expired());
 		sx.clear();
@@ -56,8 +54,8 @@ int main( int argc, char const * argv[] )
 		BOOST_TEST(sx.expired());
 	}
 	{
-		shared_ptr<test_type> x(new test_type);
-		synapse::synapse_detail::weak_store sx=synapse::synapse_detail::weak_store(weak_ptr<test_type>(x));
+		std::shared_ptr<test_type> x(new test_type);
+		synapse::synapse_detail::weak_store sx=synapse::synapse_detail::weak_store(std::weak_ptr<test_type>(x));
 		BOOST_TEST(sx.lockable());
 		BOOST_TEST_EQ(sx.maybe_lock<void const>(), x);
 		BOOST_TEST_EQ(sx.maybe_lock<void>(), x);
@@ -81,17 +79,17 @@ int main( int argc, char const * argv[] )
 		BOOST_TEST(sx.expired());
 	}
 	{
-		shared_ptr<test_type const> x(new test_type);
-		synapse::synapse_detail::weak_store sx=synapse::synapse_detail::weak_store(weak_ptr<test_type const>(x));
+		std::shared_ptr<test_type const> x(new test_type);
+		synapse::synapse_detail::weak_store sx=synapse::synapse_detail::weak_store(std::weak_ptr<test_type const>(x));
 		BOOST_TEST(sx.lockable());
 		BOOST_TEST_EQ(sx.maybe_lock<void const>(), x);
 		BOOST_TEST(!sx.maybe_lock<void>());
 		BOOST_TEST_EQ(sx.maybe_lock<test_type const>(), x);
 		BOOST_TEST(!sx.maybe_lock<test_type>());
 		BOOST_TEST(shared(sx.maybe_lock<void const>(),x));
-		BOOST_TEST(shared(sx.maybe_lock<void>(),shared_ptr<void const>()));
+		BOOST_TEST(shared(sx.maybe_lock<void>(),std::shared_ptr<void const>()));
 		BOOST_TEST(shared(sx.maybe_lock<test_type const>(),x));
-		BOOST_TEST(shared(sx.maybe_lock<test_type>(),shared_ptr<void const>()));
+		BOOST_TEST(shared(sx.maybe_lock<test_type>(),std::shared_ptr<void const>()));
 		BOOST_TEST(!sx.empty());
 		BOOST_TEST(!sx.expired());
 		x.reset();

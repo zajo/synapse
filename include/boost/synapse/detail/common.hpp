@@ -17,8 +17,8 @@
 #endif
 
 #include <boost/synapse/detail/config.hpp>
-#include <boost/synapse/detail/smart_ptr.hpp>
 #include <boost/synapse/signal_traits.hpp>
+#include <memory>
 #include <atomic>
 
 namespace boost { namespace synapse {
@@ -53,7 +53,7 @@ namespace boost { namespace synapse {
 
 		public:
 
-			virtual void notify_connection_list_created( shared_ptr<thread_local_signal_data> const & )=0;
+			virtual void notify_connection_list_created( std::shared_ptr<thread_local_signal_data> const & )=0;
 			virtual int emit( thread_local_signal_data const &, void const *, args_binder_base const * )=0;
 		};
 
@@ -71,18 +71,18 @@ namespace boost { namespace synapse {
 
 			class connection_list;
 			friend class connection_list;
-			weak_ptr<connection_list> cl_;
+			std::weak_ptr<connection_list> cl_;
 
 			class blocked_emitters_list;
-			weak_ptr<blocked_emitters_list> bl_;
+			std::weak_ptr<blocked_emitters_list> bl_;
 
 			class posted_signals;
-			shared_ptr<posted_signals> ps_;
+			std::shared_ptr<posted_signals> ps_;
 
-			shared_ptr<thread_local_signal_data const> keep_meta_connected_tlsd_afloat_;
-			shared_ptr<thread_local_signal_data const> keep_meta_blocked_tlsd_afloat_;
+			std::shared_ptr<thread_local_signal_data const> keep_meta_connected_tlsd_afloat_;
+			std::shared_ptr<thread_local_signal_data const> keep_meta_blocked_tlsd_afloat_;
 
-			shared_ptr<connection_list_list> const & (* const get_cll_)( shared_ptr<connection_list_list> (*)() );
+			std::shared_ptr<connection_list_list> const & (* const get_cll_)( std::shared_ptr<connection_list_list> (*)() );
 			std::atomic<interthread_interface *> * const interthread_;
 
 			thread_local_signal_data():
@@ -95,7 +95,7 @@ namespace boost { namespace synapse {
 			{
 			}
 
-			thread_local_signal_data( shared_ptr<connection_list_list> const & (*get_cll)( shared_ptr<connection_list_list> (*)() ), std::atomic<int> & cl_count, std::atomic<interthread_interface *> & interthread ):
+			thread_local_signal_data( std::shared_ptr<connection_list_list> const & (*get_cll)( std::shared_ptr<connection_list_list> (*)() ), std::atomic<int> & cl_count, std::atomic<interthread_interface *> & interthread ):
 				cleanup_(&cleanup_stub),
 				cl_count_(&cl_count),
 				emit_(&emit_stub),
@@ -124,19 +124,19 @@ namespace boost { namespace synapse {
 		};
 
 		template <class Signal>
-		shared_ptr<connection_list_list> const & get_connection_list_list( shared_ptr<connection_list_list> (*create_connection_list_list)() )
+		std::shared_ptr<connection_list_list> const & get_connection_list_list( std::shared_ptr<connection_list_list> (*create_connection_list_list)() )
 		{
-			static shared_ptr<connection_list_list> obj(create_connection_list_list());
+			static std::shared_ptr<connection_list_list> obj(create_connection_list_list());
 			return obj;
 		}
 
 		template <class Signal>
-		shared_ptr<thread_local_signal_data> const & get_thread_local_signal_data( bool allocate );
+		std::shared_ptr<thread_local_signal_data> const & get_thread_local_signal_data( bool allocate );
 
 		template <class Signal>
 		struct register_with_non_meta
 		{
-			static void keep_afloat( shared_ptr<thread_local_signal_data const> const & )
+			static void keep_afloat( std::shared_ptr<thread_local_signal_data const> const & )
 			{
 			}
 		};
@@ -144,7 +144,7 @@ namespace boost { namespace synapse {
 		template <class Signal>
 		struct register_with_non_meta<meta::connected<Signal> >
 		{
-			static void keep_afloat( shared_ptr<thread_local_signal_data const> const & meta )
+			static void keep_afloat( std::shared_ptr<thread_local_signal_data const> const & meta )
 			{
 				auto main_tlsd = get_thread_local_signal_data<Signal>(true);
 				BOOST_SYNAPSE_ASSERT(!main_tlsd->keep_meta_connected_tlsd_afloat_);
@@ -155,7 +155,7 @@ namespace boost { namespace synapse {
 		template <class Signal>
 		struct register_with_non_meta<meta::blocked<Signal> >
 		{
-			static void keep_afloat( shared_ptr<thread_local_signal_data const> const & meta )
+			static void keep_afloat( std::shared_ptr<thread_local_signal_data const> const & meta )
 			{
 				auto main_tlsd = get_thread_local_signal_data<Signal>(true);
 				BOOST_SYNAPSE_ASSERT(!main_tlsd->keep_meta_blocked_tlsd_afloat_);
@@ -169,14 +169,14 @@ namespace boost { namespace synapse {
 		template <class Signal>
 		struct thread_local_signal_data_<Signal, false>
 		{
-			static shared_ptr<thread_local_signal_data> const & get( bool allocate )
+			static std::shared_ptr<thread_local_signal_data> const & get( bool allocate )
 			{
 				static std::atomic<int> count;
 				static std::atomic<interthread_interface *> interthread;
-				static thread_local shared_ptr<thread_local_signal_data> obj;
+				static thread_local std::shared_ptr<thread_local_signal_data> obj;
 				if( !obj && (allocate || interthread.load()) )
 				{
-					obj=synapse::make_shared<thread_local_signal_data>(&get_connection_list_list<Signal>,count,interthread);
+					obj=std::make_shared<thread_local_signal_data>(&get_connection_list_list<Signal>,count,interthread);
 					register_with_non_meta<Signal>::keep_afloat(obj);
 				}
 				return obj;
@@ -186,12 +186,12 @@ namespace boost { namespace synapse {
 		template <class Signal>
 		struct thread_local_signal_data_<Signal, true>
 		{
-			static shared_ptr<thread_local_signal_data> const & get( bool allocate )
+			static std::shared_ptr<thread_local_signal_data> const & get( bool allocate )
 			{
-				static thread_local shared_ptr<thread_local_signal_data> obj;
+				static thread_local std::shared_ptr<thread_local_signal_data> obj;
 				if( !obj && allocate )
 				{
-					obj=synapse::make_shared<thread_local_signal_data>();
+					obj=std::make_shared<thread_local_signal_data>();
 					register_with_non_meta<Signal>::keep_afloat(obj);
 				}
 				return obj;
@@ -199,7 +199,7 @@ namespace boost { namespace synapse {
 		};
 
 		template <class Signal>
-		shared_ptr<thread_local_signal_data> const & get_thread_local_signal_data( bool allocate )
+		std::shared_ptr<thread_local_signal_data> const & get_thread_local_signal_data( bool allocate )
 		{
 			return thread_local_signal_data_<Signal>::get(allocate);
 		}
@@ -207,5 +207,9 @@ namespace boost { namespace synapse {
 	}
 
 } }
+
+#if defined(_MSC_VER) && !defined(BOOST_SYNAPSE_ENABLE_WARNINGS)
+#	pragma warning(pop)
+#endif
 
 #endif

@@ -18,7 +18,7 @@
 
 #include <boost/synapse/detail/common.hpp>
 #include <boost/synapse/detail/mp11.hpp>
-#include <boost/synapse/detail/functional.hpp>
+#include <functional>
 #include <tuple>
 
 namespace boost { namespace synapse {
@@ -41,7 +41,7 @@ namespace boost { namespace synapse {
 		{
 		public:
 
-			virtual shared_ptr<args_binder_base> clone() const = 0;
+			virtual std::shared_ptr<args_binder_base> clone() const = 0;
 			virtual void call( void const * ) const = 0;
 			virtual int call_translated( void const * ) const = 0;
 		};
@@ -55,19 +55,19 @@ namespace boost { namespace synapse {
 		{
 			std::tuple<A...> a_;
 
-			shared_ptr<args_binder_base> clone() const final override
+			std::shared_ptr<args_binder_base> clone() const final override
 			{
-				return synapse::make_shared<args_binder>(*this);
+				return std::make_shared<args_binder>(*this);
 			}
 
 			void call( void const * f ) const final override
 			{
-				synapse_detail_mp11::tuple_apply(*static_cast<function<void(SigA...)> const *>(f), a_);
+				synapse_detail_mp11::tuple_apply(*static_cast<std::function<void(SigA...)> const *>(f), a_);
 			}
 
 			int call_translated( void const * f ) const final override
 			{
-				return synapse_detail_mp11::tuple_apply(*static_cast<function<int(SigA...)> const *>(f), a_);
+				return synapse_detail_mp11::tuple_apply(*static_cast<std::function<int(SigA...)> const *>(f), a_);
 			}
 
 		public:
@@ -78,24 +78,24 @@ namespace boost { namespace synapse {
 			}
 		};
 
-		shared_ptr<void const> & meta_emitter();
+		std::shared_ptr<void const> & meta_emitter();
 
 		template <class Signal>
 		int emit_meta_connected( connection & c, unsigned connect_flags )
 		{
-			return emit<meta::connected<Signal> >(meta_emitter().get(), ref(c), connect_flags);
+			return emit<meta::connected<Signal> >(meta_emitter().get(), std::ref(c), connect_flags);
 		}
 
 		template <class Signal>
 		int emit_meta_blocked( blocker & eb, bool is_blocked )
 		{
-			return emit<meta::blocked<Signal> >(meta_emitter().get(), ref(eb), is_blocked);
+			return emit<meta::blocked<Signal> >(meta_emitter().get(), std::ref(eb), is_blocked);
 		}
 
 		template <class Signal>
 		int emit_fwd( void const * e, args_binder_base const & args )
 		{
-			if( shared_ptr<thread_local_signal_data> const & tlsd = get_thread_local_signal_data<Signal>(false) )
+			if( std::shared_ptr<thread_local_signal_data> const & tlsd = get_thread_local_signal_data<Signal>(false) )
 				if( e )
 					return tlsd->emit_(*tlsd, e, &args);
 			return 0;
@@ -104,7 +104,7 @@ namespace boost { namespace synapse {
 		template <class Signal>
 		int emit_fwd_no_args( void const * e )
 		{
-			if( shared_ptr<thread_local_signal_data> const & tlsd = get_thread_local_signal_data<Signal>(false) )
+			if( std::shared_ptr<thread_local_signal_data> const & tlsd = get_thread_local_signal_data<Signal>(false) )
 				if( e )
 					return tlsd->emit_(*tlsd, e, 0);
 			return 0;
@@ -118,5 +118,9 @@ namespace boost { namespace synapse {
 	}
 
 }  }
+
+#if defined(_MSC_VER) && !defined(BOOST_SYNAPSE_ENABLE_WARNINGS)
+#	pragma warning(pop)
+#endif
 
 #endif

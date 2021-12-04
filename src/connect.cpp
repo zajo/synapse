@@ -31,14 +31,14 @@ namespace boost { namespace synapse {
 				void const * ep_;
 				weak_store e_;
 				weak_store r_;
-				shared_ptr<void const> fn_;
-				shared_ptr<pconnection> c_;
+				std::shared_ptr<void const> fn_;
+				std::shared_ptr<pconnection> c_;
 				int next_;
 				bool translated_;
 
 			public:
 
-				conn_rec( weak_store && e, weak_store && r, shared_ptr<void const> const & fn, shared_ptr<pconnection> const & c, bool translated ):
+				conn_rec( weak_store && e, weak_store && r, std::shared_ptr<void const> const & fn, std::shared_ptr<pconnection> const & c, bool translated ):
 					ep_(e.maybe_lock<void const>().get()),
 					e_(std::move(e)),
 					r_(std::move(r)),
@@ -51,9 +51,9 @@ namespace boost { namespace synapse {
 					BOOST_SYNAPSE_ASSERT(fn);
 				}
 
-				shared_ptr<pconnection> release()
+				std::shared_ptr<pconnection> release()
 				{
-					shared_ptr<pconnection> c; c.swap(c_);
+					std::shared_ptr<pconnection> c; c.swap(c_);
 					return c;
 				}
 
@@ -123,13 +123,13 @@ namespace boost { namespace synapse {
 									if( args )
 										return args->call_translated(fn_.get());
 									else
-										return (*static_cast<function<int()> const *>(fn_.get()))();
+										return (*static_cast<std::function<int()> const *>(fn_.get()))();
 								else
 								{
 									if( args )
 										args->call(fn_.get());
 									else
-										(*static_cast<function<void()> const *>(fn_.get()))();
+										(*static_cast<std::function<void()> const *>(fn_.get()))();
 									return 1;
 								}
 					return 0;
@@ -142,7 +142,7 @@ namespace boost { namespace synapse {
 			connection_list( connection_list const & );
 			connection_list & operator=( connection_list const & );
 
-			weak_ptr<thread_local_signal_data> const tlsd_;
+			std::weak_ptr<thread_local_signal_data> const tlsd_;
 			std::vector<conn_rec> conn_;
 			std::vector<conn_rec> * emit_conn_ptr_;
 			int first_free_;
@@ -197,7 +197,7 @@ namespace boost { namespace synapse {
 					if( interthread_interface * interthread=tlsd.interthread_->load() )
 						n1=interthread->emit(tlsd,e,args);
 				if( !tlsd.emitter_blocked_(tlsd,e) )
-					if( shared_ptr<thread_local_signal_data::connection_list> cl=tlsd.cl_.lock() )
+					if( std::shared_ptr<thread_local_signal_data::connection_list> cl=tlsd.cl_.lock() )
 					{
 						int n2=cl->emit_from_emitter(e,args);
 						return n1+n2;
@@ -209,7 +209,7 @@ namespace boost { namespace synapse {
 
 			static void cleanup_impl( thread_local_signal_data const & tlsd )
 			{
-				shared_ptr<connection_list> cl=tlsd.cl_.lock();
+				std::shared_ptr<connection_list> cl=tlsd.cl_.lock();
 				BOOST_SYNAPSE_ASSERT(cl);
 				cl->cleanup();
 				cl->destroy();
@@ -217,7 +217,7 @@ namespace boost { namespace synapse {
 
 			void destroy()
 			{
-				if( shared_ptr<thread_local_signal_data> tlsd=tlsd_.lock() )
+				if( std::shared_ptr<thread_local_signal_data> tlsd=tlsd_.lock() )
 				{
 					BOOST_SYNAPSE_ASSERT(tlsd);
 					if( tlsd->cl_count_ )
@@ -240,7 +240,7 @@ namespace boost { namespace synapse {
 
 		int (* const emit_meta_connected_)( connection &, unsigned );
 
-		connection_list( shared_ptr<thread_local_signal_data> const & tlsd, int (*emit_meta_connected)( connection &, unsigned ) ):
+		connection_list( std::shared_ptr<thread_local_signal_data> const & tlsd, int (*emit_meta_connected)( connection &, unsigned ) ):
 			tlsd_(tlsd),
 			emit_conn_ptr_(0),
 			first_free_(-1),
@@ -275,7 +275,7 @@ namespace boost { namespace synapse {
 				return conn_[index].receiver();
 			}
 
-			shared_ptr<pconnection> release( int index )
+			std::shared_ptr<pconnection> release( int index )
 			{
 				return conn_[index].release();
 			}
@@ -371,13 +371,13 @@ namespace boost { namespace synapse {
 			void purge()
 			{
 				check_invariants();
-				std::deque<shared_ptr<pconnection> > purged;
+				std::deque<std::shared_ptr<pconnection> > purged;
 				for( int const * i=&first_rec_; *i!=-1; )
 				{
 					conn_rec & cr=conn_[*i];
 					BOOST_SYNAPSE_ASSERT(!cr.is_free());
 					if( cr.expired() )
-						if( shared_ptr<pconnection> c=cr.release() )
+						if( std::shared_ptr<pconnection> c=cr.release() )
 							purged.push_back(c);
 					i=&cr.next();
 				}
@@ -390,12 +390,12 @@ namespace boost { namespace synapse {
 				try
 #endif
 				{
-					std::deque<shared_ptr<pconnection> > purged;
+					std::deque<std::shared_ptr<pconnection> > purged;
 					for( int const * i=&first_rec_; *i!=-1; )
 					{
 						conn_rec & cr=conn_[*i];
 						BOOST_SYNAPSE_ASSERT(!cr.is_free());
-						if( shared_ptr<pconnection> c=cr.release() )
+						if( std::shared_ptr<pconnection> c=cr.release() )
 							purged.push_back(c);
 						i=&cr.next();
 					}
@@ -415,13 +415,13 @@ namespace boost { namespace synapse {
 
 		namespace
 		{
-			shared_ptr<thread_local_signal_data::connection_list>
-			get_connection_list_( shared_ptr<thread_local_signal_data> const & tlsd, int (*emit_meta_connected)(connection &,unsigned) )
+			std::shared_ptr<thread_local_signal_data::connection_list>
+			get_connection_list_( std::shared_ptr<thread_local_signal_data> const & tlsd, int (*emit_meta_connected)(connection &,unsigned) )
 			{
-				shared_ptr<thread_local_signal_data::connection_list> cl=tlsd->cl_.lock();
+				std::shared_ptr<thread_local_signal_data::connection_list> cl=tlsd->cl_.lock();
 				if( !cl )
 				{
-					make_shared<thread_local_signal_data::connection_list>(tlsd,emit_meta_connected).swap(cl);
+					std::make_shared<thread_local_signal_data::connection_list>(tlsd,emit_meta_connected).swap(cl);
 					tlsd->cl_=cl;
 					if( tlsd->interthread_ )
 						if( interthread_interface * interthread=get_interthread_api() )
@@ -438,7 +438,7 @@ namespace boost { namespace synapse {
 			{
 				connection_impl( connection_impl const & );
 				connection_impl & operator=( connection_impl const & );
-				shared_ptr<thread_local_signal_data::connection_list> const cl_;
+				std::shared_ptr<thread_local_signal_data::connection_list> const cl_;
 				int position_;
 
 				weak_store const & emitter_() const final override
@@ -453,7 +453,7 @@ namespace boost { namespace synapse {
 
 			public:
 
-				explicit connection_impl( shared_ptr<thread_local_signal_data::connection_list> const & cl ):
+				explicit connection_impl( std::shared_ptr<thread_local_signal_data::connection_list> const & cl ):
 					cl_(cl)
 				{
 				}
@@ -489,42 +489,42 @@ namespace boost { namespace synapse {
 					cl_->remove(position_);
 				}
 
-				shared_ptr<connection const> release() const
+				std::shared_ptr<connection const> release() const
 				{
-					shared_ptr<void> pc = cl_->release(position_);
-					return shared_ptr<connection const>(pc,static_cast<connection const *>(this));
+					std::shared_ptr<void> pc = cl_->release(position_);
+					return std::shared_ptr<connection const>(pc,static_cast<connection const *>(this));
 				}
 
-				shared_ptr<connection> release()
+				std::shared_ptr<connection> release()
 				{
-					shared_ptr<void> pc = cl_->release(position_);
-					return shared_ptr<connection>(pc,static_cast<connection *>(this));
+					std::shared_ptr<void> pc = cl_->release(position_);
+					return std::shared_ptr<connection>(pc,static_cast<connection *>(this));
 				}
 			};
 
-			shared_ptr<connection> connect_impl( shared_ptr<thread_local_signal_data> const & tlsd, weak_store && e, weak_store && r, shared_ptr<void const> const & fn, int(*emit_meta_connected)(connection &,unsigned), bool translated )
+			std::shared_ptr<connection> connect_impl( std::shared_ptr<thread_local_signal_data> const & tlsd, weak_store && e, weak_store && r, std::shared_ptr<void const> const & fn, int(*emit_meta_connected)(connection &,unsigned), bool translated )
 			{
 				BOOST_SYNAPSE_ASSERT(fn);
-				auto c=make_shared<connection_impl<connection> >(get_connection_list_(tlsd,emit_meta_connected));
+				auto c=std::make_shared<connection_impl<connection> >(get_connection_list_(tlsd,emit_meta_connected));
 				c->connect(
 					conn_rec(
 						std::move(e),
-						r.empty() ? weak_store(weak_ptr<connection_impl<connection> >(c)) : std::move(r),
+						r.empty() ? weak_store(std::weak_ptr<connection_impl<connection> >(c)) : std::move(r),
 						fn,
-						shared_ptr<pconnection>(),
+						std::shared_ptr<pconnection>(),
 						translated ) );
 				return c;
 			}
 
-			shared_ptr<pconnection> pconnect_impl( shared_ptr<thread_local_signal_data> const & tlsd, weak_store && e, weak_store && r, shared_ptr<void const> const & fn, int(*emit_meta_connected)(connection &,unsigned), bool translated )
+			std::shared_ptr<pconnection> pconnect_impl( std::shared_ptr<thread_local_signal_data> const & tlsd, weak_store && e, weak_store && r, std::shared_ptr<void const> const & fn, int(*emit_meta_connected)(connection &,unsigned), bool translated )
 			{
 				BOOST_SYNAPSE_ASSERT(fn);
 				BOOST_SYNAPSE_ASSERT(e.lockable() || r.lockable());
-				auto c=make_shared<connection_impl<pconnection> >(get_connection_list_(tlsd,emit_meta_connected));
+				auto c=std::make_shared<connection_impl<pconnection> >(get_connection_list_(tlsd,emit_meta_connected));
 				c->connect(
 					conn_rec(
 						std::move(e),
-						r.empty() ? weak_store(weak_ptr<connection_impl<pconnection> >(c)) : std::move(r),
+						r.empty() ? weak_store(std::weak_ptr<connection_impl<pconnection> >(c)) : std::move(r),
 						fn,
 						c,
 						translated ) );
@@ -532,36 +532,36 @@ namespace boost { namespace synapse {
 			}
 		}
 
-		shared_ptr<connection> connect_( shared_ptr<thread_local_signal_data> const & tlsd, weak_store && e, weak_store && r, shared_ptr<void const> const & fn, int(*emit_meta_connected)(connection &,unsigned) )
+		std::shared_ptr<connection> connect_( std::shared_ptr<thread_local_signal_data> const & tlsd, weak_store && e, weak_store && r, std::shared_ptr<void const> const & fn, int(*emit_meta_connected)(connection &,unsigned) )
 		{
 			return connect_impl(tlsd,std::move(e),std::move(r),fn,emit_meta_connected,false);
 		}
 
-		shared_ptr<pconnection> pconnect_( shared_ptr<thread_local_signal_data> const & tlsd, weak_store && e, weak_store && r, shared_ptr<void const> const & fn, int(*emit_meta_connected)(connection &,unsigned) )
+		std::shared_ptr<pconnection> pconnect_( std::shared_ptr<thread_local_signal_data> const & tlsd, weak_store && e, weak_store && r, std::shared_ptr<void const> const & fn, int(*emit_meta_connected)(connection &,unsigned) )
 		{
 			return pconnect_impl(tlsd,std::move(e),std::move(r),fn,emit_meta_connected,false);
 		}
 
-		shared_ptr<connection> connect_translated_( shared_ptr<thread_local_signal_data> const & tlsd, weak_store && e, weak_store && r, shared_ptr<void const> const & fn, int(*emit_meta_connected)(connection &,unsigned) )
+		std::shared_ptr<connection> connect_translated_( std::shared_ptr<thread_local_signal_data> const & tlsd, weak_store && e, weak_store && r, std::shared_ptr<void const> const & fn, int(*emit_meta_connected)(connection &,unsigned) )
 		{
 			return connect_impl(tlsd,std::move(e),std::move(r),fn,emit_meta_connected,true);
 		}
 
-		shared_ptr<pconnection> pconnect_translated_( shared_ptr<thread_local_signal_data> const & tlsd, weak_store && e, weak_store && r, shared_ptr<void const> const & fn, int(*emit_meta_connected)(connection &,unsigned) )
+		std::shared_ptr<pconnection> pconnect_translated_( std::shared_ptr<thread_local_signal_data> const & tlsd, weak_store && e, weak_store && r, std::shared_ptr<void const> const & fn, int(*emit_meta_connected)(connection &,unsigned) )
 		{
 			return pconnect_impl(tlsd,std::move(e),std::move(r),fn,emit_meta_connected,true);
 		}
 
-		shared_ptr<void const> & meta_emitter()
+		std::shared_ptr<void const> & meta_emitter()
 		{
-			static shared_ptr<void const> me(make_shared<int>(42));
+			static std::shared_ptr<void const> me(std::make_shared<int>(42));
 			return me;
 		}
 	}
 
 	namespace meta
 	{
-		weak_ptr<void const> emitter()
+		std::weak_ptr<void const> emitter()
 		{
 			return synapse_detail::meta_emitter();
 		}
@@ -583,18 +583,18 @@ namespace boost { namespace synapse {
 	{
 	}
 
-	shared_ptr<connection const> release( weak_ptr<pconnection const> const & c )
+	std::shared_ptr<connection const> release( std::weak_ptr<pconnection const> const & c )
 	{
-		shared_ptr<pconnection const> sp = c.lock();
-		shared_ptr<connection const> released = static_cast<synapse_detail::connection_impl<pconnection> const *>(sp.get())->release();
-		return released ? released : shared_ptr<connection const>();
+		std::shared_ptr<pconnection const> sp = c.lock();
+		std::shared_ptr<connection const> released = static_cast<synapse_detail::connection_impl<pconnection> const *>(sp.get())->release();
+		return released ? released : std::shared_ptr<connection const>();
 	}
 
-	shared_ptr<connection> release( weak_ptr<pconnection> const & c )
+	std::shared_ptr<connection> release( std::weak_ptr<pconnection> const & c )
 	{
-		shared_ptr<pconnection> sp = c.lock();
-		shared_ptr<connection> released = static_cast<synapse_detail::connection_impl<pconnection> *>(sp.get())->release();
-		return released ? released : shared_ptr<connection>();
+		std::shared_ptr<pconnection> sp = c.lock();
+		std::shared_ptr<connection> released = static_cast<synapse_detail::connection_impl<pconnection> *>(sp.get())->release();
+		return released ? released : std::shared_ptr<connection>();
 	}
 
 } }

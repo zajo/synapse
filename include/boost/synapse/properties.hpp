@@ -29,13 +29,13 @@ namespace boost { namespace synapse {
 		};
 
 		template <class Property, class ObjectRef, class Object>
-		shared_ptr<connection> set_( ObjectRef const & o, Object * op, typename Property::type x )
+		std::shared_ptr<connection> set_( ObjectRef const & o, Object * op, typename Property::type x )
 		{
 			BOOST_SYNAPSE_ASSERT(op != 0);
 			if( int n=emit<access_property<Property> >(op, &x, true) )
 			{
 				BOOST_SYNAPSE_ASSERT(n == 1);
-				return shared_ptr<connection>();
+				return std::shared_ptr<connection>();
 			}
 			else
 				return connect<access_property<Property> >(o,
@@ -49,13 +49,13 @@ namespace boost { namespace synapse {
 		}
 
 		template <class Property, class ObjectRef, class Object>
-		weak_ptr<pconnection> pset_( ObjectRef const & o, Object * op, typename Property::type x )
+		std::weak_ptr<pconnection> pset_( ObjectRef const & o, Object * op, typename Property::type x )
 		{
 			BOOST_SYNAPSE_ASSERT(op!=0);
 			if( int n = emit<access_property<Property> >(op, &x, true) )
 			{
 				BOOST_SYNAPSE_ASSERT(n == 1);
-				return weak_ptr<pconnection>();
+				return std::weak_ptr<pconnection>();
 			}
 			else
 				return connect<access_property<Property> >(o,
@@ -83,24 +83,24 @@ namespace boost { namespace synapse {
 	};
 
 	template <class Property, class Object>
-	shared_ptr<connection> set( Object * o, typename Property::type const & x )
+	std::shared_ptr<connection> set( Object * o, typename Property::type const & x )
 	{
 		return synapse_detail::set_<Property>(o, o, x);
 	}
 
 	template <class Property, class Object>
-	weak_ptr<pconnection> set( shared_ptr<Object> const & o, typename Property::type x )
+	std::weak_ptr<pconnection> set( std::shared_ptr<Object> const & o, typename Property::type x )
 	{
 		return synapse_detail::pset_<Property>(o, o.get(), x);
 	}
 
 	template <class Property, class Object>
-	weak_ptr<pconnection> set( weak_ptr<Object> const & o, typename Property::type x )
+	std::weak_ptr<pconnection> set( std::weak_ptr<Object> const & o, typename Property::type x )
 	{
-		if( shared_ptr<Object> so = o.lock() )
+		if( std::shared_ptr<Object> so = o.lock() )
 			return set<Property>(o, x);
 		else
-			return weak_ptr<pconnection>();
+			return std::weak_ptr<pconnection>();
 	}
 
 	template <class Property, class Object>
@@ -113,5 +113,9 @@ namespace boost { namespace synapse {
 	}
 
 } }
+
+#if defined(_MSC_VER) && !defined(BOOST_SYNAPSE_ENABLE_WARNINGS)
+#	pragma warning(pop)
+#endif
 
 #endif

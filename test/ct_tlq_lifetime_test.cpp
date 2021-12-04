@@ -12,9 +12,6 @@
 #include "boost/core/lightweight_test.hpp"
 
 namespace synapse=boost::synapse;
-using synapse::shared_ptr;
-using synapse::weak_ptr;
-using synapse::make_shared;
 
 namespace
 {
@@ -42,15 +39,15 @@ namespace
 		}
 	};
 
-	void emitting_thread( barrier & b, weak_ptr<void> const & terminate )
+	void emitting_thread( barrier & b, std::weak_ptr<void> const & terminate )
 	{
-		shared_ptr<synapse::thread_local_queue> tlq=synapse::create_thread_local_queue();
+		std::shared_ptr<synapse::thread_local_queue> tlq=synapse::create_thread_local_queue();
 		bool keep_going=true;
 		synapse::connect<terminate_thread>( terminate,
 			[&keep_going]
 			{
 				keep_going=false;
-			}).lock()->set_user_data(make_shared<thread_connection_counter>());
+			}).lock()->set_user_data(std::make_shared<thread_connection_counter>());
 		b.wait();
 		while( keep_going )
 		{
@@ -67,7 +64,7 @@ namespace
 		assert(series_count>0);
 		std::cout << "*** " << emitting_thread_count << '/' << per_thread_emit_count << '/' << series_count << " ***" << std::endl;
 		barrier b( emitting_thread_count + 1 );
-		shared_ptr<int> terminate(make_shared<int>(42));
+		std::shared_ptr<int> terminate(std::make_shared<int>(42));
 		std::vector<std::thread> tgr;
 		tgr.reserve(emitting_thread_count);
 		for( int i=0; i!=emitting_thread_count; ++i )
@@ -79,11 +76,11 @@ namespace
 		b.wait();
 		BOOST_TEST(terminate.unique());
 		BOOST_TEST_EQ(connection_count, emitting_thread_count);
-		shared_ptr<synapse::connection> c1=synapse::connect<signal1>(&emitter,[](){});
-		shared_ptr<synapse::connection> c2=synapse::connect<signal2>(&emitter,[](){});
+		std::shared_ptr<synapse::connection> c1=synapse::connect<signal1>(&emitter,[](){});
+		std::shared_ptr<synapse::connection> c2=synapse::connect<signal2>(&emitter,[](){});
 		for( int i=0; i!=series_count; ++i )
 		{
-			shared_ptr<synapse::thread_local_queue> tlq=synapse::create_thread_local_queue();
+			std::shared_ptr<synapse::thread_local_queue> tlq=synapse::create_thread_local_queue();
 			for( int j=0; j<emitting_thread_count*per_thread_emit_count; )
 			{
 				int n=poll(*tlq);

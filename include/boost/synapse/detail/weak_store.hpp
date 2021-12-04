@@ -17,7 +17,7 @@
 #endif
 
 #include <boost/synapse/detail/config.hpp>
-#include <boost/synapse/detail/smart_ptr.hpp>
+#include <memory>
 
 namespace boost { namespace synapse {
 
@@ -25,7 +25,7 @@ namespace boost { namespace synapse {
 	{
 		class weak_store
 		{
-			weak_ptr<void const> w_;
+			std::weak_ptr<void const> w_;
 			void const * px_;
 			void (*type_)();
 			void (*ctype_)();
@@ -68,7 +68,7 @@ namespace boost { namespace synapse {
 			}
 
 			template <class T>
-			weak_store( weak_ptr<T> const & w ):
+			weak_store( std::weak_ptr<T> const & w ):
 				w_(w),
 				px_(0),
 				type_(&type<T>),
@@ -80,7 +80,7 @@ namespace boost { namespace synapse {
 			}
 
 			template <class T>
-			weak_store( weak_ptr<T const> const & w ):
+			weak_store( std::weak_ptr<T const> const & w ):
 				w_(w),
 				px_(0),
 				type_(0),
@@ -92,7 +92,7 @@ namespace boost { namespace synapse {
 			}
 
 			template <class T>
-			weak_store( shared_ptr<T> const & w ):
+			weak_store( std::shared_ptr<T> const & w ):
 				w_(w),
 				px_(0),
 				type_(&type<T>),
@@ -104,7 +104,7 @@ namespace boost { namespace synapse {
 			}
 
 			template <class T>
-			weak_store( shared_ptr<T const> const & w ):
+			weak_store( std::shared_ptr<T const> const & w ):
 				w_(w),
 				px_(0),
 				type_(0),
@@ -139,7 +139,7 @@ namespace boost { namespace synapse {
 			}
 
 			template <class T>
-			shared_ptr<T> maybe_lock() const
+			std::shared_ptr<T> maybe_lock() const
 			{
 				return access<T>::get(maybe_lock<void const>(), &type<T>, type_,ctype_);
 			}
@@ -148,37 +148,41 @@ namespace boost { namespace synapse {
 		template <class T>
 		struct weak_store:: access
 		{
-			static shared_ptr<T> get( shared_ptr<void const> const & p, void (*pt)(), void (*type)(), void (*)() )
+			static std::shared_ptr<T> get( std::shared_ptr<void const> const & p, void (*pt)(), void (*type)(), void (*)() )
 			{
-				return p && type==pt ? shared_ptr<T>(p,(T *)p.get()) : shared_ptr<T>();
+				return p && type==pt ? std::shared_ptr<T>(p,(T *)p.get()) : std::shared_ptr<T>();
 			}
 		};
 
 		template <class T>
 		struct weak_store::access<T const>
 		{
-			static shared_ptr<T const> get( shared_ptr<void const> const & p, void (*pt)(), void (*)(), void (*ctype)() )
+			static std::shared_ptr<T const> get( std::shared_ptr<void const> const & p, void (*pt)(), void (*)(), void (*ctype)() )
 			{
-				return p && ctype==pt ? shared_ptr<T const>(p,(T const *)p.get()) : shared_ptr<T const>();
+				return p && ctype==pt ? std::shared_ptr<T const>(p,(T const *)p.get()) : std::shared_ptr<T const>();
 			}
 		};
 
 		template <>
 		struct weak_store::access<void>
 		{
-			static shared_ptr<void> get( shared_ptr<void const> const & p, void (*)(), void (*type)(), void (*)() )
+			static std::shared_ptr<void> get( std::shared_ptr<void const> const & p, void (*)(), void (*type)(), void (*)() )
 			{
-				return p && type ? shared_ptr<void>(p,(void *)p.get()) : shared_ptr<void>();
+				return p && type ? std::shared_ptr<void>(p,(void *)p.get()) : std::shared_ptr<void>();
 			}
 		};
 
 		template <>
-		inline shared_ptr<void const> weak_store::maybe_lock<void const>() const
+		inline std::shared_ptr<void const> weak_store::maybe_lock<void const>() const
 		{
-			return px_ ? shared_ptr<void const>(shared_ptr<void>(), px_) : w_.lock();
+			return px_ ? std::shared_ptr<void const>(std::shared_ptr<void>(), px_) : w_.lock();
 		}
 	}
 
 } }
+
+#if defined(_MSC_VER) && !defined(BOOST_SYNAPSE_ENABLE_WARNINGS)
+#	pragma warning(pop)
+#endif
 
 #endif

@@ -32,7 +32,7 @@ namespace boost { namespace synapse {
 
 	public:
 
-		template <class T> shared_ptr<T> emitter() const;
+		template <class T> std::shared_ptr<T> emitter() const;
 	};
 
 } }
@@ -42,11 +42,15 @@ namespace boost { namespace synapse {
 namespace boost { namespace synapse {
 
 	template <class T>
-	shared_ptr<T> blocker::emitter() const
+	std::shared_ptr<T> blocker::emitter() const
 	{
 		return emitter_().maybe_lock<T>();
 	}
 
 } }
+
+#if defined(_MSC_VER) && !defined(BOOST_SYNAPSE_ENABLE_WARNINGS)
+#	pragma warning(pop)
+#endif
 
 #endif

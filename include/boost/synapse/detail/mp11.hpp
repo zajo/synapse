@@ -140,4 +140,8 @@ BOOST_SYNAPSE_CONSTEXPR auto tuple_apply( F && f, Tp && tp )
 
 } } }
 
+#if defined(_MSC_VER) && !defined(BOOST_SYNAPSE_ENABLE_WARNINGS)
+#	pragma warning(pop)
+#endif
+
 #endif

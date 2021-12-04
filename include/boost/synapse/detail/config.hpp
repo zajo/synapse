@@ -143,4 +143,8 @@
 #	endif
 #endif
 
+#if defined(_MSC_VER) && !defined(BOOST_SYNAPSE_ENABLE_WARNINGS)
+#	pragma warning(pop)
+#endif
+
 #endif

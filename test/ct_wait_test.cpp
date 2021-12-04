@@ -10,8 +10,6 @@
 #include "boost/core/lightweight_test.hpp"
 
 namespace synapse=boost::synapse;
-using synapse::shared_ptr;
-using synapse::weak_ptr;
 
 namespace
 {
@@ -31,9 +29,9 @@ namespace
 
 	void test()
 	{
-		shared_ptr<synapse::thread_local_queue> tlq=synapse::create_thread_local_queue();
-		int counter1=0; shared_ptr<synapse::connection const> c1=synapse::connect<sig1>(&counter1,[&counter1](){++counter1;});
-		int counter2=0; shared_ptr<synapse::connection const> c2=synapse::connect<sig2>(&counter2,[&counter2](){++counter2;});
+		std::shared_ptr<synapse::thread_local_queue> tlq=synapse::create_thread_local_queue();
+		int counter1=0; std::shared_ptr<synapse::connection const> c1=synapse::connect<sig1>(&counter1,[&counter1](){++counter1;});
+		int counter2=0; std::shared_ptr<synapse::connection const> c2=synapse::connect<sig2>(&counter2,[&counter2](){++counter2;});
 		std::thread th1(
 			[&]
 			{

@@ -46,7 +46,6 @@ defines = [ ]
 dep_boost = [ ]
 if get_option('synapse_use_boost') # Requires that Synapse resides under boost_root/libs/synapse.
 	dep_boost = declare_dependency(include_directories: '../..')
-	defines = [ '-DBOOST_SYNAPSE_USE_BOOST' ]
 endif
 if not option_suppress_warnings
 	defines = [ '-DBOOST_SYNAPSE_ENABLE_WARNINGS' ]

@@ -53,7 +53,7 @@ class synapsifier<R(*)(GLFWwindow *,A...)>
 		// (when the connection expires). The emitter pointer passed to connect
 		// (which in this case is of type GLFWwindow) is stored in the
 		// synapse::connection object passed to the lambda below, and can be
-		// accessed by the connection::emitter member function template.
+		// accessed by the connection::emitter member std::function template.
 		connect<meta::connected<Signal> >( meta::emitter(),
 			[setter]( connection & c, unsigned flags )
 			{

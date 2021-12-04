@@ -19,7 +19,7 @@ namespace boost { namespace synapse {
 			{
 				blocker_impl( blocker_impl const & );
 				blocker_impl & operator=( blocker_impl const & );
-				shared_ptr<thread_local_signal_data::blocked_emitters_list> const bl_;
+				std::shared_ptr<thread_local_signal_data::blocked_emitters_list> const bl_;
 
 				weak_store const &  emitter_() const final override
 				{
@@ -29,7 +29,7 @@ namespace boost { namespace synapse {
 			public:
 
 				weak_store e_;
-				blocker_impl( weak_store &&, shared_ptr<thread_local_signal_data::blocked_emitters_list> const & );
+				blocker_impl( weak_store &&, std::shared_ptr<thread_local_signal_data::blocked_emitters_list> const & );
 				~blocker_impl();
 			};
 		} //namespace
@@ -42,10 +42,10 @@ namespace boost { namespace synapse {
 			struct bl_rec
 			{
 				void const * ep_;
-				weak_ptr<blocker_impl> eb_;
+				std::weak_ptr<blocker_impl> eb_;
 				blocker_impl const * ebp_;
 
-				bl_rec( void const * ep, shared_ptr<blocker_impl> const & eb ):
+				bl_rec( void const * ep, std::shared_ptr<blocker_impl> const & eb ):
 					ep_(ep),
 					eb_(eb),
 					ebp_(eb.get())
@@ -75,7 +75,7 @@ namespace boost { namespace synapse {
 
 			static bool emitter_blocked_impl( thread_local_signal_data const & tlsd, void const * e )
 			{
-				if( shared_ptr<blocked_emitters_list> bl=tlsd.bl_.lock() )
+				if( std::shared_ptr<blocked_emitters_list> bl=tlsd.bl_.lock() )
 					return bl->is_blocked(e);
 				else
 				{
@@ -84,14 +84,14 @@ namespace boost { namespace synapse {
 				}
 			}
 
-			shared_ptr<thread_local_signal_data> const tlsd_;
+			std::shared_ptr<thread_local_signal_data> const tlsd_;
 			std::vector<bl_rec> bl_;
 
 		public:
 
 			int (* const emit_meta_blocked_)(blocker &,bool);
 
-			blocked_emitters_list( shared_ptr<thread_local_signal_data> const & tlsd, int (*emit_meta_blocked)(blocker &,bool) ):
+			blocked_emitters_list( std::shared_ptr<thread_local_signal_data> const & tlsd, int (*emit_meta_blocked)(blocker &,bool) ):
 				tlsd_(tlsd),
 				emit_meta_blocked_(emit_meta_blocked)
 			{
@@ -105,7 +105,7 @@ namespace boost { namespace synapse {
 				tlsd_->emitter_blocked_=&emitter_blocked_stub;
 			}
 
-			shared_ptr<blocker> block( shared_ptr<blocked_emitters_list> const & bl, weak_store && e, shared_ptr<void const> const & sp )
+			std::shared_ptr<blocker> block( std::shared_ptr<blocked_emitters_list> const & bl, weak_store && e, std::shared_ptr<void const> const & sp )
 			{
 				BOOST_SYNAPSE_ASSERT(bl);
 				BOOST_SYNAPSE_ASSERT(sp);
@@ -113,13 +113,13 @@ namespace boost { namespace synapse {
 				std::vector<bl_rec>::const_iterator i=std::find_if(bl_.begin(),bl_.end(),[&sp](bl_rec const & r) { return r.same_emitter(sp.get()); });
 				if( i!=bl_.end() )
 				{
-					shared_ptr<blocker> bb=i->eb_.lock();
+					std::shared_ptr<blocker> bb=i->eb_.lock();
 					BOOST_SYNAPSE_ASSERT(bb);
 					return bb;
 				}
 				else
 				{
-					shared_ptr<blocker_impl> bb=make_shared<blocker_impl>(std::move(e),bl);
+					std::shared_ptr<blocker_impl> bb=std::make_shared<blocker_impl>(std::move(e),bl);
 					bl_.push_back(bl_rec(sp.get(),bb));
 					return bb;
 				}
@@ -141,7 +141,7 @@ namespace boost { namespace synapse {
 
 		namespace
 		{
-			blocker_impl::blocker_impl( weak_store && e, shared_ptr<thread_local_signal_data::blocked_emitters_list> const & bl ):
+			blocker_impl::blocker_impl( weak_store && e, std::shared_ptr<thread_local_signal_data::blocked_emitters_list> const & bl ):
 				bl_(bl),
 				e_(std::move(e))
 			{
@@ -157,27 +157,27 @@ namespace boost { namespace synapse {
 				bl_->emit_meta_blocked_(*this,false);
 			}
 
-			shared_ptr<thread_local_signal_data::blocked_emitters_list> get_blocked_list_( shared_ptr<thread_local_signal_data> const & tlsd, int (*emit_meta_blocked)(blocker &,bool) )
+			std::shared_ptr<thread_local_signal_data::blocked_emitters_list> get_blocked_list_( std::shared_ptr<thread_local_signal_data> const & tlsd, int (*emit_meta_blocked)(blocker &,bool) )
 			{
-				shared_ptr<thread_local_signal_data::blocked_emitters_list> bl=tlsd->bl_.lock();
+				std::shared_ptr<thread_local_signal_data::blocked_emitters_list> bl=tlsd->bl_.lock();
 				if( !bl )
 				{
-					make_shared<thread_local_signal_data::blocked_emitters_list>(tlsd,emit_meta_blocked).swap(bl);
+					std::make_shared<thread_local_signal_data::blocked_emitters_list>(tlsd,emit_meta_blocked).swap(bl);
 					tlsd->bl_=bl;
 				}
 				return bl;
 			}
 		} //namespace
 
-		shared_ptr<blocker> block_( shared_ptr<thread_local_signal_data> const & tlsd, weak_store && e, int(*emit_meta_blocked)(blocker &,bool) )
+		std::shared_ptr<blocker> block_( std::shared_ptr<thread_local_signal_data> const & tlsd, weak_store && e, int(*emit_meta_blocked)(blocker &,bool) )
 		{
-			if( shared_ptr<void const> sp=e.maybe_lock<void const>() )
+			if( std::shared_ptr<void const> sp=e.maybe_lock<void const>() )
 			{
-				shared_ptr<thread_local_signal_data::blocked_emitters_list> bl=get_blocked_list_(tlsd,emit_meta_blocked);
+				std::shared_ptr<thread_local_signal_data::blocked_emitters_list> bl=get_blocked_list_(tlsd,emit_meta_blocked);
 				return bl->block(bl,std::move(e),sp);
 			}
 			else
-				return shared_ptr<blocker>();
+				return std::shared_ptr<blocker>();
 		}
 
 	}

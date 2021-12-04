@@ -28,6 +28,19 @@
 			}
 		},
 		{
+			"group": "test",
+			"label": "Run all unit tests (b2, all configurations)",
+			"type": "shell",
+			"command": "../../b2 test link=shared,static variant=debug,release exception-handling=on,off cxxstd=11,14,1z,17",
+			"problemMatcher": {
+				"base": "$gcc",
+				"fileLocation": [
+					"relative",
+					"${workspaceRoot}/bld/release"
+				]
+			}
+		},
+		{
 			"group": {
 				"kind": "test",
 				"isDefault": true

@@ -11,7 +11,6 @@
 #include "boost/core/lightweight_test.hpp"
 
 namespace synapse = boost::synapse;
-using synapse::shared_ptr;
 
 namespace
 {
@@ -21,8 +20,8 @@ namespace
 
 	void emitting_thread( int consuming_thread_count, int iterations )
 	{
-		int local_count1=0; shared_ptr<synapse::connection> c1=synapse::connect<signal1>(&emitter, [&local_count1]() { ++local_count1; } );
-		int local_count2=0; shared_ptr<synapse::connection> c2=synapse::connect<signal2>(&emitter, [&local_count2]() { ++local_count2; } );
+		int local_count1=0; std::shared_ptr<synapse::connection> c1=synapse::connect<signal1>(&emitter, [&local_count1]() { ++local_count1; } );
+		int local_count2=0; std::shared_ptr<synapse::connection> c2=synapse::connect<signal2>(&emitter, [&local_count2]() { ++local_count2; } );
 		for( int i=0; i!=iterations; ++i )
 		{
 			int n1=synapse::emit<signal1>(&emitter);
@@ -37,9 +36,9 @@ namespace
 	void consuming_thread( barrier & b, int total_count )
 	{
 		assert(total_count>0);
-		int n1=0; shared_ptr<synapse::connection> c1=synapse::connect<signal1>(&emitter, [&n1]() { ++n1; } );
-		shared_ptr<synapse::thread_local_queue> tlq=synapse::create_thread_local_queue();
-		int n2=0; shared_ptr<synapse::connection> c2=synapse::connect<signal2>(&emitter, [&n2]() { ++n2; } );
+		int n1=0; std::shared_ptr<synapse::connection> c1=synapse::connect<signal1>(&emitter, [&n1]() { ++n1; } );
+		std::shared_ptr<synapse::thread_local_queue> tlq=synapse::create_thread_local_queue();
+		int n2=0; std::shared_ptr<synapse::connection> c2=synapse::connect<signal2>(&emitter, [&n2]() { ++n2; } );
 		b.wait();
 		while( n1!=total_count || n2!=total_count )
 		{

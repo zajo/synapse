@@ -28,11 +28,11 @@ namespace boost { namespace synapse {
 			{
 				unsigned serial_number;
 				void const * e;
-				shared_ptr<args_binder_base> args;
+				std::shared_ptr<args_binder_base> args;
 				posted()
 				{
 				}
-				posted( unsigned serial_number, void const * e, shared_ptr<args_binder_base> const & args ):
+				posted( unsigned serial_number, void const * e, std::shared_ptr<args_binder_base> const & args ):
 					serial_number(serial_number),
 					e(e),
 					args(args)
@@ -63,7 +63,7 @@ namespace boost { namespace synapse {
 					return false;
 				else
 				{
-					shared_ptr<args_binder_base> a;
+					std::shared_ptr<args_binder_base> a;
 					if( args )
 						a=args->clone();
 					{
@@ -89,7 +89,7 @@ namespace boost { namespace synapse {
 				}
 				BOOST_SYNAPSE_ASSERT(p.e!=0);
 				if( !tlsd.emitter_blocked_(tlsd,p.e) )
-					if( shared_ptr<thread_local_signal_data::connection_list> cl=tlsd.cl_.lock() )
+					if( std::shared_ptr<thread_local_signal_data::connection_list> cl=tlsd.cl_.lock() )
 						return emit_from_emitter(*cl,p.e,p.args.get());
 				return 0;
 			}
@@ -99,11 +99,11 @@ namespace boost { namespace synapse {
 		{
 			class cl_rec
 			{
-				weak_ptr<thread_local_signal_data> tlsd_;
-				weak_ptr<thread_local_signal_data::connection_list> cl_;
+				std::weak_ptr<thread_local_signal_data> tlsd_;
+				std::weak_ptr<thread_local_signal_data::connection_list> cl_;
 			public:
 
-				explicit cl_rec( shared_ptr<thread_local_signal_data> const & tlsd ):
+				explicit cl_rec( std::shared_ptr<thread_local_signal_data> const & tlsd ):
 					tlsd_(tlsd),
 					cl_(tlsd->cl_)
 				{
@@ -114,9 +114,9 @@ namespace boost { namespace synapse {
 					return cl_.expired() || tlsd_.expired();
 				}
 
-				shared_ptr<thread_local_signal_data> lock() const
+				std::shared_ptr<thread_local_signal_data> lock() const
 				{
-					return cl_.expired()? shared_ptr<thread_local_signal_data>() : tlsd_.lock();
+					return cl_.expired()? std::shared_ptr<thread_local_signal_data>() : tlsd_.lock();
 				}
 			};
 
@@ -141,7 +141,7 @@ namespace boost { namespace synapse {
 			{
 			}
 
-			void notify_connection_list_created( shared_ptr<thread_local_signal_data> const & tlsd )
+			void notify_connection_list_created( std::shared_ptr<thread_local_signal_data> const & tlsd )
 			{
 				std::lock_guard<std::mutex> lk(mut_);
 				same_signal_different_threads_.push_back(cl_rec(tlsd));
@@ -154,7 +154,7 @@ namespace boost { namespace synapse {
 				int count=0;
 				std::lock_guard<std::mutex> lk(mut_);
 				for( auto & r : same_signal_different_threads_ )
-					if( shared_ptr<thread_local_signal_data> sp=r.lock() )
+					if( std::shared_ptr<thread_local_signal_data> sp=r.lock() )
 						if( sp->ps_ )
 							count+=int(sp->ps_->post(e,args));
 				return count;
@@ -163,9 +163,9 @@ namespace boost { namespace synapse {
 
 		namespace
 		{
-			shared_ptr<connection_list_list> create_connection_list_list()
+			std::shared_ptr<connection_list_list> create_connection_list_list()
 			{
-				return make_shared<connection_list_list>();
+				return std::make_shared<connection_list_list>();
 			}
 
 			class thread_local_connection_list_list
@@ -189,11 +189,11 @@ namespace boost { namespace synapse {
 				{
 				}
 
-				void notify_connection_list_created( shared_ptr<thread_local_signal_data> const & tlsd )
+				void notify_connection_list_created( std::shared_ptr<thread_local_signal_data> const & tlsd )
 				{
 					if( has_tlq_ )
 					{
-						shared_ptr<thread_local_signal_data::posted_signals> ps=synapse::make_shared<thread_local_signal_data::posted_signals>(emit_serial_number_,wait_cond_);
+						std::shared_ptr<thread_local_signal_data::posted_signals> ps=std::make_shared<thread_local_signal_data::posted_signals>(emit_serial_number_,wait_cond_);
 						{
 							std::lock_guard<std::mutex> lk(tlsd->get_cll_(&create_connection_list_list)->mut_);
 							tlsd->ps_.swap(ps);
@@ -207,9 +207,9 @@ namespace boost { namespace synapse {
 				{
 					BOOST_SYNAPSE_ASSERT(!has_tlq_);
 					for( auto & r : same_thread_different_signals_ )
-						if( shared_ptr<thread_local_signal_data> sp=r.lock() )
+						if( std::shared_ptr<thread_local_signal_data> sp=r.lock() )
 						{
-							shared_ptr<thread_local_signal_data::posted_signals> ps=synapse::make_shared<thread_local_signal_data::posted_signals>(emit_serial_number_,wait_cond_);
+							std::shared_ptr<thread_local_signal_data::posted_signals> ps=std::make_shared<thread_local_signal_data::posted_signals>(emit_serial_number_,wait_cond_);
 							{
 								std::lock_guard<std::mutex> lk(sp->get_cll_(&create_connection_list_list)->mut_);
 								sp->ps_.swap(ps);
@@ -222,9 +222,9 @@ namespace boost { namespace synapse {
 				{
 					BOOST_SYNAPSE_ASSERT(has_tlq_);
 					for( auto & r : same_thread_different_signals_ )
-						if( shared_ptr<thread_local_signal_data> sp = r.lock() )
+						if( std::shared_ptr<thread_local_signal_data> sp = r.lock() )
 						{
-							shared_ptr<thread_local_signal_data::posted_signals> ps;
+							std::shared_ptr<thread_local_signal_data::posted_signals> ps;
 							{
 								std::lock_guard<std::mutex> lk(sp->get_cll_(&create_connection_list_list)->mut_);
 								sp->ps_.swap(ps);
@@ -245,7 +245,7 @@ namespace boost { namespace synapse {
 						bool found = std::find_if( same_thread_different_signals_.begin(), same_thread_different_signals_.end(),
 							[&count,serial_number]( cl_rec const & r )
 							{
-								if( shared_ptr<thread_local_signal_data> sp=r.lock() )
+								if( std::shared_ptr<thread_local_signal_data> sp=r.lock() )
 								{
 									int n=sp->ps_->emit_if_serial_number_matches(serial_number,*sp);
 									if( n>=0 )
@@ -273,9 +273,9 @@ namespace boost { namespace synapse {
 				}
 			};
 
-			shared_ptr<thread_local_connection_list_list> get_thread_local_connection_list_list()
+			std::shared_ptr<thread_local_connection_list_list> get_thread_local_connection_list_list()
 			{
-				static thread_local shared_ptr<thread_local_connection_list_list> tlcll(make_shared<thread_local_connection_list_list>());
+				static thread_local std::shared_ptr<thread_local_connection_list_list> tlcll(std::make_shared<thread_local_connection_list_list>());
 				return tlcll;
 			}
 		}
@@ -285,7 +285,7 @@ namespace boost { namespace synapse {
 			class interthread_impl:
 				public interthread_interface
 			{
-				void notify_connection_list_created( shared_ptr<thread_local_signal_data> const & tlsd ) final override
+				void notify_connection_list_created( std::shared_ptr<thread_local_signal_data> const & tlsd ) final override
 				{
 					tlsd->get_cll_(&create_connection_list_list)->notify_connection_list_created(tlsd);
 					get_thread_local_connection_list_list()->notify_connection_list_created(tlsd);
@@ -303,7 +303,7 @@ namespace boost { namespace synapse {
 
 	namespace
 	{
-		typedef struct bare_lambda_(*bare_lambda)( function<void()> const & );
+		typedef struct bare_lambda_(*bare_lambda)( std::function<void()> const & );
 	}
 
 	struct thread_local_queue
@@ -313,7 +313,7 @@ namespace boost { namespace synapse {
 		thread_local_queue & operator=( thread_local_queue const & );
 
 		std::thread::id const tid_;
-		shared_ptr<synapse_detail::thread_local_connection_list_list> const tlcll_;
+		std::shared_ptr<synapse_detail::thread_local_connection_list_list> const tlcll_;
 
 	public:
 
@@ -341,16 +341,16 @@ namespace boost { namespace synapse {
 			return tlcll_->wait();
 		}
 
-		void post( function<void()> const & f )
+		void post( std::function<void()> const & f )
 		{
 			BOOST_SYNAPSE_ASSERT(f);
 			emit<bare_lambda>(this,f);
 		}
 	};
 
-	shared_ptr<thread_local_queue> create_thread_local_queue()
+	std::shared_ptr<thread_local_queue> create_thread_local_queue()
 	{
-		std::shared_ptr<thread_local_queue> tlq = make_shared<thread_local_queue>();
+		std::shared_ptr<thread_local_queue> tlq = std::make_shared<thread_local_queue>();
 		(void) connect<bare_lambda>(tlq, []( std::function<void()> const & f )
 			{
 				BOOST_SYNAPSE_ASSERT(f);
@@ -369,7 +369,7 @@ namespace boost { namespace synapse {
 		return tlq.wait();
 	}
 
-	void post( thread_local_queue & tlq, function<void()> const & f )
+	void post( thread_local_queue & tlq, std::function<void()> const & f )
 	{
 		tlq.post(f);
 	}

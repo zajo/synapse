@@ -8,7 +8,6 @@
 #include <string>
 
 namespace synapse=boost::synapse;
-using synapse::shared_ptr;
 
 typedef synapse::property<struct prop1_,std::string> prop1;
 

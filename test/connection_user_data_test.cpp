@@ -8,9 +8,6 @@
 #include "boost/core/lightweight_test.hpp"
 
 namespace synapse=boost::synapse;
-using synapse::shared_ptr;
-using synapse::make_shared;
-
 namespace
 {
 	struct my_emitter_type { };
@@ -24,14 +21,14 @@ int main( int argc, char const * argv[] )
 {
 	{
 		my_emitter_type e;
-		shared_ptr<synapse::connection> c=synapse::connect<my_signal>(&e,&noop);
+		std::shared_ptr<synapse::connection> c=synapse::connect<my_signal>(&e,&noop);
 		BOOST_TEST(!c->get_user_data<int>());
 		c->set_user_data(42);
 		BOOST_TEST_EQ(*c->get_user_data<int>(), 42);
 	}
 	{
-		auto e = make_shared<my_emitter_type>();
-		shared_ptr<synapse::pconnection> c=synapse::connect<my_signal>(e,&noop).lock();
+		auto e = std::make_shared<my_emitter_type>();
+		std::shared_ptr<synapse::pconnection> c=synapse::connect<my_signal>(e,&noop).lock();
 		BOOST_TEST(!c->get_user_data<int>());
 		c->set_user_data(42);
 		BOOST_TEST_EQ(*c->get_user_data<int>(), 42);

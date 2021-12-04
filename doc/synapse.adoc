@@ -1361,10 +1361,6 @@ Because Synapse is formatted for Boost review, people often ask what are the dif
 
 == Macros and Configuration
 
-=== `BOOST_SYNAPSE_USE_BOOST`
-
-If this macro is defined, Synapse will use `boost::shared_ptr`, `boost::weak_ptr` and `boost::function`. By default, it will use `std::shared_ptr`, `std::weak_ptr` and `std::function`.
-
 === `BOOST_SYNAPSE_ASSERT`
 
 All assertions in Synapse use this macro. If it is not defined, Synapse header files `#define` it either as `BOOST_ASSERT` or `assert`, depending on whether `BOOST_SYNAPSE_USE_BOOST` is defined.

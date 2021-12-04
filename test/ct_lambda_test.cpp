@@ -10,18 +10,16 @@
 #include "boost/core/lightweight_test.hpp"
 
 namespace synapse=boost::synapse;
-using synapse::shared_ptr;
-using synapse::weak_ptr;
 
 namespace
 {
 	int const thread_count=10;
 	int const iteration_count=1000;
 
-	void emitting_thread( weak_ptr<synapse::thread_local_queue> tlq, int & counter, std::thread::id tid )
+	void emitting_thread( std::weak_ptr<synapse::thread_local_queue> tlq, int & counter, std::thread::id tid )
 	{
 		for(;;)
-			if( shared_ptr<synapse::thread_local_queue> p=tlq.lock() )
+			if( std::shared_ptr<synapse::thread_local_queue> p=tlq.lock() )
 				post( *p, [&counter, tid]()
 					{
 						BOOST_TEST_EQ(std::this_thread::get_id(), tid);
@@ -35,7 +33,7 @@ namespace
 	{
 		assert(iteration_count>0);
 		int count=0;
-		shared_ptr<synapse::thread_local_queue> tlq=synapse::create_thread_local_queue();
+		std::shared_ptr<synapse::thread_local_queue> tlq=synapse::create_thread_local_queue();
 		std::thread::id const tid = std::this_thread::get_id();
 		std::thread th( [&]
 			{

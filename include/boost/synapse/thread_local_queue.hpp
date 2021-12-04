@@ -16,18 +16,22 @@
 #	endif
 #endif
 
-#include <boost/synapse/detail/smart_ptr.hpp>
-#include <boost/synapse/detail/functional.hpp>
+#include <memory>
+#include <functional>
 
 namespace boost { namespace synapse {
 
 	struct thread_local_queue;
 
-	shared_ptr<thread_local_queue> create_thread_local_queue();
+	std::shared_ptr<thread_local_queue> create_thread_local_queue();
 	int poll( thread_local_queue & );
 	int wait( thread_local_queue & );
-	void post( thread_local_queue &, function<void()> const & );
+	void post( thread_local_queue &, std::function<void()> const & );
 
 } }
+
+#if defined(_MSC_VER) && !defined(BOOST_SYNAPSE_ENABLE_WARNINGS)
+#	pragma warning(pop)
+#endif
 
 #endif
