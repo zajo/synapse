@@ -4,6 +4,7 @@
 //file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/synapse/connect.hpp>
+#include <stdlib.h>
 
 namespace synapse=boost::synapse;
 struct my_emitter_type { };
