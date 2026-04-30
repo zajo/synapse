@@ -32,7 +32,7 @@ namespace boost { namespace synapse {
 		std::shared_ptr<connection> set_( ObjectRef const & o, Object * op, typename Property::type x )
 		{
 			BOOST_SYNAPSE_ASSERT(op != 0);
-			if( int n=emit<access_property<Property> >(op, &x, true) )
+			if( int n = emit<access_property<Property> >(op, &x, true) )
 			{
 				BOOST_SYNAPSE_ASSERT(n == 1);
 				return std::shared_ptr<connection>();
@@ -51,7 +51,7 @@ namespace boost { namespace synapse {
 		template <class Property, class ObjectRef, class Object>
 		std::weak_ptr<pconnection> pset_( ObjectRef const & o, Object * op, typename Property::type x )
 		{
-			BOOST_SYNAPSE_ASSERT(op!=0);
+			BOOST_SYNAPSE_ASSERT(op != 0);
 			if( int n = emit<access_property<Property> >(op, &x, true) )
 			{
 				BOOST_SYNAPSE_ASSERT(n == 1);
@@ -104,9 +104,9 @@ namespace boost { namespace synapse {
 	}
 
 	template <class Property, class Object>
-	typename Property::type get( Object * o, typename Property::type p=typename Property::type() )
+	typename Property::type get( Object * o, typename Property::type p = typename Property::type() )
 	{
-		int n=emit<synapse_detail::access_property<Property> >(o, &p, false);
+		int n = emit<synapse_detail::access_property<Property> >(o, &p, false);
 		BOOST_SYNAPSE_ASSERT(n >= 0);
 		BOOST_SYNAPSE_ASSERT(n <= 1);
 		return p;

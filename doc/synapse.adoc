@@ -13,7 +13,7 @@ ifndef::backend-pdf[]
 :toc-title:
 
 [.text-right]
-https://github.com/zajo/synapse[GitHub] | link:./synapse.pdf[PDF]
+https://github.com/zajo/synapse[GitHub]
 endif::[]
 
 [abstract]
@@ -38,34 +38,23 @@ endif::[]
 
 === Signals, Emitters, Receivers
 
-Signal programming libraries allow _signals_ to be associated with emitter objects. Like function types, each signal has a signature. Emitting a signal is similar to function invocation, except it may call multiple functions that currently connect that particular signal from that particular emitter object. Naturally, the signature of any connected function must match the signature of the signal.
+Signal programming libraries allow _signals_ to be associated with emitter objects. Each signal has a signature. Emitting a signal is similar to function invocation, except it may call multiple functions that currently connect that particular signal from that particular emitter object. Naturally, the signature of any connected function must match the signature of the signal.
 
-In Synapse, signals are defined as function pointer typedefs. When a signal is emitted, the value returned from any connected function is discarded, but the return type of the signal definition is still important: it is used as an identifier of the signal, a way to tell apart different signals that have otherwise identical signatures. For example, the following typedefs define two different signals, even though they both take one `int` argument:
-
-[source,c++]
-----
-struct this_signal_;
-typedef this_signal_(*this_signal)(int);
-
-struct that_signal_;
-typedef that_signal_(*that_signal)(int);
-----
-
-The two defined signals are different because they use different return types (`this_signal_` vs. `that_signal_`). By convention, the return types are defined implicitly within each `typedef`. This makes the signal definitions more compact:
+In Synapse, signals are defined as empty types derived from `synapse::signal<Signature>`. The derived type identifies the signal, while the base class specifies its signature. This makes it possible to define different signals that have identical function signatures:
 
 [source,c++]
 ----
-typedef struct this_signal_(*this_signal)(int);
-typedef struct that_signal_(*that_signal)(int);
+struct this_signal: synapse::signal<void(int)> {};
+struct that_signal: synapse::signal<void(int)> {};
 ----
 
-To emit a Synapse signal, we instantiate the `emit` function template with a pre-defined signal `typedef` (e.g. `this_signal`), passing the emitter object as the first argument. The rest of the arguments follow, as defined by the signal signature (in this case a single `int` argument). Note that the emitter object passed as the first argument to `emit<S>` is not forwarded implicitly to the connected functions; its only purpose is to specify the _emitter_, that is, which object is emitting the signal `S`.
+To emit a Synapse signal, we instantiate the `emit` function template with a pre-defined signal type (e.g. `this_signal`), passing the emitter object as the first argument. The rest of the arguments follow, as defined by the signal signature (in this case a single `int` argument). Note that the emitter object passed as the first argument to `emit<S>` is not forwarded implicitly to the connected functions; its only purpose is to specify the _emitter_, that is, which object is emitting the signal `S`.
 
 As a less abstract example, let's define a type `button` that emits a Synapse signal `clicked` (which takes no arguments) when the member function `click` is called:
 
 [source,c++]
 ----
-typedef struct clicked_(*clicked)();
+struct clicked: synapse::signal<void()> {};
 
 class button {
 
@@ -78,8 +67,6 @@ class button {
 ----
 [.text-right]
 <<emit>>
-
-TIP: It is possible to define the `clicked` `typedef` as a member of `class button`, but this coupling is usually not appropriate when using Synapse. It is better to treat signals as types with independent semantics that can be used with any appropriate object. In this case, anything clickable could emit the `clicked` signal.
 
 Next, let's connect the signal `clicked` to the `accept` member function of a dialog box object:
 
@@ -94,8 +81,8 @@ class dialog {
 };
 
 ....
-shared_ptr<button> emitter=make_shared<button>();
-shared_ptr<dialog> receiver=make_shared<dialog>();
+shared_ptr<button> emitter = make_shared<button>();
+shared_ptr<dialog> receiver = make_shared<dialog>();
 synapse::connect<clicked>(emitter, receiver, &dialog::accept);
 ----
 [.text-right]
@@ -125,15 +112,15 @@ But in Synapse, _any_ object whatsoever can be used as an emitter. This makes it
 
 [source,c++]
 ----
-typedef struct report_progress_(*report_progress)(int progress);
+struct report_progress: synapse::signal<void(int)> {};
 
 void process_file( FILE * f ) {
 
-	for( int progress=0; !feof(f); ) {
+	for( int progress = 0; !feof(f); ) {
 		....
-		progress += fread(buf,1,nread,f);
+		progress += fread(buf, 1, nread, f);
 		....
-		synapse::emit<report_progress>(f,progress);
+		synapse::emit<report_progress>(f, progress);
 	}
 
 }
@@ -145,9 +132,9 @@ Outside of `process_file` the `report_progress` signal can be connected to some 
 
 [source,c++]
 ----
-if( FILE * f=fopen("file.dat","rb") ) {
+if( FILE * f = fopen("file.dat", "rb") ) {
 	QProgressBar pb(....);
-	auto c=synapse::connect<report_progress>(f, &pb, &QProgressBar::setValue);
+	auto c = synapse::connect<report_progress>(f, &pb, &QProgressBar::setValue);
 	process_file(f);
 	fclose(f);
 }
@@ -184,7 +171,7 @@ NOTE: Blocking affects pre-existing as well as future connections.
 
 namespace synapse = boost::synapse;
 
-typedef struct print_(*print)(std::string const & s);
+struct print: synapse::signal<void(std::string const &)> {};
 
 int main() {
 
@@ -227,13 +214,13 @@ NOTE: To further facilitate interoperability between Synapse and other callback 
 
 Synapse can be used to implement interthread communication using signals. The data structures created by <<connect,`connect`>> (or <<translate,`translate`>>) use thread-local storage, so by default calling <<emit,`emit`>> will call only functions connected by the calling thread (and will not return until all such functions have been called in order, or one of them throws.)
 
-The following diagram shows the connections created (by calls to `<<connect,connect>><S>`) in a single thread for a given signal type `S`, each connecting an emitter to a function. When `<<emit,emit>><S>(e1,arg,...)` is called, all functions connecting the signal `S` from the given emitter `e1` are called in the order in which the connections were created:
+The following diagram shows the connections created (by calls to `<<connect,connect>><S>`) in a single thread for a given signal type `S`, each connecting an emitter to a function. When `<<emit,emit>><S>(e1, arg, ...)` is called, all functions connecting the signal `S` from the given emitter `e1` are called in the order in which the connections were created:
 
 image::fig1.png[]
 
 It is also possible for any thread to request to receive all signals emitted by other threads, by creating its own <<thread_local_queue,`thread_local_queue`>> object.
 
-In this case, _in addition_ to the behavior described above, `<<emit,emit>><S>(e1,arg,...)` will capture its arguments (depending on the signature of `S`) and queue them into the <<thread_local_queue,`thread_local_queue`>> object created by any thread _other_ than the calling thread. Each such thread must poll its own <<thread_local_queue,`thread_local_queue`>> regularly; this "emits" the queued objects locally and removes them from the queue (note that <<poll,`poll`>> is not given an emitter or a signal type, it emits locally all queued objects, regardless of signal type or emitter).
+In this case, _in addition_ to the behavior described above, `<<emit,emit>><S>(e1, arg, ...)` will capture its arguments (depending on the signature of `S`) and queue them into the <<thread_local_queue,`thread_local_queue`>> object created by any thread _other_ than the calling thread. Each such thread must poll its own <<thread_local_queue,`thread_local_queue`>> regularly; this "emits" the queued objects locally and removes them from the queue (note that <<poll,`poll`>> is not given an emitter or a signal type, it emits locally all queued objects, regardless of signal type or emitter).
 
 This is illustrated by the following diagram:
 
@@ -245,10 +232,10 @@ Special care must be taken to ensure that any objects referred to by arguments p
 
 [source,c++]
 ----
-typedef struct my_signal_(*my_signal)( int * );
+struct my_signal: synapse::signal<void(int *)> {};
 
 void emit_my_signal( void * emitter, int x ) {
-	emit<my_signal>(emitter,&x); //Undefined behavior in the presence of thread_local_queues!
+	emit<my_signal>(emitter, &x); //Undefined behavior in the presence of thread_local_queues!
 }
 ----
 [.text-right]
@@ -263,50 +250,235 @@ The <<post,`post`>> function can be used to queue into a <<thread_local_queue,`t
 [[synopsis]]
 == Synopsis
 
+[[emit.hpp]]
+=== `emit.hpp`
+
 ====
-include::synopses/emit.hpp.adoc[]
+.#include <boost/synapse/emit.hpp>
+[source,c++]
+----
+namespace boost { namespace synapse {
+
+	template <class Signal, class... A>
+	int emit( void const *, A... );
+
+} }
+----
 
 [.text-right]
 <<emit>>
 ====
 
+[[connect.hpp]]
+=== `connect.hpp`
+
 ====
-include::synopses/connect.hpp.adoc[]
+.#include <boost/synapse/connect.hpp>
+[source,c++]
+----
+namespace boost { namespace synapse {
+
+	class connection;
+
+	template <class Signal, class Emitter, class F>
+	shared_ptr<connection> connect( Emitter * e, F f );
+
+	template <class Signal, class Emitter, class Receiver, class F>
+	shared_ptr<connection> connect( Emitter * e, Receiver * r, F f );
+
+	class pconnection;
+
+	template <class Signal, class Emitter, class F>
+	weak_ptr<pconnection> connect( <<Emitter>> e, F f ); <1>
+
+	template <class Signal, class Emitter, class Receiver, class F>
+	weak_ptr<pconnection> connect( <<Emitter>> e, <<Receiver>> r, F f ); <2>
+
+	shared_ptr<connection const> release( weak_ptr<pconnection const> const & c );
+	shared_ptr<connection> release( weak_ptr<pconnection> const & c );
+
+	namespace meta {
+
+		weak_ptr<void const> emitter();
+
+		namespace connect_flags {
+
+			unsigned const connecting = 1;
+			unsigned const first_for_this_emitter = 2;
+			unsigned const last_for_this_emitter = 4;
+
+		}
+
+		template <class Signal>
+		struct connected;
+	}
+
+} }
+----
+<1> Two overloads are provided: `\<<Emitter>>`  is `weak_ptr<Emitter> const &` or, equivalently, `shared_ptr<Emitter> const &`;
+<2> Multple overloads are provided: `\<<Emitter>>`  is `Emitter *`, `weak_ptr<Emitter> const &` or, equivalently, `shared_ptr<Emitter> const &`; at least one of `e` and `r` is _not_ a raw pointer.
 
 [.text-right]
 <<connection>> |  `<<connection,pconnection>>` | <<connect>> | <<release>> | `<<meta::connected,meta::emitter>>` | `<<meta::connected,meta::connected>>`
 ====
 
+[[translate.hpp]]
+=== `translate.hpp`
+
 ====
-include::synopses/translate.hpp.adoc[]
+.#include <boost/synapse/translate.hpp>
+[source,c++]
+----
+namespace boost { namespace synapse {
+
+	template <
+		class OriginalSignal,  class TranslatedSignal,
+		class OriginalEmitter, class TranslatedEmitter>
+	shared_ptr<connection> translate( OriginalEmitter * e1, TranslatedEmitter * e2 );
+
+	template <
+		class OriginalSignal,  class TranslatedSignal,
+		class OriginalEmitter, class TranslatedEmitter>
+	weak_ptr<pconnection> translate( <<OriginalEmitter>> e1, <<TranslatedEmitter>> e2 ); <1>
+
+} }
+----
+<1> Multiple overloads are provided: `\<<OriginalEmitter>>` is either `OriginalEmitter *`, `weak_ptr<OriginalEmitter> const &` or, equivalently, `shared_ptr<OriginalEmitter> const &`; `\<<TranslatedEmitter>>` by analogy. At least one of `e1` and `e2` is _not_ a raw pointer.
 
 [.text-right]
 <<translate>>
 ====
 
+[[connection.hpp]]
+=== `connection.hpp`
+
 ====
-include::synopses/connection.hpp.adoc[]
+.#include <boost/synapse/connection.hpp>
+[source,c++]
+----
+namespace boost { namespace synapse {
+
+	class connection { //abstract base
+
+	protected:
+
+		connection();
+		~connection();
+
+	public:
+		
+		template <class T>
+		void set_user_data( T const & );
+
+		template <class T>
+		T * get_user_data() const;
+
+		template <class T>
+		shared_ptr<T> emitter() const;
+
+		template <class T>
+		shared_ptr<T> receiver() const;
+	};
+
+	class pconnection: protected connection { //abstract base
+
+	protected:
+
+		pconnection();
+		~pconnection();
+
+	public:
+		
+		using connection::set_user_data;
+		using connection::get_user_data;
+		using connection::emitter;
+		using connection::receiver;
+
+	};
+
+} }
+----
 
 [.text-right]
 <<connection>> | <<pconnection>> | <<connection::set_user_data>> | <<connection::get_user_data>> | <<connection::emitter>> | <<connection::receiver>>
 ====
 
+[[block.hpp]]
+=== `block.hpp`
+
 ====
-include::synopses/block.hpp.adoc[]
+.#include <boost/synapse/block.hpp>
+[source,c++]
+----
+namespace boost { namespace synapse {
+
+	class blocker;
+
+	template <class Signal, class Emitter>
+	shared_ptr<blocker> block( <<Emitter>> e ); <1>
+
+	namespace meta {
+
+		template <class Signal>
+		struct blocked;
+
+	}
+
+} }
+----
+<1> Multiple overloads are provided: `\<<Emitter>>`  is `Emitter *`, `weak_ptr<Emitter> const &` or, equivalently, `shared_ptr<Emitter> const &`.
 
 [.text-right]
 <<blocker>> | <<block>> | `<<meta::blocked,meta::blocked>>`
 ====
 
+[[blocker.hpp]]
+=== `blocker.hpp`
+
 ====
-include::synopses/blocker.hpp.adoc[]
+.#include <boost/synapse/blocker.hpp>
+[source,c++]
+----
+namespace boost { namespace synapse {
+
+	class blocker { //abstract base
+
+	protected:
+
+		blocker();
+		~blocker();
+
+	public:
+
+		template <class T>
+		shared_ptr<T> emitter() const;
+	};
+
+} }
+----
 
 [.text-right]
 <<blocker>> | <<blocker::emitter>>
 ====
 
+[[thread_local_queue.hpp]]
+=== `thread_local_queue.hpp`
+
 ====
-include::synopses/thread_local_queue.hpp.adoc[]
+.#include <boost/synapse/thread_local_queue.hpp>
+[source,c++]
+----
+namespace boost { namespace synapse {
+
+	struct thread_local_queue;
+	shared_ptr<thread_local_queue> create_thread_local_queue();
+
+	int poll( thread_local_queue & q );
+	int wait( thread_local_queue & q );
+	void post( thread_local_queue & q, function<void()> const & f );
+
+} }
+----
 
 [.text-right]
 <<thread_local_queue>> | <<create_thread_local_queue>> | <<poll>> | <<wait>> | <<post>>
@@ -318,7 +490,16 @@ include::synopses/thread_local_queue.hpp.adoc[]
 [[emit]]
 === `emit`
 
-include::synopses/emit.hpp.adoc[]
+[source,c++]
+.#include <boost/synapse/emit.hpp>
+----
+namespace boost { namespace synapse {
+
+	template <class Signal, class... A>
+	int emit( void const *, A... );
+
+} }
+----
 
 Effects: ::
 Calls all function objects that are connected to the specified `Signal` from the emitter `e`, in the order in which they were connected by <<connect,`connect`>> or <<translate,`translate`>>, passing the specified arguments depending on the `Signal` signature, subject to the connection lifetime/blocking restrictions.
@@ -404,9 +585,9 @@ namespace boost { namespace synapse {
 		};
 
 		namespace connect_flags {
-			unsigned const connecting=1;
-			unsigned const first_for_this_emitter=2;
-			unsigned const last_for_this_emitter=4;
+			unsigned const connecting = 1;
+			unsigned const first_for_this_emitter = 2;
+			unsigned const last_for_this_emitter = 4;
 		}
 
 	}
@@ -457,7 +638,24 @@ Effects: :: Converts a weak <<pconnection,`pconnection`>> reference to shared ow
 [[translate]]
 === `translate`
 
-include::synopses/translate.hpp.adoc[]
+[source,c++]
+.#include <boost/synapse/translate.hpp>
+----
+namespace boost { namespace synapse {
+
+	template <
+		class OriginalSignal,  class TranslatedSignal,
+		class OriginalEmitter, class TranslatedEmitter>
+	shared_ptr<connection> translate( OriginalEmitter * e1, TranslatedEmitter * e2 );
+
+	template <
+		class OriginalSignal,  class TranslatedSignal,
+		class OriginalEmitter, class TranslatedEmitter>
+	weak_ptr<pconnection> translate( <<OriginalEmitter>> e1, <<TranslatedEmitter>> e2 ); <1>
+
+} }
+----
+<1> Multiple overloads are provided: `\<<OriginalEmitter>>` is either `OriginalEmitter *`, `weak_ptr<OriginalEmitter> const &` or, equivalently, `shared_ptr<OriginalEmitter> const &`; `\<<TranslatedEmitter>>` by analogy. At least one of `e1` and `e2` is _not_ a raw pointer.
 
 Effects: ::
 The `translate` function template creates a connection which causes the emitter `e2` to emit `TranslatedSignal` each time the emitter `e1` emits `OriginalSignal` (the two signals must have compatible signatures). This behavior persists until:
@@ -477,7 +675,51 @@ IMPORTANT: If either `e1` or `e2`, passed as raw pointers, expire before the ret
 [[pconnection]]
 === `pconnection`
 
-include::synopses/connection.hpp.adoc[]
+[source,c++]
+.#include <boost/synapse/connection.hpp>
+----
+namespace boost { namespace synapse {
+
+	class connection { //abstract base
+
+	protected:
+
+		connection();
+		~connection();
+
+	public:
+		
+		template <class T>
+		void set_user_data( T const & );
+
+		template <class T>
+		T * get_user_data() const;
+
+		template <class T>
+		shared_ptr<T> emitter() const;
+
+		template <class T>
+		shared_ptr<T> receiver() const;
+	};
+
+	class pconnection: protected connection { //abstract base
+
+	protected:
+
+		pconnection();
+		~pconnection();
+
+	public:
+		
+		using connection::set_user_data;
+		using connection::get_user_data;
+		using connection::emitter;
+		using connection::receiver;
+
+	};
+
+} }
+----
 
 [.text-right]
 <<connection::set_user_data>> | <<connection::get_user_data>> | <<connection::emitter>> | <<connection::receiver>>
@@ -609,7 +851,26 @@ IMPORTANT: If `block` is passed a raw pointer, deleting the emitter before the r
 [[blocker]]
 === `blocker`
 
-include::synopses/blocker.hpp.adoc[]
+[source,c++]
+.#include <boost/synapse/blocker.hpp>
+----
+namespace boost { namespace synapse {
+
+	class blocker { //abstract base
+
+	protected:
+
+		blocker();
+		~blocker();
+
+	public:
+
+		template <class T>
+		shared_ptr<T> emitter() const;
+	};
+
+} }
+----
 
 [.text-right]
 <<blocker::emitter>>
@@ -731,14 +992,14 @@ It is often needed to monitor the operations of a complex dynamic system beyond 
 
 Consider a dynamic object environment in a video game, where various art assets may be loaded on the fly, cached, and eventually unloaded when they are no longer needed. Such events are typically not accessible through a formal interface because they are implementation details; yet there is still a need to analyze the efficiency of the caching algorithm.
 
-Using Synapse, we can easily define a set of signal typedefs to represent such events:
+Using Synapse, we can easily define a set of signal types to represent such events:
 
 [source,c++]
 ----
-typedef struct object_loaded_(*object_loaded)( char const * type, char const * name );
-typedef struct object_unloaded_(*object_unloaded)( char const * type, char const * name );
-typedef struct cache_miss_(*cache_miss)( char const * type, char const * name );
-typedef struct cache_hit_(*cache_hit)( char const * type, char const * name );
+struct object_loaded: synapse::signal<void(char const *, char const *)> {};
+struct object_unloaded: synapse::signal<void(char const *, char const *)> {};
+struct cache_miss: synapse::signal<void(char const *, char const *)> {};
+struct cache_hit: synapse::signal<void(char const *, char const *)> {};
 ----
 
 As part of the implementation of the `object_cache` class, we call <<emit,`emit`>> to signal the corresponding events as they occur:
@@ -749,7 +1010,7 @@ void object_cache::load_object( char const * type, char const * name ) {
 	....
 	//load the object
 	....
-	synapse::emit<object_loaded>(this,type,name);
+	synapse::emit<object_loaded>(this, type, name);
 }
 ----
 
@@ -781,10 +1042,10 @@ To do this for the `SSL_set_info_callback` function, we first  define a Synapse 
 
 [source,c++]
 ----
-typedef struct SSL_info_callback_(*SSL_info_callback)( const SSL *ssl, int type, int val );
+struct ssl_info_callback: synapse::signal<void(SSL const *, int, int)> {};
 ----
 
-Next, at global scope or during initialization, we install a handler for the `meta::connected<SSL_info_callback>` signal, which the <<meta::connected,`meta::emitter`>> emits every time the user connects or disconnects the `SSL_info_callback` signal we defined:
+Next, at global scope or during initialization, we install a handler for the `meta::connected<ssl_info_callback>` signal, which the <<meta::connected,`meta::emitter`>> emits every time the user connects or disconnects the `ssl_info_callback` signal we defined:
 
 [source,c++]
 ----
@@ -792,19 +1053,19 @@ void emit_fwd( SSL const * ssl, int type, int val );
 
 int main( int argc, char const * argv[ ] ) {
 
-	connect<meta::connected<SSL_info_callback> >( meta::emitter(),
+	connect<meta::connected<ssl_info_callback> >( meta::emitter(),
 		[ ]( connection & c, unsigned flags ) { <1>
 
 			if( flags & meta::connect_flags::connecting ) { <2>
 
 				if( flags & meta::connect_flags::first_for_this_emitter ) <3>
-					SSL_set_info_callback(c.emitter<SSL>().get(),&emit_fwd); <4>
+					SSL_set_info_callback(c.emitter<SSL>().get(), &emit_fwd); <4>
 
 			} else { <5>
 
 				if( flags & meta::connect_flags::last_for_this_emitter ) <6>
 					if( auto ssl = c.emitter<SSL>() ) <7>
-						SSL_set_info_callback(ssl.get(),0); <8>
+						SSL_set_info_callback(ssl.get(), 0); <8>
 
 			}
 
@@ -813,28 +1074,28 @@ int main( int argc, char const * argv[ ] ) {
 }
 
 void emit_fwd( SSL const * ssl, int type, int val ) {
-	emit<SSL_info_callback>(ssl,ssl,type,val);
+	emit<ssl_info_callback>(ssl, ssl, type, val);
 }
 ----
 [.text-right]
 <<connect>> | `<<meta::connected,meta::connected>>` | <<emit>>
 
-<1> This lambda function is called every time the user connects or disconnects the `SSL_info_callback` Synapse signal.
-<2> The `SSL_info_callback` signal is being _connected_.
-<3> This is the _first_ time the `SSL_info_callback` signal is being connected for a particular `SSL` object (emitter).
-<4> Call <<connection::emitter,`connection::emitter`>> to get the emitter as a `shared_ptr<SSL>` (we know the emitter is of type `SSL *`), and then use the OpenSSL API to install a C callback `emit_fwd`, which uses `<<emit,emit>><SSL_info_callback>` to call all connected Synapse functions.
-<5> The `SSL_info_callback` signal is being _disconnected_.
-<6> This is the _last_ `SSL_info_callback` connection being destroyed for a particular `SSL` object (emitter).
+<1> This lambda function is called every time the user connects or disconnects the `ssl_info_callback` Synapse signal.
+<2> The `ssl_info_callback` signal is being _connected_.
+<3> This is the _first_ time the `ssl_info_callback` signal is being connected for a particular `SSL` object (emitter).
+<4> Call <<connection::emitter,`connection::emitter`>> to get the emitter as a `shared_ptr<SSL>` (we know the emitter is of type `SSL *`), and then use the OpenSSL API to install a C callback `emit_fwd`, which uses `<<emit,emit>><ssl_info_callback>` to call all connected Synapse functions.
+<5> The `ssl_info_callback` signal is being _disconnected_.
+<6> This is the _last_ `ssl_info_callback` connection being destroyed for a particular `SSL` object (emitter).
 <7> Check if the SSL object is still accessible (it may have been destroyed already).
 <8> Uninstall the `emit_fwd` callback.
 
-Once the above handler for the `meta::connected<SSL_info_callback>` signal is installed, we can simply use <<connect,`connect`>> to install a {CPP} lambda handler for the `SSL_info_callback` signal we defined:
+Once the above handler for the `meta::connected<ssl_info_callback>` signal is installed, we can simply use <<connect,`connect`>> to install a {CPP} lambda handler for the `ssl_info_callback` signal we defined:
 
 [source,c++]
 ----
-shared_ptr<SSL> ssl(SSL_new(ctx),&SSL_free);
+shared_ptr<SSL> ssl(SSL_new(ctx), &SSL_free);
 
-connect<SSL_info_callback>( ssl,
+connect<ssl_info_callback>( ssl,
 	[ ]( const SSL *ssl, int type, int val ) noexcept {
 
 	} );
@@ -851,17 +1112,17 @@ First, we define a Synapse signal we will use to report exceptions:
 
 [source,c++]
 ----
-typedef struct exception_caught_(*exception_caught)();
+struct exception_caught: synapse::signal<void()> {};
 ----
 
-If we take a handler of the `SSL_info_callback` (see above) as an example, we could modify it like this:
+If we take a handler of the `ssl_info_callback` (see above) as an example, we could modify it like this:
 
 
 [source,c++]
 ----
-shared_ptr<SSL> ssl(SSL_new(ctx),&SSL_free);
+shared_ptr<SSL> ssl(SSL_new(ctx), &SSL_free);
 
-connect<SSL_info_callback>( ssl,
+connect<ssl_info_callback>( ssl,
 	[ ]( const SSL *ssl, int type, int val ) noexcept {
 		try {
 
@@ -869,7 +1130,7 @@ connect<SSL_info_callback>( ssl,
 
 		} catch(...) {
 
-			int n=synapse::emit<exception_caught>(ssl); <1>
+			int n = synapse::emit<exception_caught>(ssl); <1>
 			assert(n>0); <2>
 
 		}
@@ -894,14 +1155,14 @@ https://wiki.qt.io/Qt_for_Beginners#Creating_custom_signals_and_slots[There is a
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QPushButton>
 
-namespace synapse=boost::synapse;
+namespace synapse = boost::synapse;
 
 class Window : public QWidget
 {
 public:
 	explicit Window(QWidget *parent = 0);
 	signals: //Not needed with Synapse but okay
-	typedef struct counterReached_(*counterReached)(); <1>
+	struct counterReached: synapse::signal<void()> {}; <1>
 private slots: //<-- Not needed with Synapse but okay
 	void slotButtonClicked(bool checked);
 private:
@@ -924,13 +1185,13 @@ Window::Window(QWidget *parent) :
 	// Set the counter to 0
 	m_counter = 0;
 
-	connect(m_button,&QPushButton::clicked,
+	connect(m_button, &QPushButton::clicked,
 		[this]( bool checked )
 		{
 			slotButtonClicked(checked);
 		} ); <3>
 
-	c_=synapse::connect<counterReached>(this,&QApplication::quit); <4>
+	c_ = synapse::connect<counterReached>(this, &QApplication::quit); <4>
 }
 
 void Window::slotButtonClicked(bool checked)
@@ -988,31 +1249,35 @@ With Synapse, we can define signals to represent this as well as all other GLFW 
 [source,c++]
 .glfw_signals.hpp:
 ----
-extern "C" { typedef struct GLFWwindow GLFWwindow; }
+#include <boost/synapse/signal_traits.hpp>
+
+struct GLFWwindow;
+
+namespace synapse = boost::synapse;
 
 namespace glfw_signals
 {
 	//User input callbacks
-	typedef struct Key_(*Key)( GLFWwindow *, int key, int scancode, int action, int mods );
-	typedef struct Char_(*Char)( GLFWwindow *, unsigned int codepoint );
-	typedef struct CharMods_(*CharMods)( GLFWwindow *, unsigned int codepoint, int mods );
-	typedef struct CursorPos_ (*CursorPos)( GLFWwindow *, double xpos, double ypos );
-	typedef struct CursorEnter_(*CursorEnter)( GLFWwindow *, int entered );
-	typedef struct MouseButton_(*MouseButton)( GLFWwindow *, int button, int action, int mods );
-	typedef struct Scroll_(*Scroll)( GLFWwindow *, double xoffset, double yoffset );
-	typedef struct Drop_(*Drop)( GLFWwindow *, int count, char const * * paths );
+	struct Key: synapse::signal<void(GLFWwindow *, int, int, int, int)> {};
+	struct Char: synapse::signal<void(GLFWwindow *, unsigned int)> {};
+	struct CharMods: synapse::signal<void(GLFWwindow *, unsigned int, int)> {};
+	struct CursorPos: synapse::signal<void(GLFWwindow *, double, double)> {};
+	struct CursorEnter: synapse::signal<void(GLFWwindow *, int)> {};
+	struct MouseButton: synapse::signal<void(GLFWwindow *, int, int, int)> {};
+	struct Scroll: synapse::signal<void(GLFWwindow *, double, double)> {};
+	struct Drop: synapse::signal<void(GLFWwindow *, int, char const * *)> {};
 
 	//Window state callbacks
-	typedef struct WindowClose_(*WindowClose)( GLFWwindow * );
-	typedef struct WindowSize_(*WindowSize)( GLFWwindow *, int width, int height );
-	typedef struct FramebufferSize_(*FramebufferSize)( GLFWwindow *, int width, int height );
-	typedef struct WindowPos_(*WindowPos)( GLFWwindow *, int xpos, int ypos );
-	typedef struct WindowIconify_(*WindowIconify)( GLFWwindow *, int iconified );
-	typedef struct WindowFocus_(*WindowFocus)( GLFWwindow *, int focused );
-	typedef struct WindowRefresh_(*WindowRefresh)( GLFWwindow * );
+	struct WindowClose: synapse::signal<void(GLFWwindow *)> {};
+	struct WindowSize: synapse::signal<void(GLFWwindow *, int, int)> {};
+	struct FramebufferSize: synapse::signal<void(GLFWwindow *, int, int)> {};
+	struct WindowPos: synapse::signal<void(GLFWwindow *, int, int)> {};
+	struct WindowIconify: synapse::signal<void(GLFWwindow *, int)> {};
+	struct WindowFocus: synapse::signal<void(GLFWwindow *, int)> {};
+	struct WindowRefresh: synapse::signal<void(GLFWwindow *)> {};
 
 	//This is emitted from the GLFWwindow object to report exceptions from connected signal handlers
-	typedef struct exception_caught_(*exception_caught)( GLFWwindow * );
+	struct exception_caught: synapse::signal<void(GLFWwindow *)> {};
 }
 ----
 
@@ -1026,14 +1291,13 @@ Next, in a different header we install `meta::connected` signal handlers for the
 #include <boost/synapse/connection.hpp>
 #include "GLFW/glfw3.h"
 
-template <class Signal>
+template <class Signal, class Signature = typename boost::synapse::signal_traits<Signal>::signature>
 class synapsifier;
 
-template <class R, class... A>
-class synapsifier<R(*)(GLFWwindow *,A...)>
+template <class Signal, class... A>
+class synapsifier<Signal, void(GLFWwindow *, A...)>
 {
-	typedef R(*Signal)(GLFWwindow *,A...);
-	typedef void (*GLFWfun)( GLFWwindow *,A... );
+	typedef void (*GLFWfun)( GLFWwindow *, A... );
 
 	static GLFWfun prev_;
 
@@ -1044,7 +1308,7 @@ class synapsifier<R(*)(GLFWwindow *,A...)>
 		using namespace boost::synapse;
 		try
 		{
-			(void) emit<Signal>(w,w,a...);
+			(void) emit<Signal>(w, w, a...);
 		}
 		catch(...)
 		{
@@ -1052,16 +1316,16 @@ class synapsifier<R(*)(GLFWwindow *,A...)>
 			//emits the exception_caught signal, which (if exceptions are
 			//expected) should be connected to capture and handle the current
 			//exception.
-			bool handled = emit<glfw_signals::exception_caught>(w,w)>0;
+			bool handled = emit<glfw_signals::exception_caught>(w, w) > 0;
 			assert(handled);
 		}
 		if( prev_ )
-			prev_(w,a...);
+			prev_(w, a...);
 	}
 
 	public:
 
-	explicit synapsifier( GLFWfun (*setter)(GLFWwindow *,GLFWfun) )
+	explicit synapsifier( GLFWfun (*setter)(GLFWwindow *, GLFWfun) )
 	{
 		using namespace boost::synapse;
 
@@ -1080,7 +1344,7 @@ class synapsifier<R(*)(GLFWwindow *,A...)>
 					//When the Signal is being connected for the first time,
 					//use the GLFW API to install our handler.
 					if( flags&meta::connect_flags::first_for_this_emitter )
-						prev_=setter(c.emitter<GLFWwindow>().get(),&handler);
+						prev_ = setter(c.emitter<GLFWwindow>().get(), &handler);
 				}
 				else
 				{
@@ -1088,16 +1352,16 @@ class synapsifier<R(*)(GLFWwindow *,A...)>
 					//to uninstall our handler and restore the previous handler.
 					if( flags&meta::connect_flags::last_for_this_emitter )
 					{
-						GLFWfun p=setter(c.emitter<GLFWwindow>().get(),prev_);
-						assert(p==&handler);
+						GLFWfun p = setter(c.emitter<GLFWwindow>().get(), prev_);
+						assert(p == &handler);
 					}
 				}
 			} );
 	}
 };
 
-template <class R, class... A>
-typename synapsifier<R(*)(GLFWwindow *,A...)>::GLFWfun synapsifier<R(*)(GLFWwindow *,A...)>::prev_;
+template <class Signal, class... A>
+typename synapsifier<Signal, void(GLFWwindow *, A...)>::GLFWfun synapsifier<Signal, void(GLFWwindow *, A...)>::prev_;
 
 //Install all the synapse::meta::connected<....> handlers
 synapsifier<glfw_signals::WindowClose> s1(&glfwSetWindowCloseCallback);
@@ -1337,13 +1601,13 @@ Because Synapse is formatted for Boost review, people often ask what are the dif
 |====
 | | Signals2 | Synapse
 
-| What is a signal? | An object of type `signal<T>`, which maintains a list of connected functions, and is callable like `std::function<T>` is. | A type, a C function pointer `typedef`.
+| What is a signal? | An object of type `signal<T>`, which maintains a list of connected functions, and is callable like `std::function<T>` is. | A type derived from `synapse::signal<T>`.
 
 | How does emitting a signal work? | Invoking `s(...)`, where `s` is of type `signal<T>`, calls all connected functions. | Invoking <<emit,`emit<S>(e,...)`>> calls all functions connecting the signal `S` for the object `e`.
 
 | What objects can emit signals? | Only instances of the `signal<T>` class template. | Any object of any type whatsoever: the <<emit,`emit<S>(e)`>> function template takes `e` as a `void` pointer.
 
-| How does connecting a signal work? | Calling `s.connect(f)`, where `s` is of type `signal<T>`, connects the function `f`. | Calling <<connect,`connect<S>(e,f)`>> connects the signal `S` from the emitter object `e` to the function `f`.
+| How does connecting a signal work? | Calling `s.connect(f)`, where `s` is of type `signal<T>`, connects the function `f`. | Calling <<connect,`connect<S>(e, f)`>> connects the signal `S` from the emitter object `e` to the function `f`.
 
 | Support for meta signals? | No (not possible, a signal is an object). | Yes. Connecting a signal of type `S` emits the signal <<meta::connected,`meta::connected<S>`>> from the <<meta::connected,`meta::emitter`>>.
 
@@ -1358,7 +1622,7 @@ Because Synapse is formatted for Boost review, people often ask what are the dif
 
 === `BOOST_SYNAPSE_ASSERT`
 
-All assertions in Synapse use this macro. If it is not defined, Synapse header files `#define` it either as `BOOST_ASSERT` or `assert`, depending on whether `BOOST_SYNAPSE_USE_BOOST` is defined.
+All assertions in Synapse use this macro. If it is not defined, Synapse header files `#define` it as `assert`.
 
 == Distribution
 

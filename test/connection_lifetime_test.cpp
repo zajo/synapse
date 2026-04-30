@@ -7,12 +7,12 @@
 #include <boost/synapse/connection.hpp>
 #include "boost/core/lightweight_test.hpp"
 
-namespace synapse=boost::synapse;
+namespace synapse = boost::synapse;
 
 namespace
 {
-	struct my_emitter_type { };
-	typedef struct my_signal_(*my_signal)();
+	struct my_emitter_type {};
+	struct my_signal: synapse::signal<void()> {};
 	int connection_count;
 
 	class connection_counter
@@ -112,8 +112,6 @@ namespace
 		BOOST_TEST_EQ(count1, 0);
 		BOOST_TEST_EQ(count2, 0);
 	}
-
-	typedef struct my_signal_(*my_signal)();
 
 	void test_reset_lifetime()
 	{

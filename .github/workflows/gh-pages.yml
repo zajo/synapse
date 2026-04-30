@@ -4,13 +4,12 @@ on:
   push:
     branches:
       - master
-      - feature/**
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Install packages
         run: |
@@ -23,7 +22,7 @@ jobs:
           cd ..
           git clone -b $BOOST_BRANCH --depth 1 https://github.com/boostorg/boost.git boost-root
           cd boost-root
-          mkdir libs/synapse
+          mkdir -p libs/synapse
           cp -r $GITHUB_WORKSPACE/* libs/synapse
           git submodule update --init tools/build
           git submodule update --init libs/config
@@ -39,8 +38,8 @@ jobs:
           ../../../b2
 
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@3.7.1
+        uses: JamesIves/github-pages-deploy-action@4.0.0
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: gh-pages
-          FOLDER: ../boost-root/libs/synapse/doc/html
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          folder: ../boost-root/libs/synapse/doc/html

@@ -49,32 +49,32 @@ namespace boost { namespace synapse {
 
 	namespace synapse_detail
 	{
-		std::shared_ptr<blocker> block_( std::shared_ptr<thread_local_signal_data> const &, weak_store &&, int(*)(blocker &,bool) );
+		std::shared_ptr<blocker> block_( std::shared_ptr<thread_local_signal_data> const &, weak_store &&, int(*)(blocker &, bool) );
 		template <class Signal> int emit_meta_blocked( blocker &, bool );
 
 		template <class Signal, class Emitter>
 		std::shared_ptr<blocker> block_fwd( weak_store && e )
 		{
-			return block_(get_thread_local_signal_data<Signal>(true),std::move(e),&emit_meta_blocked<Signal>);
+			return block_(get_thread_local_signal_data<Signal>(true), std::move(e), &emit_meta_blocked<Signal>);
 		}
 	}
 
 	template <class Signal, class Emitter>
 	std::shared_ptr<blocker> block( Emitter * e )
 	{
-		return synapse_detail::block_fwd<Signal,Emitter>(e);
+		return synapse_detail::block_fwd<Signal, Emitter>(e);
 	}
 
 	template <class Signal, class Emitter>
 	std::shared_ptr<blocker> block( std::weak_ptr<Emitter> const & e )
 	{
-		return synapse_detail::block_fwd<Signal,Emitter>(e);
+		return synapse_detail::block_fwd<Signal, Emitter>(e);
 	}
 
 	template <class Signal, class Emitter>
 	std::shared_ptr<blocker> block( std::shared_ptr<Emitter> const & e )
 	{
-		return synapse_detail::block_fwd<Signal,Emitter>(e);
+		return synapse_detail::block_fwd<Signal, Emitter>(e);
 	}
 
 } }

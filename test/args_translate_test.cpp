@@ -11,11 +11,11 @@
 #if BOOST_SYNAPSE_MSVC
 #	pragma warning( disable: 4244 ) // 'argument': conversion from '_Ty' to 'float', possible loss of data
 #endif
-namespace synapse=boost::synapse;
+namespace synapse = boost::synapse;
 
 namespace
 {
-	struct my_emitter_type { };
+	struct my_emitter_type {};
 
 	void test_meta_callback_connect( int & count, my_emitter_type * e1, synapse::connection & c, unsigned flags )
 	{
@@ -30,9 +30,9 @@ namespace
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
-	typedef struct signal0_a0_(*signal0_a0)();
-	typedef struct signal1_a0_(*signal1_a0)();
-	typedef struct signal2_a0_(*signal2_a0)();
+	struct signal0_a0: synapse::signal<void()> {};
+	struct signal1_a0: synapse::signal<void()> {};
+	struct signal2_a0: synapse::signal<void()> {};
 
 	void test_a0()
 	{
@@ -42,15 +42,15 @@ namespace
 		my_emitter_type e2;
 		std::shared_ptr<synapse::connection> mc_c0 = release( synapse::connect<synapse::meta::connected<signal0_a0> >(synapse::meta::emitter(),
 			[&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
-		BOOST_TEST(mc_c0.unique());
+		BOOST_TEST(mc_c0.use_count() == 1);
 		BOOST_TEST_EQ(connect_count, 0);
 		std::shared_ptr<synapse::connection> mc_c1 = release( synapse::connect<synapse::meta::connected<signal1_a0> >(synapse::meta::emitter(),
 			[&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
-		BOOST_TEST(mc_c1.unique());
+		BOOST_TEST(mc_c1.use_count() == 1);
 		BOOST_TEST_EQ(connect_count, 0);
 		std::shared_ptr<synapse::connection> mc_c2 = release( synapse::connect<synapse::meta::connected<signal2_a0> >(synapse::meta::emitter(),
 			[&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } ) );
-		BOOST_TEST(mc_c2.unique());
+		BOOST_TEST(mc_c2.use_count() == 1);
 		BOOST_TEST_EQ(connect_count, 0);
 		std::shared_ptr<synapse::connection> c0=synapse::translate<signal0_a0,signal1_a0>(&e1,&e1);
 		BOOST_TEST_EQ(connect_count, 1);
@@ -98,9 +98,9 @@ namespace
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
-	typedef struct signal0_a1_(*signal0_a1)(short);
-	typedef struct signal1_a1_(*signal1_a1)(int);
-	typedef struct signal2_a1_(*signal2_a1)(int);
+	struct signal0_a1: synapse::signal<void(short)> {};
+	struct signal1_a1: synapse::signal<void(int)> {};
+	struct signal2_a1: synapse::signal<void(int)> {};
 
 	void test_a1()
 	{
@@ -110,15 +110,15 @@ namespace
 		my_emitter_type e2;
 		std::shared_ptr<synapse::connection> mc_c0 = release( synapse::connect<synapse::meta::connected<signal0_a1> >(synapse::meta::emitter(),
 			[&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
-		BOOST_TEST(mc_c0.unique());
+		BOOST_TEST(mc_c0.use_count() == 1);
 		BOOST_TEST_EQ(connect_count, 0);
 		std::shared_ptr<synapse::connection> mc_c1 = release( synapse::connect<synapse::meta::connected<signal1_a1> >(synapse::meta::emitter(),
 			[&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
-		BOOST_TEST(mc_c1.unique());
+		BOOST_TEST(mc_c1.use_count() == 1);
 		BOOST_TEST_EQ(connect_count, 0);
 		std::shared_ptr<synapse::connection> mc_c2 = release( synapse::connect<synapse::meta::connected<signal2_a1> >(synapse::meta::emitter(),
 			[&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } ) );
-		BOOST_TEST(mc_c2.unique());
+		BOOST_TEST(mc_c2.use_count() == 1);
 		BOOST_TEST_EQ(connect_count, 0);
 		std::shared_ptr<synapse::connection> c0=synapse::translate<signal0_a1,signal1_a1>(&e1,&e1);
 		BOOST_TEST_EQ(connect_count, 1);
@@ -167,9 +167,9 @@ namespace
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
-	typedef struct signal0_a2_(*signal0_a2)(int,double);
-	typedef struct signal1_a2_(*signal1_a2)(int,float);
-	typedef struct signal2_a2_(*signal2_a2)(int,float);
+	struct signal0_a2: synapse::signal<void(int,double)> {};
+	struct signal1_a2: synapse::signal<void(int,float)> {};
+	struct signal2_a2: synapse::signal<void(int,float)> {};
 	void test_a2()
 	{
 		int connect_count=0;
@@ -178,15 +178,15 @@ namespace
 		my_emitter_type e2;
 		std::shared_ptr<synapse::connection> mc_c0 = release( synapse::connect<synapse::meta::connected<signal0_a2> >(synapse::meta::emitter(),
 			[&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
-		BOOST_TEST(mc_c0.unique());
+		BOOST_TEST(mc_c0.use_count() == 1);
 		BOOST_TEST_EQ(connect_count, 0);
 		std::shared_ptr<synapse::connection> mc_c1 = release( synapse::connect<synapse::meta::connected<signal1_a2> >(synapse::meta::emitter(),
 			[&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
-		BOOST_TEST(mc_c1.unique());
+		BOOST_TEST(mc_c1.use_count() == 1);
 		BOOST_TEST_EQ(connect_count, 0);
 		std::shared_ptr<synapse::connection> mc_c2 = release( synapse::connect<synapse::meta::connected<signal2_a2> >(synapse::meta::emitter(),
 			[&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } ) );
-		BOOST_TEST(mc_c2.unique());
+		BOOST_TEST(mc_c2.use_count() == 1);
 		BOOST_TEST_EQ(connect_count, 0);
 		std::shared_ptr<synapse::connection> c0=synapse::translate<signal0_a2,signal1_a2>(&e1,&e1);
 		BOOST_TEST_EQ(connect_count, 1);
@@ -236,9 +236,9 @@ namespace
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
-	typedef struct signal0_a3_(*signal0_a3)(int,float,char const *);
-	typedef struct signal1_a3_(*signal1_a3)(int,float,std::string const &);
-	typedef struct signal2_a3_(*signal2_a3)(int,float,std::string const &);
+	struct signal0_a3: synapse::signal<void(int,float,char const *)> {};
+	struct signal1_a3: synapse::signal<void(int,float,std::string const &)> {};
+	struct signal2_a3: synapse::signal<void(int,float,std::string const &)> {};
 
 	void test_a3()
 	{
@@ -248,15 +248,15 @@ namespace
 		my_emitter_type e2;
 		std::shared_ptr<synapse::connection> mc_c0 = release( synapse::connect<synapse::meta::connected<signal0_a3> >(synapse::meta::emitter(),
 			[&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
-		BOOST_TEST(mc_c0.unique());
+		BOOST_TEST(mc_c0.use_count() == 1);
 		BOOST_TEST_EQ(connect_count, 0);
 		std::shared_ptr<synapse::connection> mc_c1 = release( synapse::connect<synapse::meta::connected<signal1_a3> >(synapse::meta::emitter(),
 			[&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
-		BOOST_TEST(mc_c1.unique());
+		BOOST_TEST(mc_c1.use_count() == 1);
 		BOOST_TEST_EQ(connect_count, 0);
 		std::shared_ptr<synapse::connection> mc_c2 = release( synapse::connect<synapse::meta::connected<signal2_a3> >(synapse::meta::emitter(),
 			[&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } ) );
-		BOOST_TEST(mc_c2.unique());
+		BOOST_TEST(mc_c2.use_count() == 1);
 		BOOST_TEST_EQ(connect_count, 0);
 		std::shared_ptr<synapse::connection> c0=synapse::translate<signal0_a3,signal1_a3>(&e1,&e1);
 		BOOST_TEST_EQ(connect_count, 1);
@@ -307,9 +307,9 @@ namespace
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
-	typedef struct signal0_a4_(*signal0_a4)(int,float,char const *,short &);
-	typedef struct signal1_a4_(*signal1_a4)(int,float,std::string const &,short &);
-	typedef struct signal2_a4_(*signal2_a4)(int,float,std::string const &,short &);
+	struct signal0_a4: synapse::signal<void(int,float,char const *,short &)> {};
+	struct signal1_a4: synapse::signal<void(int,float,std::string const &,short &)> {};
+	struct signal2_a4: synapse::signal<void(int,float,std::string const &,short &)> {};
 
 	void test_a4()
 	{
@@ -319,15 +319,15 @@ namespace
 		my_emitter_type e2;
 		std::shared_ptr<synapse::connection> mc_c0 = release( synapse::connect<synapse::meta::connected<signal0_a4> >(synapse::meta::emitter(),
 			[&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
-		BOOST_TEST(mc_c0.unique());
+		BOOST_TEST(mc_c0.use_count() == 1);
 		BOOST_TEST_EQ(connect_count, 0);
 		std::shared_ptr<synapse::connection> mc_c1 = release( synapse::connect<synapse::meta::connected<signal1_a4> >(synapse::meta::emitter(),
 			[&connect_count,&e1]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e1,c,flags); } ) );
-		BOOST_TEST(mc_c1.unique());
+		BOOST_TEST(mc_c1.use_count() == 1);
 		BOOST_TEST_EQ(connect_count, 0);
 		std::shared_ptr<synapse::connection> mc_c2 = release( synapse::connect<synapse::meta::connected<signal2_a4> >(synapse::meta::emitter(),
 			[&connect_count,&e2]( synapse::connection & c, unsigned flags ) { test_meta_callback_connect(connect_count,&e2,c,flags); } ) );
-		BOOST_TEST(mc_c2.unique());
+		BOOST_TEST(mc_c2.use_count() == 1);
 		BOOST_TEST_EQ(connect_count, 0);
 		short a4=42;
 		std::shared_ptr<synapse::connection> c0=synapse::translate<signal0_a4,signal1_a4>(&e1,&e1);

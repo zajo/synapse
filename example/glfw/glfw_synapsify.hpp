@@ -10,14 +10,13 @@
 #include <boost/synapse/connection.hpp>
 #include "GLFW/glfw3.h"
 
-template <class Signal>
+template <class Signal, class Signature = typename boost::synapse::signal_traits<Signal>::signature>
 class synapsifier;
 
-template <class R, class... A>
-class synapsifier<R(*)(GLFWwindow *,A...)>
+template <class Signal, class... A>
+class synapsifier<Signal, void(GLFWwindow *, A...)>
 {
-	typedef R(*Signal)(GLFWwindow *,A...);
-	typedef void (*GLFWfun)( GLFWwindow *,A... );
+	typedef void (*GLFWfun)( GLFWwindow *, A... );
 	static GLFWfun prev_;
 
 	// This is the handler that GLFW calls. It emits the corresponding Synapse
@@ -27,7 +26,7 @@ class synapsifier<R(*)(GLFWwindow *,A...)>
 		using namespace boost::synapse;
 		try
 		{
-			(void) emit<Signal>(w,w,a...);
+			(void) emit<Signal>(w, w, a...);
 		}
 		catch(...)
 		{
@@ -35,16 +34,16 @@ class synapsifier<R(*)(GLFWwindow *,A...)>
 			// emits the exception_caught signal, which (if exceptions are
 			// expected) should be connected to capture and handle the current
 			// exception.
-			bool handled = emit<glfw_signals::exception_caught>(w,w)>0;
+			bool handled = emit<glfw_signals::exception_caught>(w, w) > 0;
 			assert(handled);
 		}
 		if( prev_ )
-			prev_(w,a...);
+			prev_(w, a...);
 	}
 
 	public:
 
-	explicit synapsifier( GLFWfun (*setter)(GLFWwindow *,GLFWfun) )
+	explicit synapsifier( GLFWfun (*setter)(GLFWwindow *, GLFWfun) )
 	{
 		using namespace boost::synapse;
 		// Here we connect the Synapse meta::connected<Signal> signal. This
@@ -62,7 +61,7 @@ class synapsifier<R(*)(GLFWwindow *,A...)>
 					// When the Signal is being connected for the first time,
 					// use the GLFW API to install our handler.
 					if( flags&meta::connect_flags::first_for_this_emitter )
-						prev_=setter(c.emitter<GLFWwindow>().get(),&handler);
+						prev_ = setter(c.emitter<GLFWwindow>().get(), &handler);
 				}
 				else
 				{
@@ -70,16 +69,16 @@ class synapsifier<R(*)(GLFWwindow *,A...)>
 					// to uninstall our handler and restore the previous handler.
 					if( flags&meta::connect_flags::last_for_this_emitter )
 					{
-						GLFWfun p=setter(c.emitter<GLFWwindow>().get(),prev_);
-						assert(p==&handler);
+						GLFWfun p = setter(c.emitter<GLFWwindow>().get(), prev_);
+						assert(p == &handler);
 					}
 				}
 			} );
 	}
 };
 
-template <class R, class... A>
-typename synapsifier<R(*)(GLFWwindow *,A...)>::GLFWfun synapsifier<R(*)(GLFWwindow *,A...)>::prev_;
+template <class Signal, class... A>
+typename synapsifier<Signal, void(GLFWwindow *, A...)>::GLFWfun synapsifier<Signal, void(GLFWwindow *, A...)>::prev_;
 
 // Install all the synapse::meta::connected<....> handlers
 synapsifier<glfw_signals::WindowClose> s1(&glfwSetWindowCloseCallback);

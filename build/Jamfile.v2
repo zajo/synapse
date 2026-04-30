@@ -12,8 +12,9 @@ project
         <toolset>clang:<cxxflags>"-Wno-delete-non-abstract-non-virtual-dtor -Wno-delete-non-virtual-dtor -Wno-dangling-else -w"
     ;
 
-alias emit ;
-obj connect : connect.cpp ;
-obj block : block.cpp ;
-obj thread_local_queue : thread_local_queue.cpp ;
-lib synapse : connect block thread_local_queue ;
+alias headers : : : : <include>../include ;
+alias emit : headers ;
+obj connect : connect.cpp headers ;
+obj block : block.cpp headers ;
+obj thread_local_queue : thread_local_queue.cpp headers ;
+lib synapse : connect block thread_local_queue headers ;

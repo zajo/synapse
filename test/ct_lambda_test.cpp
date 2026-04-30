@@ -5,26 +5,31 @@
 
 #include <boost/synapse/thread_local_queue.hpp>
 #include <boost/synapse/connect.hpp>
+#include <atomic>
 #include <thread>
 #include <vector>
 #include "boost/core/lightweight_test.hpp"
 
-namespace synapse=boost::synapse;
+namespace synapse = boost::synapse;
 
 namespace
 {
 	int const thread_count=10;
 	int const iteration_count=1000;
 
-	void emitting_thread( std::weak_ptr<synapse::thread_local_queue> tlq, int & counter, std::thread::id tid )
+	void emitting_thread( std::weak_ptr<synapse::thread_local_queue> tlq, std::atomic<bool> & stop, int & counter, std::thread::id tid )
 	{
-		for(;;)
+		int post_count=0;
+		while( !stop && post_count!=iteration_count*3 )
 			if( std::shared_ptr<synapse::thread_local_queue> p=tlq.lock() )
+			{
 				post( *p, [&counter, tid]()
 					{
 						BOOST_TEST_EQ(std::this_thread::get_id(), tid);
 						++counter;
 					} );
+				++post_count;
+			}
 			else
 				break;
 	}
@@ -33,16 +38,20 @@ namespace
 	{
 		assert(iteration_count>0);
 		int count=0;
+		std::atomic<bool> stop(false);
 		std::shared_ptr<synapse::thread_local_queue> tlq=synapse::create_thread_local_queue();
 		std::thread::id const tid = std::this_thread::get_id();
 		std::thread th( [&]
 			{
-				emitting_thread( tlq, count, tid );
+				emitting_thread( tlq, stop, count, tid );
 			} );
 		while( count<iteration_count )
 			poll(*tlq);
-		tlq.reset();
+		stop = true;
 		th.join();
+		while( poll(*tlq) )
+			{ }
+		tlq.reset();
 	}
 }
 

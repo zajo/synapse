@@ -14,13 +14,13 @@ project
         <toolset>clang:<cxxflags>"-Wno-delete-non-abstract-non-virtual-dtor -Wno-delete-non-virtual-dtor -Wno-dangling-else -w"
     ;
 
-compile _hpp_compile_block_test.cpp ;
-compile _hpp_compile_blocker_test.cpp ;
-compile _hpp_compile_connect_test.cpp ;
-compile _hpp_compile_connection_test.cpp ;
-compile _hpp_compile_emit_test.cpp ;
-compile _hpp_compile_thread_local_queue_test.cpp : <threading>multi ;
-compile _hpp_compile_translate_test.cpp ;
+compile _hpp_compile_block_test.cpp ../build//headers ;
+compile _hpp_compile_blocker_test.cpp ../build//headers ;
+compile _hpp_compile_connect_test.cpp ../build//headers ;
+compile _hpp_compile_connection_test.cpp ../build//headers ;
+compile _hpp_compile_emit_test.cpp ../build//headers ;
+compile _hpp_compile_thread_local_queue_test.cpp ../build//headers : <threading>multi ;
+compile _hpp_compile_translate_test.cpp ../build//headers ;
 
 run args_connect_test.cpp ../build//synapse ;
 run args_translate_test.cpp ../build//synapse ;
@@ -32,9 +32,11 @@ run connection_user_data_test.cpp ../build//synapse ;
 run ct_basic_test.cpp ../build//synapse : : : <threading>multi ;
 run ct_lambda_test.cpp ../build//synapse : : : <threading>multi ;
 run ct_tlq_lifetime_test.cpp ../build//synapse : : : <threading>multi ;
+run ct_wait_missed_wakeup_test.cpp ../build//synapse : : : <threading>multi ;
 run ct_wait_test.cpp ../build//synapse : : : <threading>multi ;
 run emit_stub_test.cpp ../build//emit ;
 run emit_test.cpp ../build//synapse ;
+run old_signal_test.cpp ../build//synapse ;
 run property_test.cpp ../build//synapse ;
 run release_test.cpp ../build//synapse ;
 run shutdown_test1.cpp ../build//synapse ;
@@ -46,4 +48,4 @@ run shutdown_test6.cpp ../build//synapse ;
 run shutdown_test7.cpp ../build//synapse ;
 run shutdown_test8.cpp ../build//synapse ;
 run shutdown_test9.cpp ../build//synapse ;
-run weak_store_test.cpp ;
+run weak_store_test.cpp ../build//headers ;

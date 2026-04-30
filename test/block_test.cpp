@@ -7,11 +7,11 @@
 #include <boost/synapse/blocker.hpp>
 #include "boost/core/lightweight_test.hpp"
 
-namespace synapse=boost::synapse;
+namespace synapse = boost::synapse;
 
 namespace
 {
-	struct my_emitter_type { };
+	struct my_emitter_type {};
 
 	struct meta_data
 	{
@@ -53,8 +53,8 @@ namespace
 		static meta_data d;
 		return d;
 	}
-	typedef struct signal1_(*signal1)();
-	typedef struct signal2_(*signal2)();
+	struct signal1: synapse::signal<void()> {};
+	struct signal2: synapse::signal<void()> {};
 }
 
 namespace boost { namespace synapse {

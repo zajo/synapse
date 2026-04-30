@@ -53,8 +53,8 @@ namespace boost { namespace synapse {
 
 		public:
 
-			virtual void notify_connection_list_created( std::shared_ptr<thread_local_signal_data> const & )=0;
-			virtual int emit( thread_local_signal_data const &, void const *, args_binder_base const * )=0;
+			virtual void notify_connection_list_created( std::shared_ptr<thread_local_signal_data> const & ) = 0;
+			virtual int emit( thread_local_signal_data const &, void const *, args_binder_base const * ) = 0;
 		};
 
 		class thread_local_signal_data
@@ -113,8 +113,8 @@ namespace boost { namespace synapse {
 			static inline int emit_stub( thread_local_signal_data const & tlsd, void const * e, args_binder_base const * args )
 			{
 				if( tlsd.cl_count_ && *tlsd.cl_count_ )
-					if( interthread_interface * interthread=tlsd.interthread_->load() )
-						return interthread->emit(tlsd,e,args);
+					if( interthread_interface * interthread = tlsd.interthread_->load() )
+						return interthread->emit(tlsd, e, args);
 				return 0;
 			}
 
@@ -176,7 +176,7 @@ namespace boost { namespace synapse {
 				static thread_local std::shared_ptr<thread_local_signal_data> obj;
 				if( !obj && (allocate || interthread.load()) )
 				{
-					obj=std::make_shared<thread_local_signal_data>(&get_connection_list_list<Signal>,count,interthread);
+					obj = std::make_shared<thread_local_signal_data>(&get_connection_list_list<Signal>, count, interthread);
 					register_with_non_meta<Signal>::keep_afloat(obj);
 				}
 				return obj;
@@ -191,7 +191,7 @@ namespace boost { namespace synapse {
 				static thread_local std::shared_ptr<thread_local_signal_data> obj;
 				if( !obj && allocate )
 				{
-					obj=std::make_shared<thread_local_signal_data>();
+					obj = std::make_shared<thread_local_signal_data>();
 					register_with_non_meta<Signal>::keep_afloat(obj);
 				}
 				return obj;

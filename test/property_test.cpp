@@ -7,7 +7,7 @@
 #include "boost/core/lightweight_test.hpp"
 #include <string>
 
-namespace synapse=boost::synapse;
+namespace synapse = boost::synapse;
 
 typedef synapse::property<struct prop1_,std::string> prop1;
 

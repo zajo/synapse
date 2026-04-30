@@ -1,18 +1,15 @@
 # Copyright 2017 Peter Dimov
-# Copyright 2018-2019 Emil Dotchevski
+# Copyright 2018-2026 Emil Dotchevski and Reverge Studios, Inc.
 #
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
 project doc/synapse ;
-import asciidoctor ;
+using asciidoctor ;
 
-html index.html : synapse.adoc : <asciidoctor-attribute>stylesheet=zajo-dark.css <asciidoctor-attribute>linkcss ;
+html index.html : synapse.adoc : <asciidoctor-attribute>stylesheet=zajo-dark.css <asciidoctor-attribute>linkcss <dependency>docinfo.html ;
 install html_ : index.html fig1.png fig2.png skin.png zajo-dark.css zajo-light.css rouge-github.css : <location>html ;
-
-pdf synapse.pdf : synapse.adoc : <asciidoctor-doctype>book  <asciidoctor-attribute>pdf-themesdir=. <asciidoctor-attribute>pdf-theme=synapse ;
-install pdf_ : synapse.pdf : <location>html ;
 
 alias boostdoc ;
 explicit boostdoc ;

@@ -34,9 +34,9 @@ namespace boost { namespace synapse {
 
 		public:
 
-			weak_store & operator=( weak_store const & )=default;
-			weak_store( weak_store const & )=default;
-			weak_store( weak_store && )=default;
+			weak_store & operator=( weak_store const & ) = default;
+			weak_store( weak_store const & ) = default;
+			weak_store( weak_store && ) = default;
 
 			weak_store():
 				px_(0),
@@ -118,14 +118,14 @@ namespace boost { namespace synapse {
 			void clear()
 			{
 				w_.reset();
-				px_=0;
-				type_=0;
-				ctype_=0;
+				px_ = 0;
+				type_ = 0;
+				ctype_ = 0;
 			}
 
 			bool empty() const
 			{
-				return ctype_==0;
+				return ctype_ == 0;
 			}
 
 			bool expired() const
@@ -135,13 +135,13 @@ namespace boost { namespace synapse {
 
 			bool lockable() const
 			{
-				return px_==0 && !empty();
+				return px_ == 0 && !empty();
 			}
 
 			template <class T>
 			std::shared_ptr<T> maybe_lock() const
 			{
-				return access<T>::get(maybe_lock<void const>(), &type<T>, type_,ctype_);
+				return access<T>::get(maybe_lock<void const>(), &type<T>, type_, ctype_);
 			}
 		};
 

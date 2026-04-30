@@ -21,7 +21,24 @@ namespace boost { namespace synapse { namespace meta { template <class Signal>  
 
 namespace boost { namespace synapse {
 
+	template <class Signature> struct signal;
 	template <class Signal> struct signal_traits;
+
+	template <class R, class... A>
+	struct signal<R(A...)>
+	{
+		typedef void signature(A...);
+		static int const arity = sizeof...(A);
+	};
+
+	template <class Signal>
+	struct signal_traits
+	{
+		typedef Signal signal_type;
+		typedef typename Signal::signature signature;
+		static int const arity = Signal::arity;
+		static bool const is_thread_local = false;
+	};
 
 	template <class R, class... A>
 	struct signal_traits<R(*)(A...)>
@@ -29,21 +46,21 @@ namespace boost { namespace synapse {
 		typedef R(*signal_type)(A...);
 		typedef void signature(A...);
 		static int const arity = sizeof...(A);
-		static bool const is_thread_local=false;
+		static bool const is_thread_local = false;
 	};
 
 	template <class Signal>
 	struct signal_traits<meta::connected<Signal> >:
 		signal_traits<typename meta::connected<Signal>::type>
 	{
-		static bool const is_thread_local=true;
+		static bool const is_thread_local = true;
 	};
 
 	template <class Signal>
 	struct signal_traits<meta::blocked<Signal> >:
 		signal_traits<typename meta::blocked<Signal>::type>
 	{
-		static bool const is_thread_local=true;
+		static bool const is_thread_local = true;
 	};
 
 } }

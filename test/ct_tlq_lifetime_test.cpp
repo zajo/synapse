@@ -11,15 +11,15 @@
 #include <vector>
 #include "boost/core/lightweight_test.hpp"
 
-namespace synapse=boost::synapse;
+namespace synapse = boost::synapse;
 
 namespace
 {
 	std::atomic<int> connection_count;
 	int emitter;
-	typedef struct signal1_(*signal1)();
-	typedef struct signal2_(*signal2)();
-	typedef struct terminate_thread_(*terminate_thread)();
+	struct signal1: synapse::signal<void()> {};
+	struct signal2: synapse::signal<void()> {};
+	struct terminate_thread: synapse::signal<void()> {};
 
 	class thread_connection_counter
 	{
@@ -43,11 +43,12 @@ namespace
 	{
 		std::shared_ptr<synapse::thread_local_queue> tlq=synapse::create_thread_local_queue();
 		bool keep_going=true;
-		synapse::connect<terminate_thread>( terminate,
+		auto c = release( synapse::connect<terminate_thread>( terminate,
 			[&keep_going]
 			{
 				keep_going=false;
-			}).lock()->set_user_data(std::make_shared<thread_connection_counter>());
+			}));
+		c->set_user_data(std::make_shared<thread_connection_counter>());
 		b.wait();
 		while( keep_going )
 		{
@@ -74,7 +75,7 @@ namespace
 					emitting_thread(b,terminate);
 				} );
 		b.wait();
-		BOOST_TEST(terminate.unique());
+		BOOST_TEST(terminate.use_count() == 1);
 		BOOST_TEST_EQ(connection_count, emitting_thread_count);
 		std::shared_ptr<synapse::connection> c1=synapse::connect<signal1>(&emitter,[](){});
 		std::shared_ptr<synapse::connection> c2=synapse::connect<signal2>(&emitter,[](){});

@@ -46,11 +46,11 @@ namespace boost { namespace synapse {
 			virtual int call_translated( void const * ) const = 0;
 		};
 
-		template <class Signal, class CallSignature>
+		template <class Signature, class CallSignature>
 		class args_binder;
 
-		template<class SigR, class... SigA, class... A>
-		class args_binder<SigR(*)(SigA...), void(*)(A...)>:
+		template<class... SigA, class... A>
+		class args_binder<void(SigA...), void(*)(A...)>:
 			public args_binder_base
 		{
 			std::tuple<A...> a_;
@@ -114,7 +114,7 @@ namespace boost { namespace synapse {
 	template <class Signal, class... A>
 	int emit( void const * e, A... a )
 	{
-		return synapse_detail::emit_fwd<Signal>(e, synapse_detail::args_binder<typename signal_traits<Signal>::signal_type, void(*)(A...)>(a...) );
+		return synapse_detail::emit_fwd<Signal>(e, synapse_detail::args_binder<typename signal_traits<Signal>::signature, void(*)(A...)>(a...) );
 	}
 
 }  }

@@ -15,8 +15,8 @@ namespace synapse = boost::synapse;
 namespace
 {
 	int emitter;
-	typedef struct signal1_(*signal1)();
-	typedef struct signal2_(*signal2)();
+	struct signal1: synapse::signal<void()> {};
+	struct signal2: synapse::signal<void()> {};
 
 	void emitting_thread( int consuming_thread_count, int iterations )
 	{

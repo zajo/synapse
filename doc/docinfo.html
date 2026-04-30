@@ -1,12 +1,53 @@
 <meta name="keywords" content="c++,signal,open source">
 <meta name="description" content="Non-intrusive C++ signal programming library">
-<link rel="stylesheet" href="./zajo-light.css" disabled=true>
+<link id="zajo-light-theme" rel="stylesheet" href="./zajo-light.css" media="not all">
+<style>
+#theme-toggle{position:fixed;right:0;bottom:0;z-index:3;line-height:0}
+#theme-toggle input{display:block;width:32px;height:32px;margin:0;padding:0;border:0;background:transparent}
+</style>
 <script>
+function get_theme_links()
+{
+    var dark = document.getElementById("zajo-dark-theme");
+    if( !dark )
+    {
+        dark = document.querySelector('link[rel*="stylesheet"][href*="zajo-dark.css"]');
+        if( dark )
+            dark.id = "zajo-dark-theme";
+    }
+    var light = document.getElementById("zajo-light-theme");
+    return dark && light ? { dark: dark, light: light } : null;
+}
+
 function switch_style()
 {
-	var i, tag;
-	for( i=0, tag=document.getElementsByTagName("link"); i<tag.length; i++ )
-		if( tag[i].rel.indexOf("stylesheet")!=-1 && tag[i].href.includes("zajo-") )
-			tag[i].disabled = !tag[i].disabled;
+    var links = get_theme_links();
+    if( !links )
+        return;
+    var use_light = links.light.media === "not all";
+    requestAnimationFrame(function() {
+        links.dark.media = use_light ? "not all" : "all";
+        links.light.media = use_light ? "all" : "not all";
+    });
 }
+
+function ensure_theme_toggle()
+{
+    if( document.getElementById("theme-toggle") )
+        return;
+    var div = document.createElement("div");
+    div.id = "theme-toggle";
+    div.innerHTML = '<input type="image" alt="Skin" src="./skin.png" onclick="this.blur();switch_style();return false;">';
+    document.body.appendChild(div);
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    var links = get_theme_links();
+    if( links )
+    {
+        links.dark.media = "all";
+        links.light.media = "not all";
+    }
+    ensure_theme_toggle();
+});
 </script>

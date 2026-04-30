@@ -8,17 +8,17 @@
 #include "boost/core/lightweight_test.hpp"
 #include <string>
 
-namespace synapse=boost::synapse;
+namespace synapse = boost::synapse;
 
 namespace
 {
 
-	struct my_emitter_type { };
+	struct my_emitter_type {};
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
-	typedef struct signal1_a0_(*signal1_a0)();
-	typedef struct signal2_a0_(*signal2_a0)();
+	struct signal1_a0: synapse::signal<void()> {};
+	struct signal2_a0: synapse::signal<void()> {};
 
 	void test_a0()
 	{
@@ -36,7 +36,7 @@ namespace
 				else
 					--connect_count;
 			} ) );
-		BOOST_TEST(mc_c1.unique());
+		BOOST_TEST(mc_c1.use_count() == 1);
 		BOOST_TEST_EQ(connect_count, 0);
 		std::shared_ptr<synapse::connection> c1=synapse::connect<signal1_a0>(&e1,
 			[&count]()
@@ -58,9 +58,9 @@ namespace
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
-	typedef struct signal0_a1_(*signal0_a1)(short);
-	typedef struct signal1_a1_(*signal1_a1)(int);
-	typedef struct signal2_a1_(*signal2_a1)(int);
+	struct signal0_a1: synapse::signal<void(short)> {};
+	struct signal1_a1: synapse::signal<void(int)> {};
+	struct signal2_a1: synapse::signal<void(int)> {};
 
 	void test_a1()
 	{
@@ -78,7 +78,7 @@ namespace
 				else
 					--connect_count;
 			} ) );
-		BOOST_TEST(mc_c1.unique());
+		BOOST_TEST(mc_c1.use_count() == 1);
 		BOOST_TEST_EQ(connect_count, 0);
 		std::shared_ptr<synapse::connection> c1=synapse::connect<signal1_a1>(&e1,
 			[&count]( int a1 )
@@ -101,9 +101,9 @@ namespace
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
-	typedef struct signal0_a2_(*signal0_a2)(int,double);
-	typedef struct signal1_a2_(*signal1_a2)(int,float);
-	typedef struct signal2_a2_(*signal2_a2)(int,float);
+	struct signal0_a2: synapse::signal<void(int,double)> {};
+	struct signal1_a2: synapse::signal<void(int,float)> {};
+	struct signal2_a2: synapse::signal<void(int,float)> {};
 
 	void test_a2()
 	{
@@ -121,7 +121,7 @@ namespace
 				else
 					--connect_count;
 			} ) );
-		BOOST_TEST(mc_c1.unique());
+		BOOST_TEST(mc_c1.use_count() == 1);
 		BOOST_TEST_EQ(connect_count, 0);
 		std::shared_ptr<synapse::connection> c1=synapse::connect<signal1_a2>(&e1,
 			[&count]( int a1, float a2 )
@@ -145,9 +145,9 @@ namespace
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
-	typedef struct signal0_a3_(*signal0_a3)(int,float,char const *);
-	typedef struct signal1_a3_(*signal1_a3)(int,float,std::string const &);
-	typedef struct signal2_a3_(*signal2_a3)(int,float,std::string const &);
+	struct signal0_a3: synapse::signal<void(int,float,char const *)> {};
+	struct signal1_a3: synapse::signal<void(int,float,std::string const &)> {};
+	struct signal2_a3: synapse::signal<void(int,float,std::string const &)> {};
 
 	void test_a3()
 	{
@@ -165,7 +165,7 @@ namespace
 				else
 					--connect_count;
 			} ) );
-		BOOST_TEST(mc_c1.unique());
+		BOOST_TEST(mc_c1.use_count() == 1);
 		BOOST_TEST_EQ(connect_count, 0);
 		std::shared_ptr<synapse::connection> c1=synapse::connect<signal1_a3>(&e1,
 			[&count]( int a1, float a2, std::string const & a3 )
@@ -190,9 +190,9 @@ namespace
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
-	typedef struct signal0_a4_(*signal0_a4)(int,float,char const *,short &);
-	typedef struct signal1_a4_(*signal1_a4)(int,float,std::string const &,short &);
-	typedef struct signal2_a4_(*signal2_a4)(int,float,std::string const &,short &);
+	struct signal0_a4: synapse::signal<void(int,float,char const *,short &)> {};
+	struct signal1_a4: synapse::signal<void(int,float,std::string const &,short &)> {};
+	struct signal2_a4: synapse::signal<void(int,float,std::string const &,short &)> {};
 
 	void test_a4()
 	{
@@ -210,7 +210,7 @@ namespace
 				else
 					--connect_count;
 			} ) );
-		BOOST_TEST(mc_c1.unique());
+		BOOST_TEST(mc_c1.use_count() == 1);
 		BOOST_TEST_EQ(connect_count, 0);
 		short a4=42;
 		std::shared_ptr<synapse::connection> c1=synapse::connect<signal1_a4>(&e1,

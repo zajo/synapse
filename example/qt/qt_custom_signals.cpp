@@ -18,14 +18,14 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QPushButton>
 
-namespace synapse=boost::synapse;
+namespace synapse = boost::synapse;
 
 class Window : public QWidget
 {
 public:
 	explicit Window(QWidget *parent = 0);
 	signals: //<-- Not needed with Synapse but okay
-	typedef struct counterReached_(*counterReached)(); //<-- Was: void counterReached();
+	struct counterReached: synapse::signal<void()> {}; //<-- Was: void counterReached();
 private slots: //<-- Not needed with Synapse but okay
 	void slotButtonClicked(bool checked);
 private:
@@ -48,12 +48,12 @@ Window::Window(QWidget *parent) :
 	// Set the counter to 0
 	m_counter = 0;
 
-	connect(m_button,&QPushButton::clicked,
+	connect(m_button, &QPushButton::clicked,
 		[this]( bool checked )
 		{
 			slotButtonClicked(checked);
 		} ); //<-- Was: connect(m_button, SIGNAL (clicked(bool)), this, SLOT (slotButtonClicked(bool)));
-	c_=synapse::connect<counterReached>(this,&QApplication::quit); //<-- Was: connect(this, SIGNAL (counterReached()), QApplication::instance(), SLOT (quit()));
+	c_ = synapse::connect<counterReached>(this, &QApplication::quit); //<-- Was: connect(this, SIGNAL (counterReached()), QApplication::instance(), SLOT (quit()));
 }
 
 void Window::slotButtonClicked(bool checked)

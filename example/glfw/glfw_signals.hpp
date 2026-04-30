@@ -8,31 +8,35 @@
 #ifndef UUID_DF9B5300F10111E79DCEF6AC7105BEE2
 #define UUID_DF9B5300F10111E79DCEF6AC7105BEE2
 
-extern "C" { typedef struct GLFWwindow GLFWwindow; }
+#include <boost/synapse/signal_traits.hpp>
+
+struct GLFWwindow;
+
+namespace synapse = boost::synapse;
 
 namespace glfw_signals
 {
 	// User input callbacks
-	typedef struct Key_(*Key)( GLFWwindow *, int key, int scancode, int action, int mods );
-	typedef struct Char_(*Char)( GLFWwindow *, unsigned int codepoint );
-	typedef struct CharMods_(*CharMods)( GLFWwindow *, unsigned int codepoint, int mods );
-	typedef struct CursorPos_ (*CursorPos)( GLFWwindow *, double xpos, double ypos );
-	typedef struct CursorEnter_(*CursorEnter)( GLFWwindow *, int entered );
-	typedef struct MouseButton_(*MouseButton)( GLFWwindow *, int button, int action, int mods );
-	typedef struct Scroll_(*Scroll)( GLFWwindow *, double xoffset, double yoffset );
-	typedef struct Drop_(*Drop)( GLFWwindow *, int count, char const * * paths );
+	struct Key: synapse::signal<void(GLFWwindow *, int, int, int, int)> {};
+	struct Char: synapse::signal<void(GLFWwindow *, unsigned int)> {};
+	struct CharMods: synapse::signal<void(GLFWwindow *, unsigned int, int)> {};
+	struct CursorPos: synapse::signal<void(GLFWwindow *, double, double)> {};
+	struct CursorEnter: synapse::signal<void(GLFWwindow *, int)> {};
+	struct MouseButton: synapse::signal<void(GLFWwindow *, int, int, int)> {};
+	struct Scroll: synapse::signal<void(GLFWwindow *, double, double)> {};
+	struct Drop: synapse::signal<void(GLFWwindow *, int, char const * *)> {};
 
 	// Window state callbacks
-	typedef struct WindowClose_(*WindowClose)( GLFWwindow * );
-	typedef struct WindowSize_(*WindowSize)( GLFWwindow *, int width, int height );
-	typedef struct FramebufferSize_(*FramebufferSize)( GLFWwindow *, int width, int height );
-	typedef struct WindowPos_(*WindowPos)( GLFWwindow *, int xpos, int ypos );
-	typedef struct WindowIconify_(*WindowIconify)( GLFWwindow *, int iconified );
-	typedef struct WindowFocus_(*WindowFocus)( GLFWwindow *, int focused );
-	typedef struct WindowRefresh_(*WindowRefresh)( GLFWwindow * );
+	struct WindowClose: synapse::signal<void(GLFWwindow *)> {};
+	struct WindowSize: synapse::signal<void(GLFWwindow *, int, int)> {};
+	struct FramebufferSize: synapse::signal<void(GLFWwindow *, int, int)> {};
+	struct WindowPos: synapse::signal<void(GLFWwindow *, int, int)> {};
+	struct WindowIconify: synapse::signal<void(GLFWwindow *, int)> {};
+	struct WindowFocus: synapse::signal<void(GLFWwindow *, int)> {};
+	struct WindowRefresh: synapse::signal<void(GLFWwindow *)> {};
 
 	// This is emitted from the GLFWwindow object to report exceptions from connected signal handlers
-	typedef struct exception_caught_(*exception_caught)( GLFWwindow * );
+	struct exception_caught: synapse::signal<void(GLFWwindow *)> {};
 }
 
 #endif

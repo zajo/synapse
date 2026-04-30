@@ -24,8 +24,8 @@ namespace boost { namespace synapse {
 	class connection
 	{
 
-		virtual synapse_detail::weak_store const & emitter_() const=0;
-		virtual synapse_detail::weak_store const & receiver_() const=0;
+		virtual synapse_detail::weak_store const & emitter_() const = 0;
+		virtual synapse_detail::weak_store const & receiver_() const = 0;
 		std::shared_ptr<void> user_data_;
 
 	protected:
@@ -81,7 +81,7 @@ namespace boost { namespace synapse {
 		};
 
 		template <class T>
-		typename std::enable_if<std::is_assignable<T&,T const &>::value>::type set_user_data_( std::shared_ptr<void> & ud, T const & x )
+		typename std::enable_if<std::is_assignable<T &, T const &>::value>::type set_user_data_( std::shared_ptr<void> & ud, T const & x )
 		{
 			if( deleter_user_data<T> * d = std::get_deleter<deleter_user_data<T> >(ud) )
 				d->value = x;
@@ -90,7 +90,7 @@ namespace boost { namespace synapse {
 		}
 
 		template <class T>
-		typename std::enable_if<!std::is_assignable<T&,T const &>::value>::type set_user_data_( std::shared_ptr<void> & ud, T const & x )
+		typename std::enable_if<!std::is_assignable<T &, T const &>::value>::type set_user_data_( std::shared_ptr<void> & ud, T const & x )
 		{
 			ud.reset((void *)0, deleter_user_data<T>(x));
 		}

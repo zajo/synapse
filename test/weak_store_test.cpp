@@ -6,7 +6,7 @@
 #include <boost/synapse/detail/weak_store.hpp>
 #include "boost/core/lightweight_test.hpp"
 
-namespace synapse=boost::synapse;
+namespace synapse = boost::synapse;
 
 struct test_type { test_type() { } };
 

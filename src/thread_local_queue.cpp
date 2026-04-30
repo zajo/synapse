@@ -19,6 +19,23 @@ namespace boost { namespace synapse {
 	{
 		int emit_from_emitter( thread_local_signal_data::connection_list &, void const *, args_binder_base const * );
 
+		class posted_signals_wait_state
+		{
+			posted_signals_wait_state( posted_signals_wait_state const & );
+			posted_signals_wait_state & operator=( posted_signals_wait_state const & );
+
+		public:
+
+			std::mutex mut_;
+			std::condition_variable cond_;
+			unsigned pending_count_;
+
+			posted_signals_wait_state():
+				pending_count_(0)
+			{
+			}
+		};
+
 		class thread_local_signal_data::posted_signals
 		{
 			posted_signals( posted_signals const & );
@@ -43,34 +60,35 @@ namespace boost { namespace synapse {
 
 			std::atomic<unsigned> & emit_serial_number_;
 			std::thread::id const thread_id_;
-			std::mutex q_mut_;
+			std::shared_ptr<posted_signals_wait_state> const wait_state_;
 			std::deque<posted> q_;
-			std::condition_variable & wait_cond_;
 
 		public:
 
-			posted_signals( std::atomic<unsigned> & emit_serial_number, std::condition_variable & wait_cond ):
+			posted_signals( std::atomic<unsigned> & emit_serial_number, std::shared_ptr<posted_signals_wait_state> const & wait_state ):
 				emit_serial_number_(emit_serial_number),
 				thread_id_(std::this_thread::get_id()),
-				wait_cond_(wait_cond)
+				wait_state_(wait_state)
 			{
+				BOOST_SYNAPSE_ASSERT(wait_state_);
 			}
 
 			bool post( void const * e, args_binder_base const * args )
 			{
-				BOOST_SYNAPSE_ASSERT(e!=0);
-				if( thread_id_==std::this_thread::get_id() )
+				BOOST_SYNAPSE_ASSERT(e != 0);
+				if( thread_id_ == std::this_thread::get_id() )
 					return false;
 				else
 				{
 					std::shared_ptr<args_binder_base> a;
 					if( args )
-						a=args->clone();
+						a = args->clone();
 					{
-						std::lock_guard<std::mutex> lk(q_mut_);
-						q_.push_back(posted(emit_serial_number_++,e,a));
+						std::lock_guard<std::mutex> lk(wait_state_->mut_);
+						q_.push_back(posted(emit_serial_number_++, e, a));
+						++wait_state_->pending_count_;
 					}
-					wait_cond_.notify_one();
+					wait_state_->cond_.notify_one();
 					return true;
 				}
 			}
@@ -79,18 +97,20 @@ namespace boost { namespace synapse {
 			{
 				posted p;
 				{
-					std::lock_guard<std::mutex> lk(q_mut_);
+					std::lock_guard<std::mutex> lk(wait_state_->mut_);
 					if( q_.empty() )
 						return -1;
-					if( q_.front().serial_number!=serial_number )
+					if( q_.front().serial_number != serial_number )
 						return -1;
-					p=q_.front();
+					p = q_.front();
 					q_.pop_front();
+					BOOST_SYNAPSE_ASSERT(wait_state_->pending_count_ != 0);
+					--wait_state_->pending_count_;
 				}
-				BOOST_SYNAPSE_ASSERT(p.e!=0);
-				if( !tlsd.emitter_blocked_(tlsd,p.e) )
-					if( std::shared_ptr<thread_local_signal_data::connection_list> cl=tlsd.cl_.lock() )
-						return emit_from_emitter(*cl,p.e,p.args.get());
+				BOOST_SYNAPSE_ASSERT(p.e != 0);
+				if( !tlsd.emitter_blocked_(tlsd, p.e) )
+					if( std::shared_ptr<thread_local_signal_data::connection_list> cl = tlsd.cl_.lock() )
+						return emit_from_emitter(*cl, p.e, p.args.get());
 				return 0;
 			}
 		};
@@ -116,14 +136,14 @@ namespace boost { namespace synapse {
 
 				std::shared_ptr<thread_local_signal_data> lock() const
 				{
-					return cl_.expired()? std::shared_ptr<thread_local_signal_data>() : tlsd_.lock();
+					return cl_.expired() ? std::shared_ptr<thread_local_signal_data>() : tlsd_.lock();
 				}
 			};
 
 			template <class Container>
 			static void purge( Container & c )
 			{
-				c.erase( std::remove_if(c.begin(),c.end(), [ ]( cl_rec const & r ) { return r.expired(); }), c.end() );
+				c.erase( std::remove_if(c.begin(), c.end(), [ ]( cl_rec const & r ) { return r.expired(); }), c.end() );
 			}
 		}
 
@@ -150,13 +170,13 @@ namespace boost { namespace synapse {
 
 			int interthread_emit( void const * e, args_binder_base const * args )
 			{
-				BOOST_SYNAPSE_ASSERT(e!=0);
-				int count=0;
+				BOOST_SYNAPSE_ASSERT(e != 0);
+				int count = 0;
 				std::lock_guard<std::mutex> lk(mut_);
 				for( auto & r : same_signal_different_threads_ )
-					if( std::shared_ptr<thread_local_signal_data> sp=r.lock() )
+					if( std::shared_ptr<thread_local_signal_data> sp = r.lock() )
 						if( sp->ps_ )
-							count+=int(sp->ps_->post(e,args));
+							count += int(sp->ps_->post(e, args));
 				return count;
 			}
 		};
@@ -177,15 +197,15 @@ namespace boost { namespace synapse {
 				std::atomic<unsigned> emit_serial_number_;
 				unsigned last_poll_serial_number_;
 				std::vector<cl_rec> same_thread_different_signals_;
-				std::mutex wait_mut_;
-				std::condition_variable wait_cond_;
+				std::shared_ptr<posted_signals_wait_state> const wait_state_;
 
 			public:
 
 				thread_local_connection_list_list():
 					has_tlq_(false),
 					emit_serial_number_(0),
-					last_poll_serial_number_(emit_serial_number_)
+					last_poll_serial_number_(emit_serial_number_),
+					wait_state_(std::make_shared<posted_signals_wait_state>())
 				{
 				}
 
@@ -193,7 +213,7 @@ namespace boost { namespace synapse {
 				{
 					if( has_tlq_ )
 					{
-						std::shared_ptr<thread_local_signal_data::posted_signals> ps=std::make_shared<thread_local_signal_data::posted_signals>(emit_serial_number_,wait_cond_);
+						std::shared_ptr<thread_local_signal_data::posted_signals> ps = std::make_shared<thread_local_signal_data::posted_signals>(emit_serial_number_, wait_state_);
 						{
 							std::lock_guard<std::mutex> lk(tlsd->get_cll_(&create_connection_list_list)->mut_);
 							tlsd->ps_.swap(ps);
@@ -207,15 +227,15 @@ namespace boost { namespace synapse {
 				{
 					BOOST_SYNAPSE_ASSERT(!has_tlq_);
 					for( auto & r : same_thread_different_signals_ )
-						if( std::shared_ptr<thread_local_signal_data> sp=r.lock() )
+						if( std::shared_ptr<thread_local_signal_data> sp = r.lock() )
 						{
-							std::shared_ptr<thread_local_signal_data::posted_signals> ps=std::make_shared<thread_local_signal_data::posted_signals>(emit_serial_number_,wait_cond_);
+							std::shared_ptr<thread_local_signal_data::posted_signals> ps = std::make_shared<thread_local_signal_data::posted_signals>(emit_serial_number_, wait_state_);
 							{
 								std::lock_guard<std::mutex> lk(sp->get_cll_(&create_connection_list_list)->mut_);
 								sp->ps_.swap(ps);
 							}
 						}
-					has_tlq_=true;
+					has_tlq_ = true;
 				}
 
 				void disable_tlq()
@@ -230,34 +250,38 @@ namespace boost { namespace synapse {
 								sp->ps_.swap(ps);
 							}
 						}
-					has_tlq_=false;
-					last_poll_serial_number_=emit_serial_number_;
+					has_tlq_ = false;
+					last_poll_serial_number_ = emit_serial_number_;
+					{
+						std::lock_guard<std::mutex> lk(wait_state_->mut_);
+						wait_state_->pending_count_ = 0;
+					}
 				}
 
 				int poll()
 				{
-					unsigned current=emit_serial_number_;
-					unsigned last_poll_serial_number=last_poll_serial_number_;
-					last_poll_serial_number_=current;
-					int count=0;
-					for( unsigned serial_number=last_poll_serial_number; serial_number!=current; ++serial_number )
+					unsigned current = emit_serial_number_;
+					unsigned last_poll_serial_number = last_poll_serial_number_;
+					last_poll_serial_number_ = current;
+					int count = 0;
+					for( unsigned serial_number = last_poll_serial_number; serial_number != current; ++serial_number )
 					{
 						bool found = std::find_if( same_thread_different_signals_.begin(), same_thread_different_signals_.end(),
-							[&count,serial_number]( cl_rec const & r )
+							[&count, serial_number]( cl_rec const & r )
 							{
-								if( std::shared_ptr<thread_local_signal_data> sp=r.lock() )
+								if( std::shared_ptr<thread_local_signal_data> sp = r.lock() )
 								{
-									int n=sp->ps_->emit_if_serial_number_matches(serial_number,*sp);
-									if( n>=0 )
+									int n = sp->ps_->emit_if_serial_number_matches(serial_number, *sp);
+									if( n >= 0 )
 									{
-										count+=n;
+										count += n;
 										return true;
 									}
 									else
-										BOOST_SYNAPSE_ASSERT(n==-1);
+										BOOST_SYNAPSE_ASSERT(n == -1);
 								}
 								return false;
-							} )!=same_thread_different_signals_.end();
+							} ) != same_thread_different_signals_.end();
 						BOOST_SYNAPSE_ASSERT(found);
 					}
 					return count;
@@ -265,11 +289,15 @@ namespace boost { namespace synapse {
 
 				int wait()
 				{
-					for( std::unique_lock<std::mutex> lk(wait_mut_); ; )
-						if( int n=poll() )
+					for( ; ; )
+					{
+						{
+							std::unique_lock<std::mutex> lk(wait_state_->mut_);
+							wait_state_->cond_.wait(lk, [this] { return wait_state_->pending_count_ != 0; });
+						}
+						if( int n = poll() )
 							return n;
-						else
-							wait_cond_.wait(lk);
+					}
 				}
 			};
 
@@ -293,7 +321,7 @@ namespace boost { namespace synapse {
 
 				int emit( thread_local_signal_data const & tlsd, void const * e, args_binder_base const * args ) final override
 				{
-					return tlsd.get_cll_(&create_connection_list_list)->interthread_emit(e,args);
+					return tlsd.get_cll_(&create_connection_list_list)->interthread_emit(e, args);
 				}
 			};
 			static interthread_impl impl;
@@ -303,7 +331,7 @@ namespace boost { namespace synapse {
 
 	namespace
 	{
-		typedef struct bare_lambda_(*bare_lambda)( std::function<void()> const & );
+		struct bare_lambda: signal<void(std::function<void()> const &)> {};
 	}
 
 	struct thread_local_queue
@@ -331,20 +359,20 @@ namespace boost { namespace synapse {
 
 		int poll()
 		{
-			BOOST_SYNAPSE_ASSERT(tid_==std::this_thread::get_id());
+			BOOST_SYNAPSE_ASSERT(tid_ == std::this_thread::get_id());
 			return tlcll_->poll();
 		}
 
 		int wait()
 		{
-			BOOST_SYNAPSE_ASSERT(tid_==std::this_thread::get_id());
+			BOOST_SYNAPSE_ASSERT(tid_ == std::this_thread::get_id());
 			return tlcll_->wait();
 		}
 
 		void post( std::function<void()> const & f )
 		{
 			BOOST_SYNAPSE_ASSERT(f);
-			emit<bare_lambda>(this,f);
+			emit<bare_lambda>(this, f);
 		}
 	};
 

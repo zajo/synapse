@@ -6,14 +6,14 @@
 #include <boost/synapse/connect.hpp>
 #include <stdlib.h>
 
-namespace synapse=boost::synapse;
+namespace synapse = boost::synapse;
 
-struct my_emitter_type { };
-typedef struct my_signal_(*my_signal)();
+struct my_emitter_type {};
+struct my_signal: synapse::signal<void()> {};
 
 int main( int argc, char const * argv[] )
 {
-	std::shared_ptr<my_emitter_type> e=std::make_shared<my_emitter_type>();
+	std::shared_ptr<my_emitter_type> e = std::make_shared<my_emitter_type>();
 	synapse::connect<my_signal>( e, [ ] ( ) { } );
 	auto connected = synapse::connect<synapse::meta::connected<my_signal> >( synapse::meta::emitter(), [ ]( synapse::connection &, unsigned ) { } );
 	exit(0);

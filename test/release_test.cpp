@@ -6,15 +6,15 @@
 #include <boost/synapse/connect.hpp>
 #include "boost/core/lightweight_test.hpp"
 
-namespace synapse=boost::synapse;
+namespace synapse = boost::synapse;
 
-typedef struct my_signal_(*my_signal)();
-struct my_emitter { };
+struct my_signal: synapse::signal<void()> {};
+struct my_emitter {};
 
 int main( int argc, char const * argv[] )
 {
-	int meta_counter=0;
-	std::shared_ptr<synapse::connection> mc=release(synapse::connect<synapse::meta::connected<my_signal> >(synapse::meta::emitter(),
+	int meta_counter = 0;
+	std::shared_ptr<synapse::connection> mc = release(synapse::connect<synapse::meta::connected<my_signal> >(synapse::meta::emitter(),
 		[&meta_counter]( synapse::connection & c, unsigned flags )
 		{
 			if( flags&synapse::meta::connect_flags::connecting )
@@ -24,7 +24,7 @@ int main( int argc, char const * argv[] )
 		}));
 
 	std::shared_ptr<my_emitter> e1 = std::make_shared<my_emitter>();
-	int emit_counter1=0;
+	int emit_counter1 = 0;
 	BOOST_TEST_EQ(meta_counter, 0);
 	std::weak_ptr<synapse::pconnection> c1 = synapse::connect<my_signal>(e1,
 		[&emit_counter1]()
@@ -34,7 +34,7 @@ int main( int argc, char const * argv[] )
 	BOOST_TEST(!c1.expired());
 
 	std::shared_ptr<my_emitter> e2 = std::make_shared<my_emitter>();
-	int emit_counter2=0;
+	int emit_counter2 = 0;
 	BOOST_TEST_EQ(meta_counter, 1);
 	std::weak_ptr<synapse::pconnection> c2 = synapse::connect<my_signal>(e2,
 		[&emit_counter2]()
@@ -59,7 +59,7 @@ int main( int argc, char const * argv[] )
 	{
 		BOOST_TEST(!c1.expired());
 		BOOST_TEST(!c2.expired());
-		std::shared_ptr<synapse::connection> c=synapse::connect<my_signal>(&meta_counter,[ ]( ){ });
+		std::shared_ptr<synapse::connection> c = synapse::connect<my_signal>(&meta_counter, [ ]( ){ });
 		BOOST_TEST(c1.expired());
 		BOOST_TEST(c2.expired());
 		BOOST_TEST_EQ(meta_counter, 1);

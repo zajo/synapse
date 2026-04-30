@@ -135,12 +135,8 @@
 ////////////////////////////////////////
 
 #ifndef BOOST_SYNAPSE_ASSERT
-#	ifdef BOOST_ASSERT
-#		define BOOST_SYNAPSE_ASSERT BOOST_ASSERT
-#	else
-#       include <cassert>
-#       define BOOST_SYNAPSE_ASSERT assert
-#	endif
+#	include <cassert>
+#	define BOOST_SYNAPSE_ASSERT assert
 #endif
 
 #if defined(_MSC_VER) && !defined(BOOST_SYNAPSE_ENABLE_WARNINGS)
